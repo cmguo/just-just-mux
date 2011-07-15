@@ -32,10 +32,10 @@
 using namespace ppbox::demux;
 using namespace ppbox::mux;
 
-#include <ppbox/bento4/Core/Ap4ByteStream.h>
-#include <ppbox/bento4/Core/Ap4Sample.h>
-#include <ppbox/bento4/Core/Ap4SampleDescription.h>
-#include <ppbox/bento4/Core/Ap4Utils.h>
+#include <bento4/Core/Ap4ByteStream.h>
+#include <bento4/Core/Ap4Sample.h>
+#include <bento4/Core/Ap4SampleDescription.h>
+#include <bento4/Core/Ap4Utils.h>
 
 #include <iostream>
 #include <stdio.h>
@@ -772,4 +772,3 @@ AP4_Mpeg2TsWriter::SetVideoStream(AP4_UI32 timescale, SampleStream*& stream, Avc
     stream = m_Video;
     return AP4_SUCCESS;
 }
-

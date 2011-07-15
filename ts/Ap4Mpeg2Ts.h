@@ -31,13 +31,14 @@
 
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/AvcConfig.h"
-#include "ppbox/demux/DemuxerBase.h"
+
+#include <ppbox/demux/DemuxerBase.h>
 
 /*----------------------------------------------------------------------
 |   includes
 +---------------------------------------------------------------------*/
-#include <ppbox/bento4/Core/Ap4.h>
-#include <ppbox/bento4/Core/Ap4Types.h>
+#include <bento4/Core/Ap4.h>
+#include <bento4/Core/Ap4Types.h>
 
 /*----------------------------------------------------------------------
 |   classes

@@ -1,11 +1,12 @@
 // TsMux.h
-#ifndef   _PPBOX_MUX_TS_TSMUX_H_
-#define   _PPBOX_MUX_TS_TSMUX_H_
+
+#ifndef _PPBOX_MUX_TS_TS_MUX_H_
+#define _PPBOX_MUX_TS_TS_MUX_H_
 
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/ts/Ap4Mpeg2Ts.h"
 
-#include <ppbox/bento4/Core/Ap4.h>
+#include <bento4/Core/Ap4.h>
 
 #include <deque>
 
@@ -16,7 +17,6 @@ namespace ppbox
         class TsMux
             : public MuxerBase
         {
-
         public:
             enum StatusEnum
             {
@@ -109,4 +109,4 @@ namespace ppbox
     }
 }
 
-#endif // End _PPBOX_MUX_TS_TSMUX_H_
+#endif // _PPBOX_MUX_TS_TS_MUX_H_
