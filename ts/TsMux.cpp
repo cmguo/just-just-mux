@@ -1,15 +1,14 @@
 // TsMux.cpp
-
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/H264Nalu.h"
 #include "ppbox/mux/ts/TsMux.h"
 #include "ppbox/mux/ts/Ap4Mpeg2Ts.h"
 
+#include <framework/memory/MemoryPage.h>
+
 #include <ppbox/demux/Demuxer.h>
 #include <ppbox/demux/DemuxerError.h>
 using namespace ppbox::demux;
-
-#include <framework/memory/MemoryPage.h>
 
 #include <iostream>
 
@@ -83,8 +82,7 @@ namespace ppbox
                                     media_file_info_.duration   = video_duration / 1000;
                                 }
                                 media_file_info_.video_codec = media_info.sub_type;
-                                if (media_info.format_type == MediaInfo::video_avc_byte_stream) {
-                                    // live
+                                if (media_info.format_type == MediaInfo::video_avc_byte_stream) { // live
                                     Buffer_Array config_list;
                                     H264Nalu::process_live_video_config(
                                         (boost::uint8_t *)&media_info.format_data.at(0),
@@ -109,8 +107,7 @@ namespace ppbox
                                     } else {
                                         ec = ppbox::demux::error::bad_file_format;
                                     }
-                                } else {
-                                    // vod
+                                } else { // vod
                                     avc_config_ = new AvcConfig((boost::uint8_t *)&media_info.format_data.at(0)
                                     , media_info.format_data.size());
                                     if (avc_config_->creat()) {
@@ -118,6 +115,8 @@ namespace ppbox
                                             video_stream_, avc_config_);
                                         if (AP4_FAILED(result)) {
                                             ec = ppbox::demux::error::bad_file_format;
+                                        } else {
+                                            video_stream_->set_spec_config(media_info.format_data);
                                         }
                                     } else {
                                         ec = ppbox::demux::error::bad_file_format;
@@ -131,20 +130,19 @@ namespace ppbox
                                 media_file_info_.channel_count = media_info.audio_format.channel_count;
                                 media_file_info_.audio_codec = media_info.sub_type;
                                 media_file_info_.audio_format_type = media_info.format_type;
-
                                 AP4_Result result;
-                                if (media_info.format_type == MediaInfo::audio_microsoft_wave) {
-                                    // live
+                                if (media_info.format_type == MediaInfo::audio_microsoft_wave) { // live1
                                     result = ts_writer_.SetAudioStream(1000,
                                         audio_stream_);
-                                } else {
-                                    // vod
+                                } else { // vod
                                     result = ts_writer_.SetAudioStream(media_info.time_scale,
                                         audio_stream_);
                                 }
-
                                 if (AP4_FAILED(result)) {
                                     std::cout << "could not create audio stream, " << result << std::endl;
+                                    ec = ppbox::demux::error::bad_file_format;
+                                } else {
+                                    audio_stream_->set_spec_config(media_info.format_data);
                                 }
                             }
                         }

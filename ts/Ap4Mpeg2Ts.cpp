@@ -32,10 +32,10 @@
 using namespace ppbox::demux;
 using namespace ppbox::mux;
 
-#include <bento4/Core/Ap4ByteStream.h>
-#include <bento4/Core/Ap4Sample.h>
-#include <bento4/Core/Ap4SampleDescription.h>
-#include <bento4/Core/Ap4Utils.h>
+#include <ppbox/bento4/Core/Ap4ByteStream.h>
+#include <ppbox/bento4/Core/Ap4Sample.h>
+#include <ppbox/bento4/Core/Ap4SampleDescription.h>
+#include <ppbox/bento4/Core/Ap4Utils.h>
 
 #include <iostream>
 #include <stdio.h>
@@ -107,6 +107,28 @@ MakeAdtsHeader(unsigned char bits[7],
     bits[4] = ((frame_size+7) >> 3)&0xFF;
     bits[5] = (((frame_size+7) << 5)&0xFF) | 0x1F;
     bits[6] = 0xFC;
+    /*
+     0:  syncword 12 always: '111111111111' 
+     12: ID 1 0: MPEG-4, 1: MPEG-2 
+     13: layer 2 always: '00' 
+     15: protection_absent 1  
+     16: profile 2  
+     18: sampling_frequency_index 4  
+     22: private_bit 1  
+     23: channel_configuration 3  
+     26: original/copy 1  
+     27: home 1  
+     28: emphasis 2 only if ID == 0 
+     
+     ADTS Variable header: these can change from frame to frame 
+     28: copyright_identification_bit 1  
+     29: copyright_identification_start 1  
+     30: aac_frame_length 13 length of the frame including header (in bytes) 
+     43: adts_buffer_fullness 11 0x7FF indicates VBR 
+     54: no_raw_data_blocks_in_frame 2  
+     ADTS Error check 
+     crc_check 16 only if protection_absent == 0 
+     */
 }
 
 static AP4_UI32 
@@ -312,6 +334,11 @@ public:
         m_Ipad = is_ipad;
     }
 
+    void set_spec_config(std::vector<boost::uint8_t> spec_config)
+    {
+        spec_config_.assign(spec_config.begin(), spec_config.end());
+    }
+
 private:
     AP4_Mpeg2TsAudioSampleStream(AP4_UI16 pid, AP4_UI32 timescale) : 
     AP4_Mpeg2TsWriter::SampleStream(pid, 
@@ -343,13 +370,20 @@ AP4_Mpeg2TsAudioSampleStream::WriteSample(Sample const &       sample,
                                           AP4_ByteStream&        output)
 {
     //if (audio_desc->GetMpeg4AudioObjectType() != AP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_LC) return AP4_ERROR_NOT_SUPPORTED;
-    unsigned int sampling_frequency_index = GetSamplingFrequencyIndex(mediainfo.sample_rate);
-    unsigned int channel_configuration = mediainfo.channel_count;
-
+    unsigned int sampling_frequency_index = 0;
+    unsigned int channel_configuration = 0;
+    if (mediainfo.audio_format_type == MediaInfo::audio_flv_tag
+        && (spec_config_.at(0) >> 3) == 5 ) { // AAC SBR
+        sampling_frequency_index = GetSamplingFrequencyIndex(mediainfo.sample_rate/2);
+        channel_configuration =  mediainfo.channel_count / 2;
+    } else {
+        sampling_frequency_index = GetSamplingFrequencyIndex(mediainfo.sample_rate);
+        channel_configuration = mediainfo.channel_count;
+    }
     if (sample.data.size() > 0) {
         if (m_Ipad) {
             if ((AP4_SI32)(sample.dts - last_audio_pts_) > 400
-                || audio_data_size_ > 10 * 1024) {
+                || (audio_data_size_+7+sample.data.size()) > 10 * 1024) {
                     AP4_UI64 audio_pts_ = AP4_ConvertTime(last_audio_pts_, 1000, 90000);
                     WritePES(audio_buffer_, audio_data_size_, 0, false, audio_pts_, with_pcr, output);
                     audio_data_size_ = 0;
@@ -390,6 +424,28 @@ public:
     {
         m_Ipad = is_ipad;
     }
+    void set_spec_config(std::vector<boost::uint8_t> spec_config)
+    {
+        spec_config_.assign(spec_config.begin(), spec_config.end());
+    }
+
+private:
+    bool video_pretreatment(
+        Sample const &       sample, 
+        MediaFileInfo const &  mediainfo,
+        boost::uint32_t & data_prefix_size);
+
+    void create_video_frame_prefix(
+        Sample const &       sample, 
+        MediaFileInfo const &  mediainfo);
+
+    void compute_pts_dts(
+        Sample const &       sample, 
+        MediaFileInfo const &  mediainfo,
+        AP4_UI64 & dts,
+        AP4_UI64 & pts,
+        boost::uint8_t const * buffer,
+        boost::uint32_t size);
 
 private:
     AP4_Mpeg2TsVideoSampleStream(AP4_UI16 pid, AP4_UI32 timescale, AvcConfig *avc_config) :
@@ -437,22 +493,20 @@ AP4_Mpeg2TsVideoSampleStream::Create(AP4_UI16                          pid,
     return AP4_SUCCESS;
 }
 
-AP4_Result
-AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample, 
-                                          MediaFileInfo const &  mediainfo,
-                                          bool                   with_pcr, 
-                                          AP4_ByteStream&        output)
-{
-    boost::uint32_t data_prefix_size = 0;
-    if (avc_config_ == NULL) return AP4_ERROR_NOT_SUPPORTED;
 
+bool AP4_Mpeg2TsVideoSampleStream::video_pretreatment(
+                        Sample const &       sample, 
+                        MediaFileInfo const &  mediainfo,
+                        boost::uint32_t & data_prefix_size)
+{
     // 计算视频数据偏移量
-    if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream) {
-        // live
+    bool skip = false;
+    if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream) { // live1
         if (is_first_sample_) {
             is_first_sample_ = false;
             if (H264Nalu::find_start_code_position(&sample.data.at(0), sample.size, 1) != 0) {
-                return AP4_SUCCESS;
+                skip = true;
+                return skip;
             }
         }
         if (sample.is_sync) {
@@ -471,23 +525,26 @@ AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample,
             }
             data_prefix_size = prefix_size_;
         }
-    } else {
+    } else if (mediainfo.video_format_type == MediaInfo::video_flv_tag) { // live2
         got_first_idr_ = true;
-        // vod
+    } else { // vod
+        got_first_idr_ = true;
     }
-    if (!got_first_idr_) {
-        return AP4_SUCCESS;
-    }
+    return skip;
+}
 
+void AP4_Mpeg2TsVideoSampleStream::create_video_frame_prefix(
+    Sample const &       sample, 
+    MediaFileInfo const &  mediainfo)
+{
     if ((int)sample.idesc != m_SampleDescriptionIndex) {
         m_SampleDescriptionIndex = sample.idesc;
         m_NaluLengthSize = avc_config_->nalu_lengthSize();
-
         if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream) {
-            // live 
+            // live1
             // 直播每个关键帧重新设置sps. pps
         } else {
-            // vod
+            // vod & live2
             m_Prefix.SetDataSize(0);
             for (unsigned int i=0; i < avc_config_->sequence_parameters().size(); i++) {
                 AP4_DataBuffer buffer(&avc_config_->sequence_parameters()[i].at(0),
@@ -526,7 +583,74 @@ AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample,
                 AP4_CopyMemory(p, buffer.GetData(), buffer.GetDataSize());
             }
         }
+    } // End if ((int)sample.idesc != m_SampleDescriptionIndex)
+}
+
+void AP4_Mpeg2TsVideoSampleStream::compute_pts_dts(
+                     Sample const &       sample, 
+                     MediaFileInfo const &  mediainfo,
+                     AP4_UI64 & dts,
+                     AP4_UI64 & pts,
+                     boost::uint8_t const * buffer,
+                     boost::uint32_t size)
+{
+    if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream
+        || mediainfo.video_format_type == MediaInfo::video_flv_tag) { // live1 & live2
+        boost::uint32_t time_stamp;
+        if (m_Ipad) {
+            time_stamp = (boost::uint32_t)sample.dts;
+        } else {
+            time_stamp = sample.time;
+        }
+        Bitstream bs;
+        bs.read_len = 0;
+        bs.frame_bitoffset = 0;
+        //bs.bitstream_length = bs.code_len = sample.data.size();
+        //bs.streamBuffer = (byte *)&sample.data[0];
+        bs.bitstream_length = bs.code_len = size;
+        bs.streamBuffer = (byte *)buffer;
+        if (sample.is_sync)
+        {
+            idr_dts_ = time_stamp;
+            is_last_a_idr_ = true;
+        }
+        if (sample.is_sync == false && is_last_a_idr_ == true)
+        {
+            frame_scale_ = AP4_UI32(time_stamp - idr_dts_);
+            is_last_a_idr_ = false;
+        }
+        AP4_UI32 target_pts;
+        nalu_.parse(&bs);
+        if (nalu_.is_ready_) {
+            target_pts = AP4_UI32(idr_dts_ + frame_scale_ * nalu_.pic_order_cnt_lsb / 2);
+        } else {
+            target_pts = time_stamp;
+        }
+        dts = AP4_ConvertTime(time_stamp, 1000, 90000);
+        pts = AP4_ConvertTime(target_pts, 1000, 90000);
+    } else { // vod
+        dts = AP4_ConvertTime(sample.time, 1000, 90000);
+        pts = AP4_ConvertTime(sample.time, 1000, 90000)+
+            AP4_ConvertTime(sample.cts_delta, m_TimeScale, 90000);
     }
+}
+
+AP4_Result
+AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample, 
+                                          MediaFileInfo const &  mediainfo,
+                                          bool                   with_pcr, 
+                                          AP4_ByteStream&        output)
+{
+    boost::uint32_t data_prefix_size = 0;
+    if (avc_config_ == NULL) return AP4_ERROR_NOT_SUPPORTED;
+
+    if (video_pretreatment(sample, mediainfo, data_prefix_size)) {
+        return AP4_SUCCESS;
+    }
+    if (!got_first_idr_) {
+        return AP4_SUCCESS;
+    }
+    create_video_frame_prefix(sample, mediainfo);
     // read the sample data
     AP4_DataBuffer sample_data(&sample.data.at(0)+data_prefix_size, sample.data.size()-data_prefix_size);
     // allocate a buffer for the PES packet
@@ -540,16 +664,15 @@ AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample,
     pes_buffer[3] = 1;
     pes_buffer[4] = 9;    // NAL type = Access Unit Delimiter;
     pes_buffer[5] = 0xE0; // Slice types = ANY
-    
     // copy the prefix
     AP4_CopyMemory(pes_buffer+6, m_Prefix.GetData(), m_Prefix.GetDataSize());
-    
+
     // write the NAL units
     const unsigned char* data      = sample_data.GetData();
     unsigned int         data_size = sample_data.GetDataSize();
-
-    if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream) {
-        // live
+    boost::uint8_t const * buffer_for_pts = NULL;
+    boost::uint32_t buffer_for_pts_len = 0;
+    if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream) { // live
         unsigned int offset = pes_data.GetDataSize();
         pes_data.SetDataSize(offset+4+data_size);
         pes_buffer = pes_data.UseData()+offset;
@@ -558,8 +681,30 @@ AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample,
         pes_buffer[2] = 0;
         pes_buffer[3] = 1;
         AP4_CopyMemory(pes_buffer+4, data, data_size);
-    } else {
-        // vod
+        buffer_for_pts = &sample.data.at(0);
+        buffer_for_pts_len = sample.data.size();
+    } else if (mediainfo.video_format_type == MediaInfo::video_flv_tag) { // live2
+        while (data_size) {
+            if (data_size < m_NaluLengthSize) break;
+            AP4_UI32 nalu_size;
+            nalu_size = AP4_BytesToInt32BE(data);
+            data      += 4;
+            data_size -= 4;
+            if (nalu_size > data_size) break;
+            unsigned int offset = pes_data.GetDataSize();
+            pes_data.SetDataSize(offset+4+nalu_size);
+            pes_buffer = pes_data.UseData()+offset;
+            pes_buffer[0] = 0;
+            pes_buffer[1] = 0;
+            pes_buffer[2] = 0;
+            pes_buffer[3] = 1;
+            AP4_CopyMemory(pes_buffer+4, data, nalu_size);
+            data      += nalu_size;
+            data_size -= nalu_size;
+        }
+        buffer_for_pts = (boost::uint8_t*)(pes_data.GetData() + 6);
+        buffer_for_pts_len = pes_data.GetDataSize() - 6;
+    } else { // vod
         while (data_size) {
             // sanity check
             if (data_size < m_NaluLengthSize) break;
@@ -580,63 +725,24 @@ AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample,
                 break;
             }
             if (nalu_size > data_size) break;
-
             // add a start code before the NAL unit
             unsigned int offset = pes_data.GetDataSize();
-            pes_data.SetDataSize(offset+3+nalu_size);
+            pes_data.SetDataSize(offset+4+nalu_size);
             pes_buffer = pes_data.UseData()+offset;
             pes_buffer[0] = 0;
             pes_buffer[1] = 0;
-            pes_buffer[2] = 1;
-            AP4_CopyMemory(pes_buffer+3, data, nalu_size);
-
+            pes_buffer[2] = 0;
+            pes_buffer[3] = 1;
+            AP4_CopyMemory(pes_buffer+4, data, nalu_size);
             // move to the next NAL unit
             data      += nalu_size;
             data_size -= nalu_size;
         }
     }
-
     // write the packet
     AP4_UI64 dts = 0;
     AP4_UI64 pts = 0;
-    if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream) {
-        // live
-        boost::uint32_t time_stamp;
-        if (m_Ipad) {
-            time_stamp = (boost::uint32_t)sample.dts;
-        } else {
-            time_stamp = sample.time;
-        }
-        Bitstream bs;
-        bs.read_len = 0;
-        bs.frame_bitoffset = 0;
-        bs.bitstream_length = bs.code_len = sample.data.size();
-        bs.streamBuffer = (byte *)&sample.data[0];
-        if (sample.is_sync)
-        {
-            idr_dts_ = time_stamp;
-            is_last_a_idr_ = true;
-        }
-        if (sample.is_sync == false && is_last_a_idr_ == true)
-        {
-            frame_scale_ = AP4_UI32(time_stamp - idr_dts_);
-            is_last_a_idr_ = false;
-        }
-        AP4_UI32 target_pts;
-        nalu_.parse(&bs);
-        if (nalu_.is_ready_) {
-            target_pts = AP4_UI32(idr_dts_ + frame_scale_ * nalu_.pic_order_cnt_lsb / 2);
-        } else {
-            target_pts = time_stamp;
-        }
-        dts = AP4_ConvertTime(time_stamp, 1000, 90000);
-        pts = AP4_ConvertTime(target_pts, 1000, 90000);
-    } else {
-        // vod
-        dts = AP4_ConvertTime(sample.time, 1000, 90000);
-        pts = AP4_ConvertTime(sample.time, 1000, 90000)+
-            AP4_ConvertTime(sample.cts_delta, m_TimeScale, 90000);
-    }
+    compute_pts_dts(sample, mediainfo, dts, pts, buffer_for_pts, buffer_for_pts_len);
     return WritePES(pes_data.GetData(), pes_data.GetDataSize(), dts, true, pts, with_pcr, output);
 }
 
@@ -772,3 +878,4 @@ AP4_Mpeg2TsWriter::SetVideoStream(AP4_UI32 timescale, SampleStream*& stream, Avc
     stream = m_Video;
     return AP4_SUCCESS;
 }
+

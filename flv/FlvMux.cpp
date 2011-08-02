@@ -104,7 +104,8 @@ namespace ppbox
             }
 
             if (is_read_head_) {
-                demuxer_->get_sample_buffered(sample_, ec);
+                //demuxer_->get_sample_buffered(sample_, ec);
+                demuxer_->get_sample(sample_, ec);
                 if (!ec) {
                     if (sample_.itrack == video_index_) {
                         current_tag_time_ = sample_.time;
