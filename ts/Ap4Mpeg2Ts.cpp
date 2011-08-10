@@ -32,10 +32,10 @@
 using namespace ppbox::demux;
 using namespace ppbox::mux;
 
-#include <ppbox/bento4/Core/Ap4ByteStream.h>
-#include <ppbox/bento4/Core/Ap4Sample.h>
-#include <ppbox/bento4/Core/Ap4SampleDescription.h>
-#include <ppbox/bento4/Core/Ap4Utils.h>
+#include <bento4/Core/Ap4ByteStream.h>
+#include <bento4/Core/Ap4Sample.h>
+#include <bento4/Core/Ap4SampleDescription.h>
+#include <bento4/Core/Ap4Utils.h>
 
 #include <iostream>
 #include <stdio.h>
