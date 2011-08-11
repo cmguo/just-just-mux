@@ -200,8 +200,7 @@ namespace ppbox
                   }
                   videotagheader.AVCPacketType = 0x01;
                   memset(videotagheader.CompositionTime, 0, sizeof(videotagheader.CompositionTime));
-                  if (media_info_->video_format_type == MediaInfo::video_avc_packet
-                      || media_info_->video_format_type == MediaInfo::video_flv_tag) {
+                  if (media_info_->video_format_type == MediaInfo::video_avc_packet) {
                       // vod
                       write_tag_to_buffer(
                           (unsigned char *)&videotagheader,
