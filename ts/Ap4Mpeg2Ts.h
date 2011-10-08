@@ -31,7 +31,8 @@
 
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/AvcConfig.h"
-#include "ppbox/demux/DemuxerBase.h"
+
+#include <ppbox/demux/DemuxerBase.h>
 
 /*----------------------------------------------------------------------
 |   includes
@@ -111,13 +112,11 @@ public:
                                        AP4_ByteStream&        output) = 0;
 
         virtual void set_ipad_stream(bool is_ipad) = 0;
-        virtual void set_spec_config(std::vector<boost::uint8_t> spec_config) = 0;
 
         unsigned int m_StreamId;
         AP4_UI08     m_StreamType;
         AP4_UI32     m_TimeScale;
         bool m_Ipad;
-        std::vector<boost::uint8_t> spec_config_;
     };
     
     // constructor

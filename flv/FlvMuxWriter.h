@@ -127,14 +127,15 @@ namespace ppbox
                       if (tag_data) {
                           flvtag_.TagType = TAG_TYPE_AUDIO;
                           AudioTagHeader audiotagheader;
-                          // codec AAC
                           audiotagheader.SoundAttribute = 0xAF;
                           audiotagheader.AACPacketType = 0x0;
                           if (stream_info.format_type != MediaInfo::audio_microsoft_wave) {
+                              // vod
                               write_header_to_buffer(
                                   (unsigned char*)&audiotagheader, 2,
                                   tag_data, tag_data_len, false);
                           } else {
+                              // new live
                               boost::uint8_t cbuf[1024];
                               memset(cbuf, 0, sizeof(cbuf));
                               memcpy(cbuf, tag_data, tag_data_len);
@@ -154,23 +155,16 @@ namespace ppbox
                       }
                   } else if (stream_info.sub_type == AUDIO_TYPE_WMA2) {
                       if (tag_data) {
+                          // old live
                           flvtag_.TagType = TAG_TYPE_AUDIO;
                           AudioTagHeader audiotagheader;
+                          // audio codec
                           audiotagheader.SoundAttribute = 0xDF;
                           audiotagheader.AACPacketType = 0x0;
                           write_header_to_buffer(
                               (unsigned char*)&audiotagheader, 2,
                               tag_data, tag_data_len, false);
                       }
-                  } else if (stream_info.sub_type == AUDIO_TYPE_MP1A) {
-                      // 支持mp3格式
-                      flvtag_.TagType = TAG_TYPE_AUDIO;
-                      AudioTagHeader audiotagheader;
-                      audiotagheader.SoundAttribute = 0x2F;
-                      audiotagheader.AACPacketType = 0x0;
-                      write_header_to_buffer(
-                          (unsigned char*)&audiotagheader, 2,
-                          tag_data, tag_data_len, false);
                   }
               }
 
@@ -384,6 +378,7 @@ namespace ppbox
                 tag_->tag_header_length = 0;
                 tag_->tag_size_length = 4;
                 if (live) {
+                    // live
                     unsigned char const * frame_data = sample.size ? &sample.data.at(0) : NULL;
                     boost::uint32_t prefix_size = START_CODE_SIZE;
                     if (sample.is_sync) {
