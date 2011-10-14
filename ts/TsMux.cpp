@@ -1,15 +1,14 @@
 // TsMux.cpp
-
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/H264Nalu.h"
 #include "ppbox/mux/ts/TsMux.h"
 #include "ppbox/mux/ts/Ap4Mpeg2Ts.h"
 
+#include <framework/memory/MemoryPage.h>
+
 #include <ppbox/demux/Demuxer.h>
 #include <ppbox/demux/DemuxerError.h>
 using namespace ppbox::demux;
-
-#include <framework/memory/MemoryPage.h>
 
 #include <iostream>
 
@@ -152,9 +151,16 @@ namespace ppbox
                 }
             }
             if (!ec) {
-                state_ = opened;
-                ts_writer_.WritePAT(*pmt_);
-                ts_writer_.WritePMT(*pmt_);
+                if(video_stream_ && audio_stream_)
+				{
+				    state_ = opened;
+					ts_writer_.WritePAT(*pmt_);
+					ts_writer_.WritePMT(*pmt_);
+				}
+				else
+				{
+					ec = ppbox::mux::error::mux_other_error;
+				}
             } else {
                 state_ = closed;
             }

@@ -1,7 +1,6 @@
 // Common.h
 
-#include <framework/Framework.h>
-#include <framework/logger/Logger.h>
+#include <ppbox/common/Common.h>
 
 #include "ppbox/mux/MuxError.h"
 
