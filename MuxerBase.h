@@ -111,6 +111,8 @@ namespace ppbox
         {
         public:
             MuxerBase()
+                : demuxer_(NULL)
+                , current_tag_time_(0)
             {
             }
 
@@ -123,7 +125,7 @@ namespace ppbox
                 demux::Demuxer * demuxer, boost::system::error_code & ec) = 0;
 
             virtual boost::system::error_code read(
-                MuxTag * tag,
+                MuxTagEx * tag,
                 boost::system::error_code & ec) = 0;
 
             virtual boost::system::error_code seek(
@@ -144,13 +146,27 @@ namespace ppbox
 
             virtual unsigned char const * get_head(boost::uint32_t & size) = 0;
 
-            virtual MediaFileInfo const & get_media_info(void) const = 0;
+            MediaFileInfo & media_info(void);
 
-            virtual boost::uint64_t get_current_time(void) = 0;
+            boost::uint64_t & current_time(void);
 
-            virtual boost::uint32_t video_track_index(void) = 0;
+            boost::uint32_t & video_track_index(void);
 
-            virtual boost::uint32_t audio_track_index(void) = 0;
+            boost::uint32_t & audio_track_index(void);
+
+            demux::Demuxer *& demuxer(void);
+
+            boost::system::error_code get_buffer_time(
+                boost::uint32_t & buffer_time,
+                boost::system::error_code & ec);
+
+        private:
+            demux::Demuxer * demuxer_;
+            boost::uint32_t video_index_;
+            boost::uint32_t audio_index_;
+            MediaFileInfo   media_file_info_;
+            boost::uint64_t current_tag_time_; // ms
+
         };
     }
 }

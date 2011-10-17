@@ -46,7 +46,7 @@ namespace ppbox
                 tag = tag_;
                 tag.tag_header_buffer = ts_mux_->get_head(tag.tag_header_length);
             } else {
-                ts_mux_->readex(&tag_, ec);
+                ts_mux_->read(&tag_, ec);
                 if (!ec) {
                     if (segment_state_ == SegmentType::NONE) {
                         if (tag_.is_sync

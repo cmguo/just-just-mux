@@ -30,7 +30,7 @@ namespace ppbox
                 demux::Demuxer * demuxer, boost::system::error_code & ec);
 
             boost::system::error_code read(
-                MuxTag * tag,
+                MuxTagEx * tag,
                 boost::system::error_code & ec);
 
             boost::system::error_code seek(
@@ -51,31 +51,17 @@ namespace ppbox
 
             unsigned char const * get_head(boost::uint32_t & size);
 
-            MediaFileInfo const & get_media_info(void) const;
-
-            boost::uint64_t get_current_time(void);
-
-            boost::uint32_t video_track_index(void);
-
-            boost::uint32_t audio_track_index(void);
-
         private:
             void create_metadata(void);
 
         private:
-            demux::Demuxer * demuxer_;
             StatusEnum       state_;
             FlvMuxWriter *   flv_writer_;
-
             ppbox::demux::Sample sample_; // 当前读取的数据帧
-            boost::uint64_t current_tag_time_;  // 单位是ms
             bool paused_;
             //bool need_seek_time_;
             bool is_read_head_;
             bool is_read_metadata_;
-            boost::uint32_t video_index_;
-            boost::uint32_t audio_index_;
-            MediaFileInfo   media_file_info_;
         };
     }
 }

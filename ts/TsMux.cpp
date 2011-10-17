@@ -19,9 +19,7 @@ namespace ppbox
     namespace mux
     {
         TsMux::TsMux()
-            : demuxer_(NULL)
-            , state_(closed)
-            , current_tag_time_(0)
+            : state_(closed)
             , paused_(false)
             , is_read_head_(false)
             , ipad_(false)
@@ -58,30 +56,30 @@ namespace ppbox
             if (state_ != closed) {
                 ec = error::mux_already_open;
             } else {
-                demuxer_ = demuxer;
-                media_file_info_.init();
-                boost::uint32_t stream_count = demuxer_->get_media_count(ec);
+                MuxerBase::demuxer() = demuxer;
+                MuxerBase::media_info().init();
+                boost::uint32_t stream_count = MuxerBase::demuxer()->get_media_count(ec);
                 if (!ec) {
                     ppbox::demux::MediaInfo media_info;
                     for (size_t i = 0; i < stream_count; ++i) {
                         std::cout << "Stream: " << i << std::endl;
-                        demuxer_->get_media_info(i, media_info, ec);
+                        MuxerBase::demuxer()->get_media_info(i, media_info, ec);
                         if (ec) {
                             break;
                         } else {
                             if (media_info.type == MEDIA_TYPE_VIDE) {
-                                media_file_info_.frame_rate = media_info.video_format.frame_rate;
-                                media_file_info_.width      = media_info.video_format.width;
-                                media_file_info_.height     = media_info.video_format.height;
-                                media_file_info_.video_format_type = media_info.format_type;
+                                MuxerBase::media_info().frame_rate = media_info.video_format.frame_rate;
+                                MuxerBase::media_info().width      = media_info.video_format.width;
+                                MuxerBase::media_info().height     = media_info.video_format.height;
+                                MuxerBase::media_info().video_format_type = media_info.format_type;
                                 error_code lec;
-                                boost::uint32_t video_duration = demuxer_->get_duration(lec);
+                                boost::uint32_t video_duration = MuxerBase::demuxer()->get_duration(lec);
                                 if (lec == framework::system::logic_error::not_supported) {
-                                    media_file_info_.duration = 0;
+                                    MuxerBase::media_info().duration = 0;
                                 } else {
-                                    media_file_info_.duration   = video_duration / 1000;
+                                    MuxerBase::media_info().duration   = video_duration / 1000;
                                 }
-                                media_file_info_.video_codec = media_info.sub_type;
+                                MuxerBase::media_info().video_codec = media_info.sub_type;
                                 if (media_info.format_type == MediaInfo::video_avc_byte_stream) {
                                     // live
                                     Buffer_Array config_list;
@@ -122,14 +120,14 @@ namespace ppbox
                                         ec = ppbox::demux::error::bad_file_format;
                                     }
                                 }
-                                video_index_ = i;
+                                MuxerBase::video_track_index() = i;
                             } else {
-                                audio_index_ = i;
-                                media_file_info_.sample_rate = media_info.audio_format.sample_rate;
-                                media_file_info_.sample_size = media_info.audio_format.sample_size;
-                                media_file_info_.channel_count = media_info.audio_format.channel_count;
-                                media_file_info_.audio_codec = media_info.sub_type;
-                                media_file_info_.audio_format_type = media_info.format_type;
+                                MuxerBase::audio_track_index() = i;
+                                MuxerBase::media_info().sample_rate = media_info.audio_format.sample_rate;
+                                MuxerBase::media_info().sample_size = media_info.audio_format.sample_size;
+                                MuxerBase::media_info().channel_count = media_info.audio_format.channel_count;
+                                MuxerBase::media_info().audio_codec = media_info.sub_type;
+                                MuxerBase::media_info().audio_format_type = media_info.format_type;
 
                                 AP4_Result result;
                                 if (media_info.format_type == MediaInfo::audio_microsoft_wave) {
@@ -151,16 +149,13 @@ namespace ppbox
                 }
             }
             if (!ec) {
-                if(video_stream_ && audio_stream_)
-				{
-				    state_ = opened;
-					ts_writer_.WritePAT(*pmt_);
-					ts_writer_.WritePMT(*pmt_);
-				}
-				else
-				{
-					ec = ppbox::mux::error::mux_other_error;
-				}
+                if (video_stream_ && audio_stream_) {
+                    state_ = opened;
+                    ts_writer_.WritePAT(*pmt_);
+                    ts_writer_.WritePMT(*pmt_);
+                } else {
+                    ec = ppbox::mux::error::mux_other_error;
+                }
             } else {
                 state_ = closed;
             }
@@ -168,64 +163,6 @@ namespace ppbox
         }
 
         error_code TsMux::read(
-            MuxTag * tag,
-            error_code & ec)
-        {
-            ec.clear();
-            assert(tag != NULL);
-            if (state_ != opened) {
-                return error::mux_not_open;
-            }
-            if (paused_) {
-                paused_ = false;
-            }
-            if (is_read_head_) {
-                get_ignored_sample(sample_, ec);
-                if (!ec) {
-                    AP4_Position p;
-                    if (sample_.itrack == video_index_) {
-                        current_tag_time_ = sample_.time;
-                        ts_sample_->Seek(0);
-                        video_stream_->WriteSample(sample_, media_file_info_, true, *ts_sample_);
-                        tag->tag_header_length = 0;
-                        tag->tag_header_buffer = NULL;
-                        ts_sample_->Tell(p);
-                        tag->tag_data_length   = p;
-                        tag->tag_data_buffer   = ts_sample_->GetData();
-                        tag->tag_size_length   = 0;
-                        tag->tag_size_buffer   = NULL;
-                    } else if (sample_.itrack == audio_index_) {
-                        ts_sample_->Seek(0);
-                        audio_stream_->WriteSample(sample_, media_file_info_, false, *ts_sample_);
-                        tag->tag_header_length = 0;
-                        tag->tag_header_buffer = NULL;
-                        ts_sample_->Tell(p);
-                        tag->tag_data_length   = p;
-                        tag->tag_data_buffer   = ts_sample_->GetData();
-                        tag->tag_size_length   = 0;
-                        tag->tag_size_buffer   = NULL;
-                    } else {
-                        tag->tag_header_length = 0;
-                        tag->tag_header_buffer = NULL;
-                        tag->tag_data_length   = 0;
-                        tag->tag_data_buffer   = NULL;
-                        tag->tag_size_length   = 0;
-                        tag->tag_size_buffer   = NULL;
-                    }
-                }
-            } else {
-                    tag->tag_header_length = 0;
-                    tag->tag_header_buffer = NULL;
-                    tag->tag_data_length = pmt_->GetDataSize();
-                    tag->tag_data_buffer = pmt_->GetData();
-                    tag->tag_size_length = 0;
-                    tag->tag_size_buffer = NULL;
-                    is_read_head_ = true;
-            }
-            return ec;
-        }
-
-        error_code TsMux::readex(
             MuxTagEx * tag,
             error_code & ec)
         {
@@ -238,17 +175,18 @@ namespace ppbox
                 paused_ = false;
             }
             if (is_read_head_) {
-                get_ignored_sample(sample_, ec);
+                get_sort_sample(sample_, ec);
+                //MuxerBase::demuxer()->get_sample(sample_, ec);
                 if (!ec) {
                     tag->idesc   = sample_.idesc;
                     tag->is_sync = sample_.is_sync;
                     tag->itrack  = sample_.itrack;
                     tag->time    = sample_.time;
                     AP4_Position p;
-                    if (sample_.itrack == video_index_) {
-                        current_tag_time_ = sample_.time;
+                    if (sample_.itrack == MuxerBase::video_track_index()) {
+                        MuxerBase::current_time() = sample_.time;
                         ts_sample_->Seek(0);
-                        video_stream_->WriteSample(sample_, media_file_info_, true, *ts_sample_);
+                        video_stream_->WriteSample(sample_, MuxerBase::media_info(), true, *ts_sample_);
                         tag->tag_header_length = 0;
                         tag->tag_header_buffer = NULL;
                         ts_sample_->Tell(p);
@@ -256,9 +194,9 @@ namespace ppbox
                         tag->tag_data_buffer   = ts_sample_->GetData();
                         tag->tag_size_length   = 0;
                         tag->tag_size_buffer   = NULL;
-                    } else if (sample_.itrack == audio_index_) {
+                    } else if (sample_.itrack == MuxerBase::audio_track_index()) {
                         ts_sample_->Seek(0);
-                        audio_stream_->WriteSample(sample_, media_file_info_, false, *ts_sample_);
+                        audio_stream_->WriteSample(sample_, MuxerBase::media_info(), false, *ts_sample_);
                         tag->tag_header_length = 0;
                         tag->tag_header_buffer = NULL;
                         ts_sample_->Tell(p);
@@ -310,15 +248,16 @@ namespace ppbox
                 }
 
                 Sample sampleTemp;
-                demuxer_->get_sample_buffered(sampleTemp, ec);
+                //MuxerBase::demuxer()->get_sample_buffered(sampleTemp, ec);
+                get_ignored_sample(sampleTemp, ec);
 
                 if (ec) {
                     return ec;
                 }
 
-                if (video_index_ == sampleTemp.itrack) {
+                if (MuxerBase::video_track_index() == sampleTemp.itrack) {
                     queue_sample_[0].push_back(sampleTemp);
-                } else if (audio_index_ == sampleTemp.itrack) {
+                } else if (MuxerBase::audio_track_index() == sampleTemp.itrack) {
                     queue_sample_[1].push_back(sampleTemp);
                 }
             }
@@ -331,16 +270,18 @@ namespace ppbox
         {
             if (is_wait_sync_) {
                 while (true) {
-                    demuxer_->get_sample(sample, ec);
+                    //MuxerBase::demuxer()->get_sample(sample, ec);
+                    MuxerBase::demuxer()->get_sample_buffered(sample, ec);
                     if (ec)
                         break;
-                    if (sample.itrack == video_index_ && sample.is_sync) {
+                    if (sample.itrack == MuxerBase::video_track_index() && sample.is_sync) {
                         is_wait_sync_ = false;
                         break;
                     }
                 }
             } else {
-                demuxer_->get_sample(sample, ec);
+                //MuxerBase::demuxer()->get_sample(sample, ec);
+                MuxerBase::demuxer()->get_sample_buffered(sample, ec);
             }
             return ec;
         }
@@ -352,9 +293,9 @@ namespace ppbox
             if (state_ != opened) {
                 ec = error::mux_not_open;
             } else {
-                demuxer_->seek(time, ec);
+                MuxerBase::demuxer()->seek(time, ec);
                 if (!ec || ec == boost::asio::error::would_block) {
-                    current_tag_time_ = time / 1000;
+                    MuxerBase::current_time() = time / 1000;
                 }
             }
             return ec;
@@ -365,7 +306,7 @@ namespace ppbox
             if (state_ != opened) {
                 ec = error::mux_not_open;
             } else {
-                demuxer_->pause(ec);
+                MuxerBase::demuxer()->pause(ec);
                 if (!ec) {
                     paused_ = true;
                 }
@@ -379,7 +320,7 @@ namespace ppbox
             if (state_ != opened) {
                 ec = error::mux_not_open;
             } else {
-                demuxer_->resume(ec);
+                MuxerBase::demuxer()->resume(ec);
                 if (!ec) {
                     paused_ = false;
                 }
@@ -413,26 +354,6 @@ namespace ppbox
                 size = pmt_->GetDataSize();
                 return pmt_->GetData();
             }
-        }
-
-        MediaFileInfo const & TsMux::get_media_info(void) const
-        {
-            return media_file_info_;
-        }
-
-        boost::uint64_t TsMux::get_current_time(void)
-        {
-            return current_tag_time_;
-        }
-
-        boost::uint32_t TsMux::video_track_index(void)
-        {
-            return video_index_;
-        }
-
-        boost::uint32_t TsMux::audio_track_index(void)
-        {
-            return audio_index_;
         }
 
         void TsMux::set_ipad(bool is_ipad)
