@@ -101,7 +101,8 @@ namespace ppbox
             }
 
             if (is_read_head_) {
-                MuxerBase::demuxer()->get_sample_buffered(sample_, ec);
+                //demuxer_->get_sample_buffered(sample_, ec);
+                MuxerBase::demuxer()->get_sample(sample_, ec);
                 if (!ec) {
                     tag->idesc   = sample_.idesc;
                     tag->is_sync = sample_.is_sync;

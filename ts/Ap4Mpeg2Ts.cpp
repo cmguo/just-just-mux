@@ -422,8 +422,7 @@ AP4_Mpeg2TsAudioSampleStream::WriteSample(Sample const &       sample,
     //if (audio_desc->GetMpeg4AudioObjectType() != AP4_MPEG4_AUDIO_OBJECT_TYPE_AAC_LC) return AP4_ERROR_NOT_SUPPORTED;
     unsigned int sampling_frequency_index = 0;
     unsigned int channel_configuration = 0;
-    if (mediainfo.audio_format_type == MediaInfo::audio_flv_tag
-        && (spec_config_.at(0) >> 3) == 5 ) { // AAC SBR
+    if ((spec_config_.at(0) >> 3) == 5 ) { // AAC SBR
         sampling_frequency_index = GetSamplingFrequencyIndex(mediainfo.sample_rate/2);
         channel_configuration =  mediainfo.channel_count / 2;
     } else {
@@ -579,7 +578,7 @@ bool AP4_Mpeg2TsVideoSampleStream::video_pretreatment(
             }
             data_prefix_size = prefix_size_;
         }
-    } else if (mediainfo.video_format_type == MediaInfo::video_flv_tag) { // live2
+    } else if (mediainfo.video_format_type == MediaInfo::video_avc_packet) { // live2
         got_first_idr_ = true;
     } else { // vod
         got_first_idr_ = true;
@@ -649,7 +648,7 @@ void AP4_Mpeg2TsVideoSampleStream::compute_pts_dts(
                      boost::uint32_t size)
 {
     if (mediainfo.video_format_type == MediaInfo::video_avc_byte_stream
-        || mediainfo.video_format_type == MediaInfo::video_flv_tag) { // live1 & live2
+        || mediainfo.video_format_type == MediaInfo::video_avc_packet) { // live1 & live2
         boost::uint32_t time_stamp;
         if (m_Ipad) {
             time_stamp = (boost::uint32_t)sample.dts;
@@ -738,7 +737,7 @@ AP4_Mpeg2TsVideoSampleStream::WriteSample(Sample const &       sample,
         AP4_CopyMemory(pes_buffer+4, data, data_size);
         buffer_for_pts = &sample.data.at(0);
         buffer_for_pts_len = sample.data.size();
-    } else if (mediainfo.video_format_type == MediaInfo::video_flv_tag) { // live2
+    } else if (mediainfo.video_format_type == MediaInfo::video_avc_packet) { // live2
         while (data_size) {
             if (data_size < m_NaluLengthSize) break;
             AP4_UI32 nalu_size;
