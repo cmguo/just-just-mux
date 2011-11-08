@@ -33,12 +33,12 @@ namespace ppbox
             std::vector<TsPacket> const & ts_buffers = 
                 *(std::vector<TsPacket> const *)sample.context;
             for (boost::uint32_t i = 0; i < ts_buffers.size()-1; ++i) {
-                RtpPacket p(sample.pts, false);
+                RtpPacket p(sample.dts + sample.cts_delta, false);
                 p.push_buffers(ts_buffers[i].buffers);
                 push_packet(p);
             }
             if (ts_buffers.size() > 0) {
-                RtpPacket p(sample.pts, true);
+                RtpPacket p(sample.dts + sample.cts_delta, true);
                 p.push_buffers(ts_buffers[ts_buffers.size()-1].buffers);
                 push_packet(p);
                 sample.context = (void*)&rtp_packets();

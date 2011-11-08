@@ -11,7 +11,7 @@ namespace ppbox
 
         void PtsComputeTransfer::transfer(ppbox::demux::Sample & sample)
         {
-            if (sample.pts != boost::uint64_t(-1)) {
+            if (sample.cts_delta != boost::uint32_t(-1)) {
                 return;
             }
             if (sample.is_sync) {
@@ -42,9 +42,9 @@ namespace ppbox
                 }
             } // End for
             if (nalu_parser_.is_ready) {
-                sample.pts = idr_dts_ + frame_scale_*nalu_parser_.pic_order_cnt_lsb/2;
+                sample.cts_delta = idr_dts_ + frame_scale_*nalu_parser_.pic_order_cnt_lsb/2 - sample.dts;
             } else {
-                sample.pts = sample.dts;
+                sample.cts_delta = 0;
             }
         }
 

@@ -32,7 +32,7 @@ namespace ppbox
             NaluList & nalus = *(NaluList *)sample.context;
 
             boost::uint32_t cts_time = boost::uint32_t(
-                (boost::uint64_t)sample.pts * 90000 / video_info->time_scale);
+                ((boost::uint64_t)sample.dts + sample.cts_delta) * 90000 / video_info->time_scale);
 
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
 
@@ -87,10 +87,10 @@ namespace ppbox
             std::string map_id_str = format(rtp_head_.mpt);
 
             boost::uint8_t const * p = &info.format_data.at(0) + 5;
-            boost::uint8_t const * sps_buf;
-            boost::uint8_t const * pps_buf;
-            boost::uint16_t sps_len;
-            boost::uint16_t pps_len;
+            boost::uint8_t const * sps_buf = p;
+            boost::uint8_t const * pps_buf = p;
+            boost::uint16_t sps_len = 0;
+            boost::uint16_t pps_len = 0;
             size_t n = (*p++) & 31;
             for (size_t i = 0; i < n; ++i) {
                 size_t l = (*p++);

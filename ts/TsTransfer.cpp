@@ -13,11 +13,10 @@ namespace ppbox
             ppbox::demux::MediaInfo const * stream_info = 
                 (ppbox::demux::MediaInfo const *)sample.media_info;
             sample.dts = AP4_ConvertTime(sample.dts, timescale_, 90000);
-            sample.pts = AP4_ConvertTime(sample.pts, timescale_, 90000);
+            sample.cts_delta = AP4_ConvertTime(sample.cts_delta, timescale_, 90000);
             if (stream_info->type == ppbox::demux::MEDIA_TYPE_VIDE) {
-                WritePES(sample, sample.dts, true, sample.pts, true);
+                WritePES(sample, sample.dts, true, sample.dts + sample.cts_delta, true);
             } else {
-                sample.pts = sample.dts;
                 WritePES(sample, 0, false, sample.dts, false);
             }
             sample.data.assign(ts_buffers_.begin(), ts_buffers_.end());
