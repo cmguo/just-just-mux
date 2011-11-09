@@ -60,7 +60,7 @@ namespace ppbox
             std::deque<boost::asio::const_buffer> datas;
             datas.push_back(boost::asio::buffer(&access_unit_delimiter_.at(0), access_unit_delimiter_.size()));
             sample.size += access_unit_delimiter_.size();
-            if (sample.is_sync) {
+            if (sample.flags & demux::Sample::sync) {
                 datas.push_back(boost::asio::buffer(sps_pps_));
                 sample.size += sps_pps_.size();
             }

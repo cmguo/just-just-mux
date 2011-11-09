@@ -16,7 +16,7 @@ namespace ppbox
         {
             flvtag_.TagType = TAG_TYPE_VIDEO;
             VideoTagHeader videotagheader;
-            if(sample.is_sync) {
+            if(sample.flags & demux::Sample::sync) {
                 videotagheader.VideoAttribute = 0x17;
             } else {
                 videotagheader.VideoAttribute = 0x27;

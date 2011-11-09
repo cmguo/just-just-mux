@@ -14,11 +14,10 @@ namespace ppbox
             if (sample.cts_delta != boost::uint32_t(-1)) {
                 return;
             }
-            if (sample.is_sync) {
+            if (sample.flags & demux::Sample::sync) {
                 idr_dts_ = sample.dts;
                 is_last_a_idr_ = true;
-            }
-            if (sample.is_sync == false && is_last_a_idr_ == true) {
+            } else if (is_last_a_idr_) {
                 frame_scale_ = boost::uint32_t(sample.dts - idr_dts_);
                 is_last_a_idr_ = false;
             }

@@ -97,10 +97,10 @@ namespace ppbox
                 }
             } else {
                 is_read_head_ = true;
-                tag.idesc   = boost::uint32_t(-1);
-                tag.is_sync = false;
-                tag.itrack  = boost::uint32_t(-1);
-                tag.ustime   = 0;
+                tag.itrack = boost::uint32_t(-1);
+                tag.idesc = boost::uint32_t(-1);
+                tag.flags = 0;
+                tag.ustime = 0;
                 tag.context = NULL;
                 head_buffer(tag);
             }

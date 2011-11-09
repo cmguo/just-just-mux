@@ -2,7 +2,9 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/rtp/RtpTsMux.h"
-#include "ppbox/mux/transfer/Transfers.h"
+#include "ppbox/mux/transfer/MergeTransfer.h"
+#include "ppbox/mux/ts/TsSplitTransfer.h"
+#include "ppbox/mux/rtp/RtpTsTransfer.h"
 
 #include <framework/string/Format.h>
 using namespace boost::system;

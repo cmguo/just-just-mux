@@ -2,7 +2,13 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/ts/TsMux.h"
-#include "ppbox/mux/transfer/Transfers.h"
+#include "ppbox/mux/transfer/PackageSplitTransfer.h"
+#include "ppbox/mux/transfer/StreamSplitTransfer.h"
+#include "ppbox/mux/transfer/PtsComputeTransfer.h"
+#include "ppbox/mux/transfer/StreamJoinTransfer.h"
+#include "ppbox/mux/transfer/AdtsAudioTransfer.h"
+#include "ppbox/mux/transfer/AudioMergeTransfer.h"
+#include "ppbox/mux/ts/TsTransfer.h"
 
 using namespace ppbox::demux;
 

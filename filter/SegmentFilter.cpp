@@ -24,11 +24,11 @@ namespace ppbox
             if (!ec) {
                 if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1)
                     && sample.itrack == media_file_info().video_index
-                    && sample.is_sync) {
+                    && (sample.flags & demux::Sample::sync)) {
                         fisrt_idr_timestamp_us_ = sample.ustime;
                 } else {
                     if (sample.itrack == media_file_info().video_index
-                        && sample.is_sync) {
+                        && (sample.flags & demux::Sample::sync)) {
                             if ((sample.ustime - fisrt_idr_timestamp_us_) 
                                 >= segent_end_time_ ) {
                                     ec = error::mux_segment_end;

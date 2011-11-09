@@ -19,7 +19,7 @@ namespace ppbox
                 Filter::get_sample(sample, ec);
                 if (ec)
                     break;
-                if (sample.itrack == media_file_info().video_index && sample.is_sync) {
+                if (sample.itrack == media_file_info().video_index && (sample.flags & demux::Sample::sync)) {
                     detach_self();
                     break;
                 } else if (sample.itrack == media_file_info().audio_index) {
