@@ -22,7 +22,12 @@ namespace ppbox
                 videotagheader.VideoAttribute = 0x27;
             }
             videotagheader.AVCPacketType = 0x01;
-            memset(videotagheader.CompositionTime, 0, sizeof(videotagheader.CompositionTime));
+            boost::uint32_t CompositionTime = sample.cts_delta;
+            videotagheader.CompositionTime[2] = CompositionTime & 0xff;
+            CompositionTime >>= 8;
+            videotagheader.CompositionTime[1] = CompositionTime & 0xff;
+            CompositionTime >>= 8;
+            videotagheader.CompositionTime[0] = CompositionTime & 0xff;
             boost::uint32_t data_length = sample.size;
             setTagSizeAndTimestamp(flvtag_, data_length+5, sample.time);
             sample_head_buffer_.resize(16);
