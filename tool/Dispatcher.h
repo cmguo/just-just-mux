@@ -116,6 +116,10 @@ namespace ppbox
 
 //内存指令
         private:
+            ppbox::demux::DemuxerModule & demuxer_module();
+
+            MuxerModule & muxer_module();
+
             std::string const & status_string();
 
             //状态机判断函数
@@ -198,8 +202,7 @@ namespace ppbox
             };
             
         private:
-            ppbox::demux::DemuxerModule & demuxer_module_;
-            MuxerModule & muxer_module_;
+            util::daemon::Daemon & daemon_;
 
             boost::thread * dispatch_thread_;    //线程指针
 
