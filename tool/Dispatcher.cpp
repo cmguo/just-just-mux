@@ -52,7 +52,8 @@ namespace ppbox
         {
             if (dispatch_thread_) 
             {
-                stop();
+                dispatch_thread_->join();
+                dispatch_thread_ = NULL;
             }
 
             if (msgq_) 
@@ -165,8 +166,6 @@ namespace ppbox
             LOG_S(Logger::kLevelEvent, "[stop]");
             session_callback_respone resp;
             msgq_->push(new MessageQType(PC_Exit,0));
-            dispatch_thread_->join();
-            dispatch_thread_ = NULL;
             return error_code();
         }
 
@@ -276,20 +275,23 @@ namespace ppbox
             else
             {//openning openned cancelling, cancel_delay, close_delay
                 //play_link 相同 type也相同
-                if (append_mov_->demuxer != NULL && param->need_session)
+                if (append_mov_->demuxer != NULL)
                 {
                     // close_delay  openned
-                    boost::uint32_t iseek = 0;
-                    append_mov_->muxer->seek(iseek,ec);
-                    append_mov_->muxer->reset();
+                    if (param->need_session) {
+                        boost::uint32_t iseek = 0;
+                        append_mov_->muxer->seek(iseek,ec);
+                        append_mov_->muxer->reset();
+                    }
+                    ec.clear();
                 }
-                ec.clear();
             }
             // closed, opening, opened, cancelling, cancel_delay, close_delay
             
             append_mov_->format = param->format_;
 
-            if (ec == boost::asio::error::would_block) {
+            if (ec == boost::asio::error::would_block) 
+            {
                 append_mov_->delay = false;
                 if (!param->need_session)
                 {
@@ -301,7 +303,8 @@ namespace ppbox
                 }
             } else if (ec) {
             } else {
-                if (param->need_session) {
+                if (param->need_session) 
+                {
                     append_mov_->session_id = param->session_id_;
                     clear_send();
                     append_mov_->delay = false;
@@ -464,13 +467,12 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::thread_stop(MessageQType* &param)
         {
+            LOG_S(Logger::kLevelEvent, "[thread_stop] ");
+
             if (NULL == append_mov_)
             {
-                assert(false);
                 return error_code();
             }
-            LOG_S(Logger::kLevelEvent, "[thread_stop] ["<<(boost::uint32_t)this<<"]["<<cur_mov_->session_id<<"]");
-
             exit_ = true;
             playing_ = false;
             return error_code();
@@ -518,6 +520,8 @@ namespace ppbox
                 Movie::Iter iter = find_if(append_mov_->sessions.begin(), append_mov_->sessions.end() ,FindBySession(session_id));
                 if (iter != append_mov_->sessions.end())
                 {//openning wait
+                    
+                    LOG_S(Logger::kLevelError, "[thread_close] find_if "<<session_id);
                     MessageQType *pMsg = (*iter);
                     append_mov_->sessions.erase(iter);
                     delete pMsg;
@@ -526,10 +530,12 @@ namespace ppbox
                     {
                         if (append_mov_ == cur_mov_)
                         {//openning转 cancel_delay
+                            LOG_S(Logger::kLevelError, "[thread_close] append_mov_->delay = true ");
                             append_mov_->delay = true;
                         }
                         else
                         {//wait
+                            LOG_S(Logger::kLevelError, "[thread_close] delete append_mov_; ");
                             delete append_mov_;
                             append_mov_ = cur_mov_;
                         }
@@ -785,6 +791,7 @@ namespace ppbox
             while(!exit_) {
                 if( msgq_->timed_pop(pMsgType,boost::posix_time::milliseconds(10000)) )
                 {
+                    LOG_SECTION();
                     LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin status:" << status_string());
                     thread_command(pMsgType);                
                     LOG_S(Logger::kLevelDebug,"[thread_dispatch] end status:" << status_string());
@@ -792,6 +799,7 @@ namespace ppbox
                 else
                 {
                     //超时处理位置
+                    LOG_SECTION();
                     thread_timeout();
                 }
             }
