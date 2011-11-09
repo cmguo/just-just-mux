@@ -12,12 +12,14 @@ namespace ppbox
         {
             ppbox::demux::MediaInfo const * stream_info = 
                 (ppbox::demux::MediaInfo const *)sample.media_info;
-            sample.dts = AP4_ConvertTime(sample.dts, timescale_, 90000);
-            sample.cts_delta = AP4_ConvertTime(sample.cts_delta, timescale_, 90000);
+            boost::uint64_t dts = sample.dts;
+            boost::uint64_t cts = sample.dts + (boost::int32_t)sample.cts_delta;
+            dts = AP4_ConvertTime(dts, timescale_, 90000);
+            cts = AP4_ConvertTime(cts, timescale_, 90000);
             if (stream_info->type == ppbox::demux::MEDIA_TYPE_VIDE) {
-                WritePES(sample, sample.dts, true, sample.dts + sample.cts_delta, true);
+                WritePES(sample, dts, true, cts, true);
             } else {
-                WritePES(sample, 0, false, sample.dts, false);
+                WritePES(sample, 0, false, dts, false);
             }
             sample.data.assign(ts_buffers_.begin(), ts_buffers_.end());
             sample.size = util::buffers::buffer_size(ts_buffers_);
