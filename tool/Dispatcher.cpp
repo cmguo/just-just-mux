@@ -404,24 +404,46 @@ namespace ppbox
 
             assert(NULL != cur_mov_);
             assert(NULL == cur_mov_->muxer);
-
             
-            if(NULL != cur_mov_ && cur_mov_->close_token && !cur_mov_->delay)
-            {//opening
-                cur_mov_->session_id = cur_mov_->sessions.back()->session_id_;
+            if(cur_mov_->close_token)
+            {
+                //openning cancel_delay
+                cur_mov_->demuxer = param->demuxer;
 
-                MessageQType* pp =NULL;
-                for (size_t ii = 0; ii < cur_mov_->sessions.size()-1; ++ii )
+                if (!cur_mov_->delay)
                 {
-                    pp = cur_mov_->sessions[ii];
-                    pp->resq_(pp->need_session ? boost::asio::error::operation_aborted : param->ec);
-                    delete pp;
-                }
+                    //openning
+                    cur_mov_->session_id = cur_mov_->sessions.back()->session_id_;
 
-                pp = cur_mov_->sessions.back();
-                pp->resq_(param->ec);
-                delete pp;
-                cur_mov_->sessions.clear();
+                    cur_mov_->muxer = muxer_module().open(cur_mov_->demuxer,
+                        cur_mov_->format,
+                        cur_mov_->mux_close_token);
+
+                    if (NULL == cur_mov_->muxer)
+                    {
+                        //理论上open_mux不为NULL
+                        cur_mov_->delay = true; //转close_delay
+                    }
+                    else
+                    {
+                        const ppbox::mux::MediaFileInfo & infoTemp = cur_mov_->muxer->mediainfo();
+                        video_type_ = infoTemp.video_index;
+                        audio_type_ = infoTemp.audio_index;
+                    }
+
+                    MessageQType* pp =NULL;
+                    for (size_t ii = 0; ii < cur_mov_->sessions.size()-1; ++ii )
+                    {
+                        pp = cur_mov_->sessions[ii];
+                        pp->resq_(pp->need_session ? boost::asio::error::operation_aborted : param->ec);
+                        delete pp;
+                    }
+
+                    pp = cur_mov_->sessions.back();
+                    pp->resq_(param->ec);
+                    delete pp;
+                    cur_mov_->sessions.clear();
+                }
             }
 
             if (cur_mov_->close_token == 0 || param->ec)  // param->ec异常 cur_mov_->close_token 是否o处理一致
@@ -446,31 +468,7 @@ namespace ppbox
                     append_mov_ = NULL;
                 }
             }
-            else
-            { 
-                //openning cancel_delay
-                cur_mov_->demuxer = param->demuxer;
-                if (!cur_mov_->delay)
-                {//openning
-                    //cur_mov_->muxer = open(cur_mov_->demuxer,ec); //获取muxer
-                    cur_mov_->muxer = muxer_module().open(cur_mov_->demuxer,
-                        cur_mov_->format,
-                        cur_mov_->mux_close_token);
 
-                    if (NULL == cur_mov_->muxer)
-                    {
-                        //理论上open_mux不为NULL
-                        cur_mov_->delay = true; //转close_delay
-                    }
-                    else
-                    {
-                        const ppbox::mux::MediaFileInfo & infoTemp = cur_mov_->muxer->mediainfo();
-                        video_type_ = infoTemp.video_index;
-                        audio_type_ = infoTemp.audio_index;
-                    }
-
-                }
-            }
             return ec;
         }
 
@@ -884,8 +882,10 @@ namespace ppbox
                             (now - start_time).total_microseconds();
 
                         if (tag.ustime > now_time)
-
+                        {
+                            //std::cout<<"Sleep :"<<tag.ustime - now_time<<std::endl;
                             boost::this_thread::sleep(boost::posix_time::microseconds(tag.ustime - now_time));
+                        }
                     }
                     
                     if (NULL != default_sink_)
