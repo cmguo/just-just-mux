@@ -6,7 +6,7 @@
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
-#include <ppbox/demux/Demuxer.h>
+#include <ppbox/demux/PptvDemuxer.h>
 using namespace ppbox::demux;
 
 #include <framework/system/BytesOrder.h>

@@ -13,7 +13,7 @@ namespace ppbox
 {
     namespace demux
     {
-        class Demuxer;
+        class PptvDemuxer;
     }
 
     namespace mux
@@ -51,7 +51,7 @@ namespace ppbox
 
         public:
             virtual boost::system::error_code open(
-                demux::Demuxer * demuxer,
+                demux::PptvDemuxer * demuxer,
                 boost::system::error_code & ec);
 
             boost::system::error_code read(
@@ -109,7 +109,7 @@ namespace ppbox
             void release_transfer(void);
 
         private:
-            demux::Demuxer * demuxer_;
+            demux::PptvDemuxer * demuxer_;
             framework::container::List<Filter> filters_;
             bool paused_;
             boost::uint32_t play_time_; // ms

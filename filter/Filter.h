@@ -4,7 +4,7 @@
 #define   _PPBOX_MUX_FILTER_H_
 
 #include "ppbox/mux/MuxerBase.h"
-#include <ppbox/demux/Demuxer.h>
+#include <ppbox/demux/PptvDemuxer.h>
 
 #include <framework/container/List.h>
 
@@ -73,13 +73,13 @@ namespace ppbox
                 return demuxer_->get_sample(sample, ec);
             }
 
-            void set_demuxer(ppbox::demux::Demuxer * demuxer)
+            void set_demuxer(ppbox::demux::PptvDemuxer * demuxer)
             {
                 demuxer_ = demuxer;
             }
 
         private:
-            ppbox::demux::Demuxer * demuxer_;
+            ppbox::demux::PptvDemuxer * demuxer_;
 
         };
 

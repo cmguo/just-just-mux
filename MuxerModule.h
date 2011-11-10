@@ -70,7 +70,7 @@ namespace ppbox
 
             // For without using demux module
             Muxer * open(
-                ppbox::demux::Demuxer * demuxer,
+                ppbox::demux::PptvDemuxer * demuxer,
                 std::string format,
                 size_t & token);
 
@@ -89,7 +89,7 @@ namespace ppbox
             void open_callback(
                 MuxerInfo * info,
                 boost::system::error_code const & ec,
-                ppbox::demux::Demuxer * demuxer);
+                ppbox::demux::PptvDemuxer * demuxer);
 
         private:
             ppbox::demux::DemuxerModule & demux_mod_;
