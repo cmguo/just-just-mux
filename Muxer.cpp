@@ -7,7 +7,7 @@
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/H264Nalu.h"
 
-#include <ppbox/demux/Demuxer.h>
+#include <ppbox/demux/PptvDemuxer.h>
 #include <ppbox/demux/asf/AsfObjectType.h>
 using namespace ppbox::demux;
 using namespace boost::system;
@@ -22,7 +22,7 @@ namespace ppbox
     namespace mux
     {
         error_code Muxer::open(
-            demux::Demuxer * demuxer,
+            demux::PptvDemuxer * demuxer,
             error_code & ec)
         {
             assert(demuxer != NULL);

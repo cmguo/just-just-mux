@@ -8,7 +8,7 @@ namespace ppbox
 {
     namespace demux
     {
-        class Demuxer;
+        class PptvDemuxer;
     }
 
     namespace mux
@@ -91,7 +91,7 @@ namespace ppbox
             MessageQType(
                 PlayControl msg,
                 boost::system::error_code ec,
-                ppbox::demux::Demuxer* demuxer)
+                ppbox::demux::PptvDemuxer* demuxer)
                 :msg_(msg),
                 ec(ec),
                 demuxer(demuxer)
@@ -144,7 +144,7 @@ namespace ppbox
 
             //Callback
             boost::system::error_code ec;
-            ppbox::demux::Demuxer* demuxer;
+            ppbox::demux::PptvDemuxer* demuxer;
 
             //Setup
             size_t  control;

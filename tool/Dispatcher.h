@@ -15,7 +15,7 @@ namespace ppbox
 {
     namespace demux
     {
-        class Demuxer;
+        class PptvDemuxer;
         class DemuxerModule;
     }
 
@@ -133,7 +133,7 @@ namespace ppbox
             void open_call_back_mux(
                 const boost::uint32_t,
                 boost::system::error_code const &,
-                ppbox::demux::Demuxer *);
+                ppbox::demux::PptvDemuxer *);
 
             void clear_send();
 
@@ -194,7 +194,7 @@ namespace ppbox
                 size_t  close_token;               //关闭流  call openned
                 size_t  mux_close_token;
                 ppbox::mux::Muxer *muxer;           //保存open callbalk的指针   callback
-                ppbox::demux::Demuxer* demuxer;
+                ppbox::demux::PptvDemuxer* demuxer;
 
                 bool delay;
                 typedef std::vector<MessageQType*>::iterator Iter;

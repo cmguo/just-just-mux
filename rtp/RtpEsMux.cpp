@@ -8,7 +8,7 @@
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 
-#include <ppbox/demux/Demuxer.h>
+#include <ppbox/demux/PptvDemuxer.h>
 using namespace ppbox::demux;
 
 namespace ppbox

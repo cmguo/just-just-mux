@@ -31,7 +31,7 @@ namespace ppbox
             size_t id;
             Muxer * muxer;
             size_t demuxer_id;
-            Demuxer * demuxer;
+            PptvDemuxer * demuxer;
             MuxerModule::open_respone_type resp;
 
             struct Finder
@@ -72,7 +72,7 @@ namespace ppbox
         void MuxerModule::open_callback(
             MuxerInfo * info,
             error_code const & ec,
-            ppbox::demux::Demuxer * demuxer)
+            ppbox::demux::PptvDemuxer * demuxer)
         {
             error_code lec = ec;
             if (!lec) {
@@ -101,7 +101,7 @@ namespace ppbox
         }
 
         Muxer * MuxerModule::open(
-            ppbox::demux::Demuxer * demuxer,
+            ppbox::demux::PptvDemuxer * demuxer,
             std::string format,
             size_t & token)
         {

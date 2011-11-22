@@ -757,7 +757,7 @@ namespace ppbox
         void Dispatcher::open_call_back_mux(
             const boost::uint32_t session_id,
             boost::system::error_code const & ec,
-            ppbox::demux::Demuxer * muxer)
+            ppbox::demux::PptvDemuxer * muxer)
         {
             msgq_->push(new MessageQType(PC_Callback,ec,muxer));
             return;
