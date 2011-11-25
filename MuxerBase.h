@@ -2,7 +2,7 @@
 #ifndef _PPBOX_MUX_MUXERBASER_H_
 #define _PPBOX_MUX_MUXERBASER_H_
 
-#include <ppbox/demux/DemuxerBase.h>
+#include <ppbox/demux/base/DemuxerBase.h>
 #include <boost/asio/buffer.hpp>
 
 namespace ppbox

@@ -7,7 +7,7 @@
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/H264Nalu.h"
 
-#include <ppbox/demux/PptvDemuxer.h>
+#include <ppbox/demux/pptv/PptvDemuxer.h>
 #include <ppbox/demux/asf/AsfObjectType.h>
 using namespace ppbox::demux;
 using namespace boost::system;

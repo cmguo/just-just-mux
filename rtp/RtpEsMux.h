@@ -6,7 +6,7 @@
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
 
-#include <ppbox/demux/DemuxerBase.h>
+#include <ppbox/demux/base/DemuxerBase.h>
 
 namespace ppbox
 {

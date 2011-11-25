@@ -6,7 +6,7 @@
 #include "ppbox/mux/MuxError.h"
 
 #include <ppbox/demux/DemuxerModule.h>
-#include <ppbox/demux/DemuxerError.h>
+#include <ppbox/demux/base/DemuxerError.h>
 
 #include <framework/system/LogicError.h>
 #include <framework/thread/MessageQueue.h>

@@ -4,7 +4,7 @@
 #define   _PPBOX_MUX_FILTER_H_
 
 #include "ppbox/mux/MuxerBase.h"
-#include <ppbox/demux/PptvDemuxer.h>
+#include <ppbox/demux/pptv/PptvDemuxer.h>
 
 #include <framework/container/List.h>
 
