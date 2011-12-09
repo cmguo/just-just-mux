@@ -9,6 +9,8 @@
 #include "ppbox/mux/rtp/RtpTsMux.h"
 using namespace ppbox::demux;
 
+#include <ppbox/demux/pptv/PptvDemuxer.h>
+
 #include <boost/bind.hpp>
 using namespace boost::system;
 
@@ -31,7 +33,7 @@ namespace ppbox
             size_t id;
             Muxer * muxer;
             size_t demuxer_id;
-            PptvDemuxer * demuxer;
+            BufferDemuxer * demuxer;
             MuxerModule::open_respone_type resp;
 
             struct Finder
@@ -101,7 +103,7 @@ namespace ppbox
         }
 
         Muxer * MuxerModule::open(
-            ppbox::demux::PptvDemuxer * demuxer,
+            ppbox::demux::BufferDemuxer * demuxer,
             std::string format,
             size_t & token)
         {

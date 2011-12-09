@@ -3,7 +3,6 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/rtp/RtpTsMux.h"
 #include "ppbox/mux/transfer/MergeTransfer.h"
-#include "ppbox/mux/ts/TsSplitTransfer.h"
 #include "ppbox/mux/rtp/RtpTsTransfer.h"
 
 #include <framework/string/Format.h>
@@ -23,21 +22,17 @@ namespace ppbox
         }
 
         void RtpTsMux::add_stream(
-            ppbox::demux::MediaInfo & mediainfo,
+            MediaInfoEx & mediainfo,
             std::vector<Transfer *> & transfers)
         {
             TsMux::add_stream(mediainfo, transfers);
-            Transfer * transfer = NULL;
-            transfer = new TsSplitTransfer();
-            transfers.push_back(transfer);
             if (rtp_ts_transfer_ == NULL) {
                 rtp_ts_transfer_ = new RtpTsTransfer(*this, map_id_);
             }
-            transfer = new MergeTransfer(rtp_ts_transfer_);
+            Transfer * transfer = new MergeTransfer(rtp_ts_transfer_);
             transfers.push_back(transfer);
 
             if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
-                mediainfo.attachment = NULL;
                 rtp_ts_transfer_->get_rtp_info(mediainfo);
                 Muxer::mediainfo().attachment = mediainfo.attachment;
             } else {
@@ -45,10 +40,17 @@ namespace ppbox
             }
         }
 
-        void RtpTsMux::head_buffer(ppbox::demux::Sample & tag)
+        void RtpTsMux::file_header(ppbox::demux::Sample & tag)
         {
-            TsMux::head_buffer(tag);
+            TsMux::file_header(tag);
             rtp_ts_transfer_->header_rtp_packet(tag);
+        }
+
+        void RtpTsMux::stream_header(
+            boost::uint32_t index, 
+            ppbox::demux::Sample & tag)
+        {
+            tag.data.clear();
         }
 
         error_code RtpTsMux::seek(

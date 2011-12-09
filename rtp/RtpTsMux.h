@@ -28,10 +28,14 @@ namespace ppbox
 
         public:
             void add_stream(
-                ppbox::demux::MediaInfo & mediainfo,
+                MediaInfoEx & mediainfo,
                 std::vector<Transfer *> & transfer);
 
-            void head_buffer(ppbox::demux::Sample & tag);
+            void file_header(ppbox::demux::Sample & tag);
+
+            void stream_header(
+                boost::uint32_t index, 
+                ppbox::demux::Sample & tag);
 
             boost::system::error_code seek(
                 boost::uint32_t & time,

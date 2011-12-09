@@ -18,7 +18,9 @@ namespace ppbox
 {
     namespace mux
     {
+
         struct MuxerInfo;
+
         class MuxerModule
             : public ppbox::common::CommonModuleBase<MuxerModule>
         {
@@ -70,7 +72,7 @@ namespace ppbox
 
             // For without using demux module
             Muxer * open(
-                ppbox::demux::PptvDemuxer * demuxer,
+                ppbox::demux::BufferDemuxer * demuxer,
                 std::string format,
                 size_t & token);
 

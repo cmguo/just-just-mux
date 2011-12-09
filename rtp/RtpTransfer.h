@@ -37,7 +37,7 @@ namespace ppbox
             {
             }
 
-            virtual void get_rtp_info(ppbox::demux::MediaInfo & info)
+            virtual void get_rtp_info(MediaInfoEx & info)
             {
             }
 

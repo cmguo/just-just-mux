@@ -25,9 +25,14 @@ namespace ppbox
 
             virtual boost::system::error_code write( ppbox::demux::Sample&)
             {
-                return framework::system::logic_error::not_supported;
+				return boost::system::error_code();
+                //return framework::system::logic_error::not_supported;
             }
 
+            virtual boost::system::error_code on_finish( boost::system::error_code const &)
+            {
+                return boost::system::error_code();
+            }
 
             void attach(size_t n)
             {

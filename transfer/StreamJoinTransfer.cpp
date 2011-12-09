@@ -17,10 +17,9 @@ namespace ppbox
             //packet -> es
             if (sample.idesc != sample_description_index_) {
                 sample_description_index_ = sample.idesc;
-                ppbox::demux::MediaInfo const * video_info = (ppbox::demux::MediaInfo const *)sample.media_info;
-                AvcConfig avc_config(&video_info->format_data.at(0), video_info->format_data.size());
-                avc_config.creat();
-                nalu_length_ = avc_config.nalu_lengthSize();
+                MediaInfoEx const * video_info = (MediaInfoEx const *)sample.media_info;
+                AvcConfig const * stream_config = (AvcConfig const *)video_info->config;;
+                nalu_length_ = stream_config->nalu_lengthSize();
                 // start code
                 nalu_start_code_.clear();
                 for(boost::uint32_t i = 0; i < nalu_length_-1; ++i) {
@@ -36,23 +35,23 @@ namespace ppbox
                 access_unit_delimiter_.push_back(9);
                 access_unit_delimiter_.push_back(0xE0);
                 // sps
-                for (boost::uint32_t i = 0; i < avc_config.sequence_parameters().size(); i++) {
+                for (boost::uint32_t i = 0; i < stream_config->sequence_parameters().size(); i++) {
                     for(boost::uint32_t j = 0; j < nalu_length_-1; ++j) {
                         sps_pps_.push_back(0);
                     }
                     sps_pps_.push_back(1);
-                    for(boost::uint32_t pos = 0; pos < avc_config.sequence_parameters()[i].size(); ++pos) {
-                        sps_pps_.push_back(avc_config.sequence_parameters()[i].at(pos));
+                    for(boost::uint32_t pos = 0; pos < stream_config->sequence_parameters()[i].size(); ++pos) {
+                        sps_pps_.push_back(stream_config->sequence_parameters()[i].at(pos));
                     }
                 }
                 // pps
-                for (boost::uint32_t i = 0; i < avc_config.picture_parameters().size(); i++) {
+                for (boost::uint32_t i = 0; i < stream_config->picture_parameters().size(); i++) {
                     for(boost::uint32_t j = 0; j < nalu_length_-1; ++j) {
                         sps_pps_.push_back(0);
                     }
                     sps_pps_.push_back(1);
-                    for(boost::uint32_t pos = 0; pos < avc_config.picture_parameters()[i].size(); ++pos) {
-                        sps_pps_.push_back(avc_config.picture_parameters()[i].at(pos));
+                    for(boost::uint32_t pos = 0; pos < stream_config->picture_parameters()[i].size(); ++pos) {
+                        sps_pps_.push_back(stream_config->picture_parameters()[i].at(pos));
                     }
                 }
             }

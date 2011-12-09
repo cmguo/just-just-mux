@@ -41,6 +41,7 @@ namespace ppbox
                 std::string result;
                 boost::uint32_t lines = 0;
                 if (duration > 0) {
+                    begin_index = 1;
                     lines = boost::uint32_t(duration / (seg_duration_ * 1000));
                 } else {
                     lines = 5;

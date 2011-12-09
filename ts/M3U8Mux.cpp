@@ -12,16 +12,23 @@ namespace ppbox
     {
 
         void M3U8Mux::add_stream(
-            ppbox::demux::MediaInfo & mediainfo,
+            MediaInfoEx & mediainfo,
             std::vector<Transfer *> & transfer)
         {
             TsMux::add_stream(mediainfo, transfer);
         }
 
-        void M3U8Mux::head_buffer(
+        void M3U8Mux::file_header(
             ppbox::demux::Sample & tag)
         {
-            TsMux::head_buffer(tag);
+            TsMux::file_header(tag);
+        }
+
+        void M3U8Mux::stream_header(
+            boost::uint32_t index, 
+            ppbox::demux::Sample & tag)
+        {
+            TsMux::stream_header(index, tag);
         }
 
         error_code M3U8Mux::seek(

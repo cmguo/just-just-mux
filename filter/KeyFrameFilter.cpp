@@ -19,10 +19,11 @@ namespace ppbox
                 Filter::get_sample(sample, ec);
                 if (ec)
                     break;
-                if (sample.itrack == media_file_info().video_index && (sample.flags & demux::Sample::sync)) {
+                if (media_file_info().stream_infos[sample.itrack].type == ppbox::demux::MEDIA_TYPE_VIDE
+                    && (sample.flags & demux::Sample::sync)) {
                     detach_self();
                     break;
-                } else if (sample.itrack == media_file_info().audio_index) {
+                } else if (media_file_info().stream_infos[sample.itrack].type == ppbox::demux::MEDIA_TYPE_AUDI) {
                     break;
                 }
             }

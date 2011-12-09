@@ -82,13 +82,14 @@ namespace ppbox
             RtpPacket packet(
                 sample.dts + sample.cts_delta, 
                 true);
+            packet.size = sample.size + 4;
             packet.push_buffers(boost::asio::buffer(au_header_section_, 4));
             packet.push_buffers(sample.data);
             push_packet(packet);
             sample.context = (void*)&rtp_packets();
         }
 
-        void RtpEsAudioTransfer::get_rtp_info(ppbox::demux::MediaInfo & info)
+        void RtpEsAudioTransfer::get_rtp_info(MediaInfoEx & info)
         {
             using namespace framework::string;
             std::string map_id_str = format(rtp_head_.mpt);

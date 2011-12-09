@@ -6,10 +6,14 @@
 #include "ppbox/mux/MuxError.h"
 
 #include <ppbox/demux/DemuxerModule.h>
+#include <ppbox/demux/pptv/PptvDemuxer.h>
 #include <ppbox/demux/base/DemuxerError.h>
+#include <ppbox/demux/base/SourceError.h>
 
 #include <framework/system/LogicError.h>
 #include <framework/thread/MessageQueue.h>
+#include <framework/logger/LoggerStreamRecord.h>
+#include <framework/logger/LoggerSection.h>
 using namespace framework::thread;
 using namespace framework::system::logic_error;
 using namespace framework::logger;
@@ -32,19 +36,22 @@ namespace ppbox
         {
             empty_sink_.attach();
 
-            default_sink_ = NULL;
+
+            default_sink_ = &empty_sink_;
+            default_sink_->attach();
 
             video_type_ = 0;
             audio_type_ = 0;
             playing_ = false;
             exit_ = false;
+            playmode_ = true;
+
             msgq_ = new MessageQueue<MessageQType*>;
 
             cur_mov_= NULL;
             append_mov_ = NULL;
 
-            dispatch_thread_ = new boost::thread(
-                boost::bind(&Dispatcher::thread_dispatch, this));
+
         }
 
         Dispatcher::~Dispatcher()
@@ -52,6 +59,7 @@ namespace ppbox
             if (dispatch_thread_) 
             {
                 dispatch_thread_->join();
+                delete dispatch_thread_;
                 dispatch_thread_ = NULL;
             }
 
@@ -73,8 +81,8 @@ namespace ppbox
             static size_t g_session_id = rand();
             session_id = g_session_id++;
 
-            LOG_S(Logger::kLevelEvent, "[open] "<<"["<<session_id<<"]"
-                <<"play:"<<play_link<<" format:"<<format);
+            LOG_S(Logger::kLevelEvent, "[open] session_id:"<<session_id<<
+                " playlink:"<<play_link<<" format:"<<format);
 
             msgq_->push(new MessageQType(PC_Open,session_id,resp,play_link,format,need_session));
 
@@ -87,7 +95,7 @@ namespace ppbox
             Sink*  sink,
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[setup] "<<"["<<session_id<<"] index:"<<index);
+            LOG_S(Logger::kLevelEvent, "[setup] session_id:"<<session_id<<" index:"<<index);
             msgq_->push(new MessageQType(PC_Setup,session_id,index,sink,resp));
             return error_code();
         }
@@ -97,7 +105,7 @@ namespace ppbox
             Sink*  sink,
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[setup] "<<"["<<session_id);
+            LOG_S(Logger::kLevelEvent, "[setup] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Setup,session_id,-1,sink,resp));
             return error_code();
         }
@@ -109,7 +117,7 @@ namespace ppbox
             ,const boost::uint32_t end
             ,session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[seek] "<<"["<<session_id<<"] seek:"<<begin);
+            LOG_S(Logger::kLevelEvent, "[seek] session_id:"<<session_id<<" seek:"<<begin);
             msgq_->push(new MessageQType(PC_Seek,session_id,resp,begin,end));
             return error_code();
         }
@@ -121,7 +129,7 @@ namespace ppbox
             ,boost::uint32_t end
             ,session_callback_respone const &resp)
         {
-            LOG_S(Logger::kLevelEvent, "[play_seek] "<<"["<<session_id<<"]");
+            LOG_S(Logger::kLevelEvent, "[play_seek] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Play,session_id,resp,begin,end));
             return boost::system::error_code();
         }
@@ -131,8 +139,17 @@ namespace ppbox
             const boost::uint32_t session_id,
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[play] "<<"["<<session_id<<"]");
+            LOG_S(Logger::kLevelEvent, "[play] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Play,session_id,resp));
+            return error_code();
+        }
+
+        error_code Dispatcher::record(
+            const boost::uint32_t session_id,
+            session_callback_respone const & resp)
+        {
+            LOG_S(Logger::kLevelEvent, "[record] session_id:"<<session_id);
+            msgq_->push(new MessageQType(PC_Record,session_id,resp));
             return error_code();
         }
 
@@ -140,31 +157,43 @@ namespace ppbox
             const boost::uint32_t session_id
             ,session_callback_respone const &resp)
         {
-            LOG_S(Logger::kLevelEvent, "[play] "<<"["<<session_id<<"]");
+            LOG_S(Logger::kLevelEvent, "[resume] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Resume,session_id,resp));
             return error_code();
         }
 
-        error_code Dispatcher::pause(const boost::uint32_t session_id,session_callback_respone const & resp)
+        error_code Dispatcher::pause(
+            const boost::uint32_t session_id, 
+            session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[pause] "<<"["<<session_id<<"]");
+            LOG_S(Logger::kLevelEvent, "[pause] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Pause,session_id,resp));
 
             return error_code();
         }
 
-        error_code Dispatcher::close(const boost::uint32_t session_id)
+        error_code Dispatcher::close(
+            const boost::uint32_t session_id)
         {
-            LOG_S(Logger::kLevelEvent, "[close] "<<"["<<session_id<<"]");
+            LOG_S(Logger::kLevelEvent, "[close] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Close,session_id)); 
+            return error_code();
+        }
+
+        boost::system::error_code Dispatcher::start()
+        {
+            dispatch_thread_ = new boost::thread(
+                boost::bind(&Dispatcher::thread_dispatch, this));
             return error_code();
         }
 
         boost::system::error_code Dispatcher::stop()
         {
             LOG_S(Logger::kLevelEvent, "[stop]");
-            session_callback_respone resp;
             msgq_->push(new MessageQType(PC_Exit,0));
+            dispatch_thread_->join();
+            delete dispatch_thread_;
+            dispatch_thread_ = NULL;
             return error_code();
         }
 
@@ -180,9 +209,6 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::thread_open(MessageQType* &param)
         {
-            //非三种状态不处理，绝对性的异常
-            LOG_S(Logger::kLevelEvent, "[thread_open] ["<<(boost::uint32_t)this<<"]["<<param->session_id_<<"]");
-
             boost::system::error_code ec = boost::asio::error::would_block;
 
             if(param->play_link_.empty())
@@ -216,7 +242,7 @@ namespace ppbox
             {
                 boost::system::error_code ec1 = boost::asio::error::operation_aborted;
                 // opening, opened, cancelling, cancel_delay, close_delay
-                for (Movie::Iter iter = append_mov_->sessions.begin();
+                /*for (Movie::Iter iter = append_mov_->sessions.begin();
                     iter != append_mov_->sessions.end();
                     ++iter)
                 {
@@ -224,8 +250,9 @@ namespace ppbox
                     (*iter)->resq_(ec1);
                     delete (*iter);
                 }
-                append_mov_->sessions.clear();// 回调
-                clear_send();
+                append_mov_->sessions.clear();*/
+                clear_movie(append_mov_,ec1);
+                clear_send(ec1);
 
                 if (param->play_link_ != append_mov_->play_link) 
                 {
@@ -315,7 +342,7 @@ namespace ppbox
                 if (param->need_session) 
                 {
                     append_mov_->session_id = param->session_id_;
-                    clear_send();
+                    clear_send(boost::asio::error::operation_aborted);
                     append_mov_->delay = false;
                 }
             }
@@ -324,13 +351,10 @@ namespace ppbox
         }
         boost::system::error_code Dispatcher::thread_resume(MessageQType* &param)
         {
-            LOG_S(Logger::kLevelEvent, "[thread_resume] ["<<(boost::uint32_t)this<<"]["<<cur_mov_->session_id<<"]");
             boost::system::error_code ec;
-
             if (cur_mov_->delay ||  0  ==  cur_mov_->close_token ||cur_mov_->muxer ==NULL )
             {
                 ec = ppbox::mux::error::mux_not_open;
-                LOG_S(Logger::kLevelEvent, "[thread_resume] wrong enter here");
             }
             else
             {
@@ -339,24 +363,45 @@ namespace ppbox
              return ec;
         }
 
-        boost::system::error_code Dispatcher::thread_play(MessageQType* &param)
+        boost::system::error_code Dispatcher::thread_record(MessageQType* &param)
         {
-            LOG_S(Logger::kLevelEvent, "[thread_play] ["<<(boost::uint32_t)this<<"]["<<cur_mov_->session_id<<"]");
             boost::system::error_code ec;
-            //assert(cur_mov_->play_resq.empty());
             if (cur_mov_->delay ||  0  ==  cur_mov_->close_token ||cur_mov_->muxer ==NULL )
             {
                 ec = ppbox::mux::error::mux_not_open;
-                LOG_S(Logger::kLevelEvent, "[thread_play] wrong enter here");
             }
             else
             {
-                if(!cur_mov_->play_resq.empty())
+                if(!play_resq_.empty())
                 {
-                    cur_mov_->play_resq(ec);
+                    play_resq_(ec);
                 }
-                cur_mov_->play_resq.swap(param->resq_);
+                play_resq_.swap(param->resq_);
                 playing_ = true;
+                playmode_ = false;
+
+            }
+
+            return ec;
+        }
+
+        boost::system::error_code Dispatcher::thread_play(MessageQType* &param)
+        {
+            boost::system::error_code ec;
+            if (cur_mov_->delay ||  0  ==  cur_mov_->close_token ||cur_mov_->muxer ==NULL )
+            {
+                ec = ppbox::mux::error::mux_not_open;
+            }
+            else
+            {
+                if(!play_resq_.empty())
+                {
+                   play_resq_(boost::asio::error::operation_aborted);
+                   session_callback_respone().swap(play_resq_);
+                }
+                play_resq_.swap(param->resq_);
+                playing_ = true;
+                playmode_ = true;
             }
 
             return ec;
@@ -364,24 +409,33 @@ namespace ppbox
         
         boost::system::error_code Dispatcher::thread_seek(MessageQType* &param)
         {
-            //ENTER_(thread_seek);
-
             boost::system::error_code ec;
-            LOG_S(Logger::kLevelEvent, "[thread_seek] ["<<(boost::uint32_t)this<<"]["<<cur_mov_->session_id<<"]"
-                <<"[PC_Seek] beg:"<<param->beg_);
 
             cur_mov_->seek = param->beg_;
-            
             cur_mov_->muxer->seek(param->beg_,ec);
 
-            if(!ec || ec == boost::asio::error::would_block)
+            size_t n = 0;
+            while (ec == boost::asio::error::would_block) {
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                ++n;
+                if (!msgq_->empty()) {
+                    ec = boost::asio::error::operation_aborted;
+                    break;
+                }
+                if (n == 5) {
+                    cur_mov_->muxer->seek(param->beg_,ec);
+                    n = 0;
+                }
+            }
+
+            if (!ec)
             {
                 cur_mov_->muxer->reset();
                 ec.clear();
             }
             else
             {
-                LOG_S(Logger::kLevelError,"[thread_seek] Seek code : "<<ec.value()<<" msg"<<ec.message().c_str());
+                LOG_S(Logger::kLevelError,"[thread_seek] Seek code : "<<ec.value()<<" msg"<<ec.message());
             }
             
             return ec;
@@ -390,7 +444,6 @@ namespace ppbox
         boost::system::error_code Dispatcher::thread_pause(MessageQType* &param)
         {
             boost::system::error_code ec;
-            LOG_S(Logger::kLevelEvent, "[thread_pause] ["<<(boost::uint32_t)this<<"]["<<cur_mov_->session_id<<"][PC_Pause] ");
             playing_ = false;
             return error_code();
         }
@@ -398,10 +451,6 @@ namespace ppbox
         boost::system::error_code Dispatcher::thread_callback(MessageQType* &param)
         {
             boost::system::error_code ec;
-            LOG_S(Logger::kLevelEvent, "[thread_callback] ["<<(boost::uint32_t)this<<"]["<<cur_mov_->session_id<<"]");
-
-            //openning canning cancel_delay
-
             assert(NULL != cur_mov_);
             assert(NULL == cur_mov_->muxer);
             
@@ -427,22 +476,16 @@ namespace ppbox
                     else
                     {
                         const ppbox::mux::MediaFileInfo & infoTemp = cur_mov_->muxer->mediainfo();
-                        video_type_ = infoTemp.video_index;
-                        audio_type_ = infoTemp.audio_index;
+                        for (boost::uint32_t i = 0; i < infoTemp.stream_infos.size(); ++i) {
+                            if (infoTemp.stream_infos[i].type == ppbox::demux::MEDIA_TYPE_VIDE) {
+                                video_type_ = i;
+                            } else if (infoTemp.stream_infos[i].type == ppbox::demux::MEDIA_TYPE_AUDI){
+                                audio_type_ = i;
+                            }
+                        }
                     }
 
-                    MessageQType* pp =NULL;
-                    for (size_t ii = 0; ii < cur_mov_->sessions.size()-1; ++ii )
-                    {
-                        pp = cur_mov_->sessions[ii];
-                        pp->resq_(pp->need_session ? boost::asio::error::operation_aborted : param->ec);
-                        delete pp;
-                    }
-
-                    pp = cur_mov_->sessions.back();
-                    pp->resq_(param->ec);
-                    delete pp;
-                    cur_mov_->sessions.clear();
+                    clear_movie(cur_mov_,param->ec);
                 }
             }
 
@@ -475,14 +518,25 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::thread_stop(MessageQType* &param)
         {
-            LOG_S(Logger::kLevelEvent, "[thread_stop] ");
-
-            if (NULL == append_mov_)
-            {
-                return error_code();
-            }
-            exit_ = true;
             playing_ = false;
+
+            if(NULL != append_mov_)
+            {
+                clear_movie(append_mov_,boost::asio::error::operation_aborted);
+
+                delete append_mov_;
+                if(cur_mov_ != append_mov_) 
+                {
+                    delete cur_mov_;
+                }
+                append_mov_ = NULL;
+                cur_mov_ = NULL;
+            }
+
+            clear_send(boost::asio::error::operation_aborted);
+
+            exit_ = true;
+
             return error_code();
 
         }
@@ -505,12 +559,10 @@ namespace ppbox
         {
             boost::uint32_t session_id =  param->session_id_;
 
-            LOG_S(Logger::kLevelEvent, "[thread_close] ["<<(boost::uint32_t)this<<"]["<<session_id<<"]");
             //cur_mov_ 中去找， 如果有值表示在 openning状态, 如果为1直接转cancel_delay >1则删掉这个，如果在最后一个，session_id提前
             //如果没有值  canceling cancel_delay close_delay openned
             if (NULL == append_mov_)
             {
-                LOG_S(Logger::kLevelError, "[thread_close] NULL == append_mov_");
                 //assert(false);
                 return framework::system::logic_error::item_not_exist;
             }
@@ -520,7 +572,7 @@ namespace ppbox
                 if (session_id == cur_mov_->session_id)
                 {//openned close_delay
                     cur_mov_->delay = true; 
-                    clear_send();
+                    clear_send(boost::asio::error::operation_aborted);
                 }
             }
             else
@@ -538,12 +590,10 @@ namespace ppbox
                     {
                         if (append_mov_ == cur_mov_)
                         {//openning转 cancel_delay
-                            LOG_S(Logger::kLevelError, "[thread_close] append_mov_->delay = true ");
                             append_mov_->delay = true;
                         }
                         else
                         {//wait
-                            LOG_S(Logger::kLevelError, "[thread_close] delete append_mov_; ");
                             delete append_mov_;
                             append_mov_ = cur_mov_;
                         }
@@ -560,18 +610,15 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::thread_timeout()
         {
-            boost::system::error_code ec;
             
-
+            boost::system::error_code ec;
             if(NULL == append_mov_)
                 return error_code();
 
-            //openning canceling cancel_delay colose_delay openned
+                //openning canceling cancel_delay colose_delay openned
 
             if(cur_mov_->delay)
             {//close_delay cancel_delay canceling
-                LOG_S(Logger::kLevelEvent, "[thread_timeout] ");
-
                 if(NULL != cur_mov_->muxer)
                 {
                     muxer_module().close(append_mov_->mux_close_token,ec);
@@ -596,14 +643,15 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::thread_setup(MessageQType* &param)
         {
-            LOG_S(Logger::kLevelEvent, "[thread_setup]");
+            //LOG_S(Logger::kLevelEvent, "[thread_setup]");
+
             boost::system::error_code ec;
+
             size_t  control = param->control;
             Sink* sink = param->sink;
             if((size_t)-1 == control)
             {
-                clear_send();
-
+                default_sink_->detach();
                 default_sink_ = sink;
                 default_sink_->attach();
             }
@@ -614,11 +662,10 @@ namespace ppbox
                 {
                     if(!sink_[control]->detach())
                     {
-                        if(NULL != cur_mov_ && !cur_mov_->play_resq.empty())
+                        if(!play_resq_.empty())
                         {
-                            LOG_S(Logger::kLevelEvent, "[detach play_resq] ");
-                            cur_mov_->play_resq(ec);
-                            cur_mov_->play_resq.clear();
+                            play_resq_(ec);
+                            play_resq_.clear();
                         }
                     }
                     sink_[control] = sink;
@@ -633,7 +680,6 @@ namespace ppbox
                 }
                 
             }
-           
             return ec;
         }
 
@@ -643,6 +689,7 @@ namespace ppbox
         boost::system::error_code Dispatcher::thread_command(MessageQType* pMsgType)
         {
             boost::uint32_t session_id = 0;
+
             assert(NULL != pMsgType);
             session_id = pMsgType->session_id_;
 
@@ -650,14 +697,14 @@ namespace ppbox
             {
                 boost::system::error_code ec1 = ppbox::mux::error::mux_not_open;
 
-                LOG_S(Logger::kLevelError, "[thread_command] ["<<(boost::uint32_t)this<<"]["<<session_id<<"]"
-                    <<"Old_ID:"<<cur_mov_->session_id<<" [MsgType] "<<pMsgType->msg_);
+                LOG_S(Logger::kLevelError, "[thread_command] session_id:"<<session_id<<
+                    " old_id:"<<cur_mov_->session_id);
 
                 if (!pMsgType->resq_.empty()) {
                     pMsgType->resq_(ec1);
                 }
                 delete pMsgType;
-                //assert(false);
+
                 //过滤掉不必要的处理
                 if (playing_)
                     play();
@@ -733,7 +780,12 @@ namespace ppbox
                 {
                     ec = thread_resume(pMsgType);
                 }
-                break;           
+                break;
+            case PC_Record:
+                {
+                    ec = thread_record(pMsgType);
+                }
+                break;
             default:
                 //异常情况
                 LOG_S(Logger::kLevelError,"[thread_dispatch][Unknow Msg Type]");
@@ -773,7 +825,19 @@ namespace ppbox
             "closed_2", 
             "close_delay", 
         };
-
+        static const std::string play_event_str[11] = {
+            "PC_Open", 
+            "PC_Close", 
+            "PC_Callback", 
+            "PC_Exit", 
+            "PC_Session", 
+            "PC_Setup", 
+            "PC_Record", 
+            "PC_Play",
+            "PC_Resume",
+            "PC_Seek",
+            "PC_Pause",
+        };
         static const std::string status_str_empty("empty");
 
         std::string const & Dispatcher::status_string()
@@ -797,50 +861,73 @@ namespace ppbox
             MessageQType* pMsgType = NULL;
 
             while(!exit_) {
-                if( msgq_->timed_pop(pMsgType,boost::posix_time::milliseconds(10000)) )
+                if( msgq_->timed_pop(pMsgType,boost::posix_time::milliseconds(300*1000)) )
                 {
                     LOG_SECTION();
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin status:" << status_string());
-                    thread_command(pMsgType);                
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] end status:" << status_string());
+
+                    boost::uint32_t session_id = pMsgType->session_id_;
+                    PlayControl msg = pMsgType->msg_;
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin msg, session:" << session_id 
+                        << ", msg:" << play_event_str[msg]
+                        << ", status:" << status_string());
+
+                    thread_command(pMsgType);
+
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended msg, session:" << session_id 
+                        << " msg:" << play_event_str[msg]
+                        << " status:" << status_string());
                 }
-                else
+                else if (cur_mov_ && cur_mov_->delay)
                 {
                     //超时处理位置
                     LOG_SECTION();
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin msg, session:0, msg:PC_Timeout, status:" << status_string());
+
                     thread_timeout();
+
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended msg, session:0, msg:PC_Timeout, status:" << status_string());
                 }
             }
 
         }
-        void Dispatcher::clear_send()
+        void Dispatcher::clear_send(boost::system::error_code const & ec)
         {
             playing_ = false;
             //std::vector<Sink*> sink_;
-            boost::system::error_code ec;
             std::vector<Sink*>::iterator iter = sink_.begin();
             for(; iter != sink_.end(); ++iter)
             {
                 (*iter)->detach();
             }
-            if (NULL != default_sink_)
-            {
-                default_sink_->detach();
-                default_sink_ = NULL;
+            sink_.clear();
 
-            }
-            if(!cur_mov_->play_resq.empty())
+            default_sink_->detach();
+            default_sink_ = &empty_sink_;
+            default_sink_->attach();
+
+            if(!play_resq_.empty())
             {
                 LOG_S(Logger::kLevelEvent, "[detach play_resq] ");
-                cur_mov_->play_resq(ec);
-                cur_mov_->play_resq.clear();
+                play_resq_(ec);
+                play_resq_.clear();
             }
-            sink_.clear();
+        }
+
+        void Dispatcher::clear_movie(Movie* movie,boost::system::error_code const & ec)
+        {
+            MessageQType* pp =NULL;
+            for (size_t ii = 0; ii < movie->sessions.size(); ++ii )
+            {
+                pp = movie->sessions[ii];
+                pp->resq_(!pp->need_session || ec || ii + 1 == movie->sessions.size() ? ec : boost::asio::error::operation_aborted);
+                delete pp;
+            }
+            movie->sessions.clear();
         }
 
         boost::system::error_code Dispatcher::play()
         {
-            LOG_S(Logger::kLevelEvent, "[play] ["<<(boost::uint32_t)this<<"]["<<cur_mov_->session_id<<"]");
+            LOG_S(Logger::kLevelEvent, "[internal_play] session:" << cur_mov_->session_id);
 
             bool start_time_valid = false;
             //playing_ = true;
@@ -857,24 +944,28 @@ namespace ppbox
 
                 if (!ec)
                 {
-                    if(tag.itrack == audio_type_)
+                    //限制播放的最大时长
+                    if (tag.ustime > seek_end64)
+                    {
+                        //if(!cur_mov_->play_resq.empty())
+                        {
+                            LOG_S(Logger::kLevelEvent, "[internal_play] play time end");
+                            play_resq_(ec);
+                            play_resq_.clear();
+                        }
+                        playing_ = false;
+                        break;
+                    }
+
+
+                    //限速模块
+                    if(playmode_ && tag.itrack == audio_type_)
                     {
                         if (!start_time_valid) {
                             start_time = 
                                 boost::posix_time::microsec_clock::universal_time()
                                 - boost::posix_time::microseconds(tag.ustime);
                             start_time_valid = true;
-                        }
-                        if (tag.ustime > seek_end64)
-                        {
-                            //if(!cur_mov_->play_resq.empty())
-                            {
-                                LOG_S(Logger::kLevelEvent, "[play end] play_resq");
-                                cur_mov_->play_resq(ec);
-                                cur_mov_->play_resq.clear();
-                            }
-                            playing_ = false;
-                            break;
                         }
                         boost::posix_time::ptime now = 
                             boost::posix_time::microsec_clock::universal_time();
@@ -888,39 +979,47 @@ namespace ppbox
                         }
                     }
                     
-                    if (NULL != default_sink_)
-                    {
-                        ec = default_sink_->write(tag);
-                    }
-                    else if(tag.itrack < sink_.size())
+                    //输出音视频信息
+                    if(tag.itrack < sink_.size())
                     {
                         ec = sink_[tag.itrack]->write(tag);
                     }
                     else
                     {
-                        LOG_S(Logger::kLevelError, "[play] ERROR tag.itrack is Big:"<<tag.itrack);
+                        ec = default_sink_->write(tag);
+                    }
+                }
+                else
+                {
+                    if(ec != boost::asio::error::would_block )
+                    {
+                        if (sink_.size() > 0)
+                        {
+                            for(size_t ii = 0; ii < sink_.size(); ++ii)
+                            {
+                                sink_[ii]->on_finish(ec);
+                            }
+                        }
+                        else
+                        {
+                            default_sink_->on_finish(ec);
+                        }
                     }
                 }
 
                 if(ec)
                 {
-                    
                     if(ec != boost::asio::error::would_block )
                     {
-                        LOG_S(Logger::kLevelError, "[play] ["<<(boost::uint32_t)this<<" ec:"
-                            <<ec<<" msg"<<ec.message().c_str());
-                        playing_ = false;
-                    
-                        //if(!cur_mov_->play_resq.empty())
-                        {
-                            LOG_S(Logger::kLevelEvent, "[play end] play_resq");
-                            cur_mov_->play_resq(ec);
-                            cur_mov_->play_resq.clear();
-                        }
+                        LOG_S(Logger::kLevelError, "[internal_play] exiting... ec:"<<ec.message());
 
+                        playing_ = false;
+                        play_resq_(ec);
+                        play_resq_.clear();
                         break;
                     }
-                    boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+                    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                    start_time_valid = false;
                     
                 }
             }

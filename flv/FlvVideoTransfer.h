@@ -3,8 +3,7 @@
 #ifndef   _PPBOX_MUX_FLV_VIDEO_TRANSFER_H_
 #define   _PPBOX_MUX_FLV_VIDEO_TRANSFER_H_
 
-#include "ppbox/mux/flv/FlvMetadata.h"
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/flv/FlvTransfer.h"
 
 namespace ppbox
 {
@@ -12,11 +11,11 @@ namespace ppbox
     {
 
         class FlvVideoTransfer
-            : public Transfer
+            : public FlvTransfer
         {
         public:
-            FlvVideoTransfer()
-                : previous_tag_size_(0)
+            FlvVideoTransfer(boost::uint8_t type)
+                : FlvTransfer(type)
             {
             }
 
@@ -26,10 +25,12 @@ namespace ppbox
 
             virtual void transfer(ppbox::demux::Sample & sample);
 
+            virtual void transfer(MediaInfoEx & mediainfo);
+
         private:
-            FlvTag    flvtag_;
-            boost::uint32_t previous_tag_size_;
-            std::vector<boost::uint8_t> sample_head_buffer_;
+            ppbox::demux::FlvVideoTagHeader videotagheader_;
+            char video_tag_header_[16];
+
         };
     }
 }

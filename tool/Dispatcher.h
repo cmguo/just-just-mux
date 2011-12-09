@@ -15,8 +15,9 @@ namespace ppbox
 {
     namespace demux
     {
-        class PptvDemuxer;
+        class BufferDemuxer;
         class DemuxerModule;
+        class PptvDemuxer;
     }
 
     namespace mux
@@ -52,6 +53,10 @@ namespace ppbox
                 ,const boost::uint32_t begin
                 ,const boost::uint32_t end
                 ,session_callback_respone const &);
+
+            boost::system::error_code record(
+                const boost::uint32_t session_id
+                ,session_callback_respone const &resp);
 
             boost::system::error_code play(
                 const boost::uint32_t session_id
@@ -89,6 +94,7 @@ namespace ppbox
                 const boost::uint32_t session_id);
 
             boost::system::error_code stop();
+            boost::system::error_code start();
 
 
             boost::system::error_code get_info(
@@ -101,6 +107,7 @@ namespace ppbox
             virtual boost::system::error_code thread_seek(MessageQType* &param);
 
             virtual boost::system::error_code thread_play(MessageQType* &param);
+            virtual boost::system::error_code thread_record(MessageQType* &param);
             virtual boost::system::error_code thread_resume(MessageQType* &param);
             virtual boost::system::error_code thread_pause(MessageQType* &param);
             virtual boost::system::error_code thread_close(MessageQType* &param);
@@ -113,6 +120,11 @@ namespace ppbox
 
             virtual boost::system::error_code thread_timeout();
         
+
+            util::daemon::Daemon & get_daemon() 
+            {
+                return daemon_;
+            }
 
 //内存指令
         private:
@@ -135,7 +147,10 @@ namespace ppbox
                 boost::system::error_code const &,
                 ppbox::demux::PptvDemuxer *);
 
-            void clear_send();
+            void clear_send(boost::system::error_code const & ec);
+
+            struct Movie;
+            void clear_movie(Movie* movie,boost::system::error_code const & ec);
 
         private:
             struct Movie
@@ -189,12 +204,11 @@ namespace ppbox
 
                 boost::uint32_t seek;  //播放的最后时长
 
-                session_callback_respone play_resq;
 
                 size_t  close_token;               //关闭流  call openned
                 size_t  mux_close_token;
                 ppbox::mux::Muxer *muxer;           //保存open callbalk的指针   callback
-                ppbox::demux::PptvDemuxer* demuxer;
+                ppbox::demux::BufferDemuxer* demuxer;
 
                 bool delay;
                 typedef std::vector<MessageQType*>::iterator Iter;
@@ -209,6 +223,7 @@ namespace ppbox
             bool playing_;
             bool exit_;
             bool need_session_;  //不关联新的session
+            bool playmode_;
 
             boost::uint32_t video_type_;          //视频索引值
             boost::uint32_t audio_type_;          //音频索引值
@@ -218,6 +233,7 @@ namespace ppbox
             Sink empty_sink_;
             std::vector<Sink*> sink_;
             Sink * default_sink_;
+            session_callback_respone play_resq_;
 
 protected:
             Movie* cur_mov_;  // 当前正在处理的影片

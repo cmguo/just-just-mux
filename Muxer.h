@@ -13,7 +13,7 @@ namespace ppbox
 {
     namespace demux
     {
-        class PptvDemuxer;
+        class BufferDemuxer;
     }
 
     namespace mux
@@ -26,7 +26,7 @@ namespace ppbox
                 : demuxer_(NULL)
                 , paused_(false)
                 , play_time_(0)
-                , is_read_head_(false)
+                , read_step_(0)
                 , demux_filter_(media_info_)
                 , key_filter_(media_info_)
             {
@@ -44,14 +44,19 @@ namespace ppbox
 
         protected:
             virtual void add_stream(
-                ppbox::demux::MediaInfo & mediainfo,
+                MediaInfoEx & mediainfo,
                 std::vector<Transfer *> & transfer) = 0;
 
-            virtual void head_buffer(ppbox::demux::Sample & tag) = 0;
+            virtual void file_header(ppbox::demux::Sample & tag) = 0;
+
+            virtual void stream_header(
+                boost::uint32_t index, 
+                ppbox::demux::Sample & tag
+                ) = 0;
 
         public:
             virtual boost::system::error_code open(
-                demux::PptvDemuxer * demuxer,
+                demux::BufferDemuxer * demuxer,
                 boost::system::error_code & ec);
 
             boost::system::error_code read(
@@ -92,37 +97,36 @@ namespace ppbox
 
 
         private:
-            ppbox::demux::Sample & get_sample(
+            boost::system::error_code get_sample(
+                ppbox::demux::Sample & sample,
                 boost::system::error_code & ec);
 
-            ppbox::demux::Sample & get_sample_with_transfer(
+            boost::system::error_code get_sample_with_transfer(
+                ppbox::demux::Sample & sample,
                 boost::system::error_code & ec);
 
             boost::system::error_code mediainfo_translater(
-                ppbox::demux::MediaInfo & stream_info,
+                MediaInfoEx & stream_info,
                 boost::system::error_code & ec);
-
-            void transfer_sample(ppbox::demux::Sample & sample);
 
             void create_transfer(void);
 
             void release_transfer(void);
 
+            void release_decode(void);
+
         private:
-            demux::PptvDemuxer * demuxer_;
+            demux::BufferDemuxer * demuxer_;
             framework::container::List<Filter> filters_;
             bool paused_;
             boost::uint32_t play_time_; // ms
             MediaFileInfo media_info_;
             // For reset
-            bool is_read_head_;
-            std::vector<Transfer *> video_transfers_;
-            std::vector<Transfer *> audio_transfers_;
-            ppbox::demux::Sample sample_;
+            boost::uint32_t read_step_;
+            std::vector<std::vector<Transfer *> > stream_transfers_;
             DemuxFilter demux_filter_;
             KeyFrameFilter key_filter_;
 
-            std::string attachment_;
             framework::configure::Config config_;
         };
     }

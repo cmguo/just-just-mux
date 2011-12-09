@@ -9,11 +9,13 @@
 #include "ppbox/mux/transfer/AdtsAudioTransfer.h"
 #include "ppbox/mux/transfer/AudioMergeTransfer.h"
 #include "ppbox/mux/ts/TsTransfer.h"
+#include "ppbox/mux/ts/MpegTsType.h"
 
 using namespace ppbox::demux;
 
 #include <util/buffers/BufferCopy.h>
 #include <util/buffers/BufferSize.h>
+#include <util/archive/ArchiveBuffer.h>
 
 using namespace boost::system;
 
@@ -78,7 +80,7 @@ namespace ppbox
         }
 
         void TsMux::add_stream(
-            ppbox::demux::MediaInfo & mediainfo,
+            MediaInfoEx & mediainfo,
             std::vector<Transfer *> & transfers)
         {
             Transfer * transfer = NULL;
@@ -94,10 +96,14 @@ namespace ppbox
                     transfer = new PtsComputeTransfer();
                     transfers.push_back(transfer);
                 }
-                transfer = new TsTransfer(video_pid_, video_stream_id_, video_stream_type_, mediainfo.time_scale);
+                transfer = new TsTransfer(
+                    video_pid_,
+                    video_stream_id_,
+                    video_stream_type_,
+                    mediainfo.time_scale);
                 transfers.push_back(transfer);
                 has_video_ = true;
-            } else {
+            } else if (mediainfo.type == ppbox::demux::MEDIA_TYPE_AUDI) {
                 has_audio_ = true;
                 if (mediainfo.sub_type == ppbox::demux::AUDIO_TYPE_MP4A) {
                     transfer = new AdtsAudioTransfer();
@@ -114,44 +120,65 @@ namespace ppbox
             }
         }
 
-        void TsMux::head_buffer(
+        void TsMux::file_header(
             ppbox::demux::Sample & tag)
         {
-            header_->Seek(0);
-            WritePAT(*header_);
-            WritePMT(*header_);
+            WritePAT(header_);
+            WritePMT(header_ + 188);
             tag.data.clear();
-            tag.data.push_back(boost::asio::buffer(header_->GetData(), header_->GetDataSize()));
+            tag.time = 0;
+            tag.ustime = 0;
+            tag.dts = 0;
+            tag.cts_delta = 0;
+            tag.data.push_back(boost::asio::buffer(header_, 376));
         }
 
-        void TsMux::WritePAT(AP4_ByteStream & output)
+        void TsMux::stream_header(
+            boost::uint32_t index, 
+            ppbox::demux::Sample & tag)
+        {
+            tag.data.clear();
+        }
+
+        void TsMux::WritePAT(boost::uint8_t * ptr)
         {
             boost::uint32_t payload_size = AP4_MPEG2TS_PACKET_PAYLOAD_SIZE;
             std::vector<boost::uint8_t> ts_header;
-            pat_->WritePacketHeader(true, payload_size, false, 0, ts_header);
-            output.Write(&ts_header.at(0), ts_header.size());
-            AP4_BitWriter writer(1024);
-            writer.Write(0, 8);  // pointer
-            writer.Write(0, 8);  // table_id
-            writer.Write(1, 1);  // section_syntax_indicator
-            writer.Write(0, 1);  // '0'
-            writer.Write(3, 2);  // reserved
-            writer.Write(13, 12);// section_length
-            writer.Write(1, 16); // transport_stream_id
-            writer.Write(3, 2);  // reserved
-            writer.Write(0, 5);  // version_number
-            writer.Write(1, 1);  // current_next_indicator
-            writer.Write(0, 8);  // section_number
-            writer.Write(0, 8);  // last_section_number
-            writer.Write(1, 16); // program number
-            writer.Write(7, 3);  // reserved
-            writer.Write(pmt_->GetPID(), 13); // program_map_PID
-            writer.Write(ComputeCRC(writer.GetData()+1, 17-1-4), 32);
-            output.Write(writer.GetData(), 17);
-            output.Write(StuffingBytes, AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-17);
+            ts_header.resize(payload_size);
+            boost::uint32_t head_size = payload_size;
+            pat_->WritePacketHeader(true, payload_size, head_size, false, 0, &ts_header.at(0));
+            memcpy(ptr, &ts_header.at(0), head_size);
+            PSI_table table_header;
+            table_header.pointer = 0;
+            table_header.table_id = 0;
+            table_header.section_syntax_indicator = 1;
+            table_header.undef = 0;
+            table_header.reserved = 3;
+            table_header.section_length = 13;
+            table_header.transport_stream_id = 1;
+            table_header.reserved1 = 3;
+            table_header.version_number = 0;
+            table_header.current_next_indicator = 1;
+            table_header.section_number = 0;
+            table_header.last_section_number = 0;
+            PAT_section pat_section;
+            pat_section.program_number = 1;
+            pat_section.reserved = 7;
+            pat_section.Pid = pmt_->GetPID();
+
+            util::archive::ArchiveBuffer<char> buf((char*)ptr +head_size, AP4_MPEG2TS_PACKET_SIZE - head_size);
+            TsOArchive ts_archive(buf);
+            ts_archive << table_header;
+            ts_archive << pat_section;
+            boost::uint32_t crc = ComputeCRC(ptr+1+head_size, 17-1-4);
+            ts_archive & crc;
+            std::vector<boost::uint8_t> suffer;
+            suffer.resize(AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-17);
+            suffer.assign(AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-17, 255);
+            util::serialization::serialize_collection(ts_archive, suffer, AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-17);
         }
 
-        void TsMux::WritePMT(AP4_ByteStream & output)
+        void TsMux::WritePMT(boost::uint8_t * ptr)
         {
             // check that we have at least one media stream
             if (!has_audio_ && !has_video_) {
@@ -160,8 +187,10 @@ namespace ppbox
 
             boost::uint32_t payload_size = AP4_MPEG2TS_PACKET_PAYLOAD_SIZE;
             std::vector<boost::uint8_t> ts_header;
-            pmt_->WritePacketHeader(true, payload_size, false, 0, ts_header);
-            output.Write(&ts_header.at(0), ts_header.size());
+            ts_header.resize(payload_size);
+            boost::uint32_t head_size = payload_size;
+            pmt_->WritePacketHeader(true, payload_size, head_size, false, 0, &ts_header.at(0));
+            memcpy(ptr, &ts_header.at(0), head_size);
 
             AP4_BitWriter writer(1024);
             unsigned int section_length = 13;
@@ -174,43 +203,58 @@ namespace ppbox
                 section_length += 5;
                 pcr_pid = video_pid_;
             }
+            PSI_table table_header;
+            table_header.pointer = 0;
+            table_header.table_id = 2;
+            table_header.section_syntax_indicator = 1;
+            table_header.undef = 0;
+            table_header.reserved = 3;
+            table_header.section_length = section_length;
+            table_header.transport_stream_id = 1;
+            table_header.reserved1 = 3;
+            table_header.version_number = 0;
+            table_header.current_next_indicator = 1;
+            table_header.section_number = 0;
+            table_header.last_section_number = 0;
+            PMT_section pmt_section;
+            pmt_section.reserved = 7;
+            pmt_section.Pcr_Pid = pcr_pid;
+            pmt_section.reserved1 = 0xF;
+            pmt_section.program_info_length = 0;
 
-            writer.Write(0, 8);        // pointer
-            writer.Write(2, 8);        // table_id
-            writer.Write(1, 1);        // section_syntax_indicator
-            writer.Write(0, 1);        // '0'
-            writer.Write(3, 2);        // reserved
-            writer.Write(section_length, 12); // section_length
-            writer.Write(1, 16);       // program_number
-            writer.Write(3, 2);        // reserved
-            writer.Write(0, 5);        // version_number
-            writer.Write(1, 1);        // current_next_indicator
-            writer.Write(0, 8);        // section_number
-            writer.Write(0, 8);        // last_section_number
-            writer.Write(7, 3);        // reserved
-            writer.Write(pcr_pid, 13); // PCD_PID
-            writer.Write(0xF, 4);      // reserved
-            writer.Write(0, 12);       // program_info_length
+            util::archive::ArchiveBuffer<char> buf((char*)ptr+head_size, AP4_MPEG2TS_PACKET_SIZE - head_size);
+            TsOArchive ts_archive(buf);
+            ts_archive << table_header;
+            ts_archive << pmt_section;
 
             if (has_audio_) {
-                writer.Write(audio_stream_type_, 8); // stream_type 
-                writer.Write(0x7, 3);                   // reserved
-                writer.Write(audio_pid_, 13);    // elementary_PID
-                writer.Write(0xF, 4);                   // reserved
-                writer.Write(0, 12);                    // ES_info_length
+                StreamInfo stream_info;
+                stream_info.stream_type = audio_stream_type_;
+                stream_info.reserved = 7;
+                stream_info.elementary_PID = audio_pid_;
+                stream_info.reserved1 = 0xF;
+                stream_info.ES_info_length = 0;
+                ts_archive << stream_info;
             }
 
             if (has_video_) {
-                writer.Write(video_stream_type_, 8); // stream_type
-                writer.Write(0x7, 3);                   // reserved
-                writer.Write(video_pid_, 13);    // elementary_PID
-                writer.Write(0xF, 4);                   // reserved
-                writer.Write(0, 12);                    // ES_info_length
+                StreamInfo stream_info;
+                stream_info.stream_type = video_stream_type_;
+                stream_info.reserved = 7;
+                stream_info.elementary_PID = video_pid_;
+                stream_info.reserved1 = 0xF;
+                stream_info.ES_info_length = 0;
+                ts_archive << stream_info;
             }
-
-            writer.Write(ComputeCRC(writer.GetData()+1, section_length-1), 32); // CRC
-            output.Write(writer.GetData(), section_length+4);
-            output.Write(StuffingBytes, AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-(section_length+4));
+            boost::uint32_t crc = ComputeCRC(ptr+1+head_size, section_length-1);
+            ts_archive & crc;
+            std::vector<boost::uint8_t> suffer;
+            suffer.resize(AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-(section_length+4));
+            suffer.assign(AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-(section_length+4), 255);
+            util::serialization::serialize_collection(
+                ts_archive, 
+                suffer, 
+                AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-(section_length+4));
         }
 
     } // namespace mux

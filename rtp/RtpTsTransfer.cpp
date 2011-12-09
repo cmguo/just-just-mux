@@ -1,9 +1,9 @@
 // RtpTsTransfer.cpp
 
 #include "ppbox/mux/Common.h"
+#include "ppbox/mux/ts/TsTransfer.h"
 #include "ppbox/mux/rtp/RtpTsTransfer.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
-#include "ppbox/mux/ts/Mpeg2Ts.h"
 
 const boost::uint32_t TS_PACKETS_PER_RTP_PACKET       = 7;
 
@@ -30,25 +30,32 @@ namespace ppbox
         void RtpTsTransfer::transfer(ppbox::demux::Sample & sample)
         {
             RtpTransfer::clear();
-            std::vector<TsPacket> const & ts_buffers = 
-                *(std::vector<TsPacket> const *)sample.context;
-            for (boost::uint32_t i = 0; i < ts_buffers.size()-1; ++i) {
+            std::vector<size_t> const & off_segs = 
+                *(std::vector<size_t> const *)sample.context;
+            std::deque<boost::asio::const_buffer>::const_iterator buf_beg = sample.data.begin();
+            std::deque<boost::asio::const_buffer>::const_iterator buf_end = sample.data.end();
+            boost::uint32_t i = TS_PACKETS_PER_RTP_PACKET;
+            for (; i + 1 < off_segs.size(); i += TS_PACKETS_PER_RTP_PACKET) {
+                // i + 1，这里+1是为了保证至少有一个RTP在后面生成，因为需要mark置为true
+                buf_end = sample.data.begin() + off_segs[i];
                 RtpPacket p(sample.dts + sample.cts_delta, false);
-                p.push_buffers(ts_buffers[i].buffers);
+                p.size = TS_PACKETS_PER_RTP_PACKET * AP4_MPEG2TS_PACKET_SIZE;
+                p.push_buffers(buf_beg, buf_end);
                 push_packet(p);
+                buf_beg = buf_end;
             }
-            if (ts_buffers.size() > 0) {
-                RtpPacket p(sample.dts + sample.cts_delta, true);
-                p.push_buffers(ts_buffers[ts_buffers.size()-1].buffers);
-                push_packet(p);
-                sample.context = (void*)&rtp_packets();
-            } else {
-                sample.context = NULL;
-            }
+            i -= TS_PACKETS_PER_RTP_PACKET;
+            buf_end = sample.data.end();
+            RtpPacket p(sample.dts + sample.cts_delta, true);
+            p.size = (off_segs.size() - i) * AP4_MPEG2TS_PACKET_SIZE;
+            p.push_buffers(buf_beg, buf_end);
+            push_packet(p);
+
+            sample.context = (void*)&rtp_packets();
         }
 
 
-        void RtpTsTransfer::get_rtp_info(ppbox::demux::MediaInfo & info)
+        void RtpTsTransfer::get_rtp_info(MediaInfoEx & info)
         {
             rep_info().sdp   = "m=video 0 RTP/AVP 33\r\n";
             rep_info().sdp += "a=rtpmap:33 MP2T/90000\r\n";

@@ -8,7 +8,7 @@ namespace ppbox
 {
     namespace demux
     {
-        class PptvDemuxer;
+        class BufferDemuxer;
     }
 
     namespace mux
@@ -21,13 +21,16 @@ namespace ppbox
             PC_Close,  //  关闭播放,回调回来后复用
             PC_Callback,  //打开状态,回调函数交给线程处理
             PC_Exit,   //线程退出
-            PC_Session = 8, 
+            PC_Session, 
             PC_Setup,  //用于流的创建
+            PC_Record, //用于节目录制
             PC_Play,   // 播放
             PC_Resume, //恢复播放s
             PC_Seek,  //  进度条拖动到
             PC_Pause,   //暂停
         };
+
+
 
 /*#ifdef AAA
         enum ThreadStatus
@@ -91,7 +94,7 @@ namespace ppbox
             MessageQType(
                 PlayControl msg,
                 boost::system::error_code ec,
-                ppbox::demux::PptvDemuxer* demuxer)
+                ppbox::demux::BufferDemuxer* demuxer)
                 :msg_(msg),
                 ec(ec),
                 demuxer(demuxer)
@@ -144,7 +147,7 @@ namespace ppbox
 
             //Callback
             boost::system::error_code ec;
-            ppbox::demux::PptvDemuxer* demuxer;
+            ppbox::demux::BufferDemuxer* demuxer;
 
             //Setup
             size_t  control;

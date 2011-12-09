@@ -5,8 +5,6 @@
 
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/ts/Mpeg2Ts.h"
-#include "ppbox/mux/detail/BitsReader.h"
-#include "ppbox/mux/rtp/RtpPacket.h"
 
 namespace ppbox
 {
@@ -66,10 +64,11 @@ namespace ppbox
             boost::uint32_t timescale_;
 
             // buffer
-            std::vector<std::vector<boost::uint8_t> > ts_headers_;
-            std::vector<boost::uint8_t> pes_heaher_buffer_;
+            std::vector<boost::uint8_t> ts_headers_;
             std::deque<boost::asio::const_buffer> ts_buffers_;
             std::vector<size_t> off_segs_;
+            char pes_heaher_buffer_[19];
+            boost::uint32_t pes_header_size_;
         };
     }
 }

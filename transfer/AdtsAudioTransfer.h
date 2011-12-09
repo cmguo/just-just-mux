@@ -24,7 +24,7 @@ namespace ppbox
 
             virtual void transfer(ppbox::demux::Sample & sample)
             {
-                ppbox::demux::MediaInfo const * audio_stream_info = sample.media_info;
+                MediaInfoEx const * audio_stream_info = (MediaInfoEx const *)sample.media_info;
                 unsigned int sampling_frequency_index = 0;
                 unsigned int channel_configuration = 0;
                 boost::uint32_t frame_size = util::buffers::buffer_size(sample.data);

@@ -6,8 +6,11 @@
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/H264Nalu.h"
+#include "ppbox/mux/decode/AvcDecode.h"
 
-#include <ppbox/demux/pptv/PptvDemuxer.h>
+#include "ppbox/mux/rtp/RtpPacket.h"
+#include <ppbox/demux/base/BufferDemuxer.h>
+
 #include <ppbox/demux/asf/AsfObjectType.h>
 using namespace ppbox::demux;
 using namespace boost::system;
@@ -22,7 +25,7 @@ namespace ppbox
     namespace mux
     {
         error_code Muxer::open(
-            demux::PptvDemuxer * demuxer,
+            demux::BufferDemuxer * demuxer,
             error_code & ec)
         {
             assert(demuxer != NULL);
@@ -37,8 +40,7 @@ namespace ppbox
                 } else {
                     media_info_.duration   = video_duration;
                 }
-                ppbox::demux::MediaInfo media_info;
-                attachment_ = "";
+                MediaInfoEx media_info;
                 for (size_t i = 0; i < media_info_.stream_count; ++i) {
                     demuxer_->get_media_info(i, media_info, ec);
                     if (ec) {
@@ -50,14 +52,17 @@ namespace ppbox
                         else {
                             media_info.attachment = NULL;
                             media_info_.stream_infos.push_back(media_info);
-                            media_info_.stream_infos[i].attachment = NULL;
-                            if (media_info.type == MEDIA_TYPE_VIDE) {
-                                media_info_.video_index = i;
-                                add_stream(media_info_.stream_infos[i], video_transfers_);
-                            } else {
-                                media_info_.audio_index = i;
-                                add_stream(media_info_.stream_infos[i], audio_transfers_);
+                            // add attachment
+                            if (media_info.type == ppbox::demux::MEDIA_TYPE_VIDE 
+                                && media_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
+                                media_info_.stream_infos[i].decode = new AvcDecode();
+                                media_info_.stream_infos[i].decode->config(
+                                    media_info.format_data, media_info_.stream_infos[i].config);
                             }
+
+                            std::vector<Transfer *> transfers;
+                            add_stream(media_info_.stream_infos[i], transfers);
+                            stream_transfers_.push_back(transfers);
                         }
                     }
                 }
@@ -85,31 +90,36 @@ namespace ppbox
             if (!is_open()) {
                 return error::mux_not_open;
             }
-
             if (paused_) {
                 paused_ = false;
             }
 
-            if (is_read_head_) {
-                Sample const & sample = Muxer::get_sample_with_transfer(ec);
-                if (!ec) {
-                    tag = sample;
-                }
-            } else {
-                is_read_head_ = true;
+            if (0 == read_step_) {
+                read_step_ = 1;
                 tag.itrack = boost::uint32_t(-1);
                 tag.idesc = boost::uint32_t(-1);
                 tag.flags = 0;
                 tag.ustime = 0;
                 tag.context = NULL;
-                head_buffer(tag);
+                file_header(tag);
+                if (!tag.data.empty())
+                    return ec;
+            } else if (read_step_ > 0 && read_step_ != boost::uint32_t(-1)) {
+                while(read_step_ <= media_info_.stream_count) {
+                    stream_header(read_step_-1, tag);
+                    read_step_++;
+                    if (!tag.data.empty()) 
+                        return ec;
+                }
+                read_step_ = boost::uint32_t(-1);
             }
+            Muxer::get_sample_with_transfer(tag, ec);
             return ec;
         }
 
         void Muxer::reset(void)
         {
-            is_read_head_ = false;
+            read_step_ = 0;
         }
 
         error_code Muxer::seek(
@@ -122,6 +132,9 @@ namespace ppbox
                 demuxer_->seek(time, ec);
                 if (!ec || ec == boost::asio::error::would_block) {
                     play_time_ = time;
+                    if (filters_.size() < 2) {
+                        filters_.push_back(&key_filter_);
+                    }
                 }
             }
             return ec;
@@ -159,6 +172,7 @@ namespace ppbox
         {
             demuxer_ = NULL;
             release_transfer();
+            release_decode();
         }
 
         boost::uint32_t & Muxer::current_time(void)
@@ -194,34 +208,46 @@ namespace ppbox
             return ec;
         }
 
-        Sample & Muxer::get_sample(
+        error_code Muxer::get_sample(
+            Sample & sample,
             error_code & ec)
         {
             if (!is_open()) {
                 ec = error::mux_not_open;
             } else {
                 paused_ = false;
-                filters_.last()->get_sample(sample_, ec);
+                filters_.last()->get_sample(sample, ec);
                 if (!ec) {
-                    sample_.media_info = &media_info_.stream_infos[sample_.itrack];
-                    play_time_ = sample_.time;
+                    sample.media_info = &media_info_.stream_infos[sample.itrack];
+                    play_time_ = sample.time;
                 }
             }
-            return sample_;
+            return ec;
         }
 
-        Sample & Muxer::get_sample_with_transfer(
+        error_code Muxer::get_sample_with_transfer(
+            Sample & sample,
             error_code & ec)
         {
-            get_sample(ec);
+            get_sample(sample, ec);
             if (!ec) {
-                transfer_sample(sample_);
+                std::vector<Transfer *> & stream_transfer = stream_transfers_[sample.itrack];
+                //if (sample_.flags & Sample::stream_changed) {
+                MediaInfoEx & mediainfo = media_info_.stream_infos[sample.itrack];
+                for(boost::uint32_t i = 0; i < stream_transfer.size(); ++i) {
+                    stream_transfer[i]->transfer(mediainfo);
+                }
+                //}
+
+                for(boost::uint32_t i = 0; i < stream_transfer.size(); ++i) {
+                    stream_transfer[i]->transfer(sample);
+                }
             }
-            return sample_;
+            return ec;
         }
 
         error_code Muxer::mediainfo_translater(
-            MediaInfo & stream_info,
+            MediaInfoEx & stream_info,
             error_code & ec)
         {
             if (stream_info.sub_type == VIDEO_TYPE_AVC1 
@@ -265,29 +291,26 @@ namespace ppbox
             return ec;
         }
 
-        void Muxer::transfer_sample(Sample & sample)
-        {
-            if(sample.itrack == media_info_.video_index) {
-                for(boost::uint32_t i = 0; i < video_transfers_.size(); ++i) {
-                    video_transfers_[i]->transfer(sample);
-                }
-            } else if (sample.itrack == media_info_.audio_index) {
-                for(boost::uint32_t i = 0; i < audio_transfers_.size(); ++i) {
-                    audio_transfers_[i]->transfer(sample);
-                }
-            }
-        }
-
         void Muxer::release_transfer(void)
         {
-            for(boost::uint32_t i = 0; i < video_transfers_.size(); ++i) {
-                delete video_transfers_[i];
+            for (boost::uint32_t i = 0; i < stream_transfers_.size(); ++i) {
+                std::vector<Transfer *> & stream_transfer = stream_transfers_[i];
+                for(boost::uint32_t j = 0; j < stream_transfer.size(); ++j) {
+                    delete stream_transfer[j];
+                }
+                stream_transfer.clear();
             }
-            video_transfers_.clear();
-            for(boost::uint32_t i = 0; i < audio_transfers_.size(); ++i) {
-                delete audio_transfers_[i];
+            stream_transfers_.clear();
+        }
+
+        void Muxer::release_decode(void)
+        {
+            for (boost::uint32_t i = 0; i < media_info_.stream_infos.size(); ++i) {
+                if (media_info_.stream_infos[i].decode) {
+                    delete media_info_.stream_infos[i].decode;
+                    media_info_.stream_infos[i].decode = NULL;
+                }
             }
-            audio_transfers_.clear();
         }
     }
 }

@@ -22,16 +22,6 @@ namespace ppbox
             boost::uint32_t ssrc;
         };
 
-        //static boost::uint64_t TimescaleConvertTime(
-        //    boost::uint64_t time_value,
-        //    boost::uint32_t from_time_scale,
-        //    boost::uint32_t to_time_scale)
-        //{
-        //    if (from_time_scale == 0) return 0;
-        //    double ratio = (double)to_time_scale/(double)from_time_scale;
-        //    return ((boost::uint64_t)((double)time_value*ratio));
-        //}
-
         class RtpPacket
             : public RtpHead
 
@@ -40,6 +30,7 @@ namespace ppbox
             RtpPacket(
                 boost::uint32_t time,
                 bool mark)
+                : size(0)
             {
                 timestamp = time;
                 mpt = mark ? 0x80 : 0;
@@ -50,6 +41,7 @@ namespace ppbox
                 RtpPacket const & r)
                 : RtpHead(r)
             {
+                size = r.size;
                 buffers = r.buffers;
                 buffers[0] = boost::asio::buffer(this, sizeof(RtpHead));
             }
@@ -69,6 +61,7 @@ namespace ppbox
                 buffers.insert(buffers.end(), beg, end);
             }
 
+            size_t size;
             std::vector<boost::asio::const_buffer> buffers;
         };
 

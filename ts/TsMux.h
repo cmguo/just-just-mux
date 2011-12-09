@@ -17,7 +17,6 @@ namespace ppbox
         public:
             TsMux()
                 : is_merge_audio_(false)
-                , header_(new AP4_MemoryByteStream(512))
                 , pat_(new Stream(0))
                 , pmt_(new Stream(AP4_MPEG2_TS_DEFAULT_PID_PMT))
                 , has_audio_(false)
@@ -35,10 +34,6 @@ namespace ppbox
 
             virtual ~TsMux()
             {
-                if (header_) {
-                    header_->Release();
-                }
-
                 if (pat_) {
                     delete pat_;
                     pat_ = NULL;
@@ -52,19 +47,22 @@ namespace ppbox
 
         public:
             void add_stream(
-                ppbox::demux::MediaInfo & mediainfo,
+                MediaInfoEx & mediainfo,
                 std::vector<Transfer *> & transfer);
 
-            void head_buffer(
+            void file_header(
+                ppbox::demux::Sample & tag);
+
+            void stream_header(
+                boost::uint32_t index, 
                 ppbox::demux::Sample & tag);
 
         private:
-            void WritePAT(AP4_ByteStream & output);
-            void WritePMT(AP4_ByteStream & output);
+            void WritePAT(boost::uint8_t * ptr);
+            void WritePMT(boost::uint8_t * ptr);
 
         private:
             bool is_merge_audio_;
-            AP4_MemoryByteStream * header_;
             Stream * pat_;
             Stream * pmt_;
             bool has_audio_;
@@ -75,6 +73,9 @@ namespace ppbox
             boost::uint16_t video_stream_id_;
             boost::uint8_t audio_stream_type_;
             boost::uint8_t video_stream_type_;
+
+            // buffer
+            boost::uint8_t header_[512];
         };
     }
 }

@@ -4,11 +4,11 @@
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/PackageJoinTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
+#include "ppbox/mux/transfer/StreamJoinTransfer.h"
 #include "ppbox/mux/rtp/RtpEsAudioTransfer.h"
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 
-#include <ppbox/demux/pptv/PptvDemuxer.h>
 using namespace ppbox::demux;
 
 namespace ppbox
@@ -17,7 +17,7 @@ namespace ppbox
     {
 
         void RtpEsMux::add_stream(
-            MediaInfo & mediainfo,
+            MediaInfoEx & mediainfo,
             std::vector<Transfer *> & transfers)
         {
             Transfer * transfer = NULL;
@@ -25,6 +25,8 @@ namespace ppbox
                 if (mediainfo.format_type == MediaInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
                     transfers.push_back(transfer);
+                    //transfer = new StreamJoinTransfer();
+                    //transfers.push_back(transfer);
                 } else if (mediainfo.format_type == MediaInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
                     transfers.push_back(transfer);
@@ -37,11 +39,11 @@ namespace ppbox
                     //transfer = new PackageSplitTransfer();
                     //transfers.push_back(transfer);
                 }
-                RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this, video_map_id_);
+                RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this, video_map_id_, 1436);
                 transfers.push_back(rtp_transfer);
                 rtp_transfer->get_rtp_info(mediainfo);
                 transfers_.push_back(rtp_transfer);
-            } else {
+            } else if (ppbox::demux::MEDIA_TYPE_AUDI == mediainfo.type){
                 RtpTransfer * rtp_transfer = new RtpEsAudioTransfer(*this, audio_map_id_);
                 transfers.push_back(rtp_transfer);
                 rtp_transfer->get_rtp_info(mediainfo);
@@ -49,7 +51,14 @@ namespace ppbox
             }
         }
 
-        void RtpEsMux::head_buffer(ppbox::demux::Sample & tag)
+        void RtpEsMux::file_header(ppbox::demux::Sample & tag)
+        {
+            tag.data.clear();
+        }
+
+        void RtpEsMux::stream_header(
+            boost::uint32_t index, 
+            ppbox::demux::Sample & tag)
         {
             tag.data.clear();
         }

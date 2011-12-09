@@ -13,6 +13,11 @@ namespace ppbox
 
         void PackageSplitTransfer::transfer(ppbox::demux::Sample & sample)
         {
+            //sample.data.clear();
+            //boost::uint8_t buf1[3] = {1,2,3};
+            //boost::uint8_t buf2[7] = {4,5,6,7,8,9,10};
+            //sample.data.push_back(boost::asio::buffer(buf1, 3));
+            //sample.data.push_back(boost::asio::buffer(buf2, 7));
             nalus_.clear();
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             MyBuffersPosition position(limit);

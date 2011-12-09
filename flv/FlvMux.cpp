@@ -3,10 +3,10 @@
 #include "ppbox/mux/flv/FlvMux.h"
 #include "ppbox/mux/transfer/PackageJoinTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
+#include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
-#include <ppbox/demux/pptv/PptvDemuxer.h>
 using namespace ppbox::demux;
 
 #include <framework/system/BytesOrder.h>
@@ -19,20 +19,6 @@ namespace ppbox
     {
         FlvMux::FlvMux()
         {
-            memset(&flvheader_, 0, sizeof(FlvHeader));
-            flvheader_.Signature[0]  = 'F';
-            flvheader_.Signature[1]  = 'L';
-            flvheader_.Signature[2]  = 'V';
-            flvheader_.Version       = 0x01;
-            flvheader_.Flags         = 0x05;
-            flvheader_.DataOffset[0] = 0x0;
-            flvheader_.DataOffset[1] = 0x0;
-            flvheader_.DataOffset[2] = 0x0;
-            flvheader_.DataOffset[3] = 0x9;
-            flvheader_.Tag0Size[0] = 0x0;
-            flvheader_.Tag0Size[1] = 0x0;
-            flvheader_.Tag0Size[2] = 0x0;
-            flvheader_.Tag0Size[3] = 0x0;
         }
 
         FlvMux::~FlvMux()
@@ -40,111 +26,149 @@ namespace ppbox
         }
 
         void FlvMux::add_stream(
-            MediaInfo & mediainfo,
+            MediaInfoEx & mediainfo,
             std::vector<Transfer *> & transfers)
         {
             Transfer * transfer = NULL;
             if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
                 if (mediainfo.format_type == MediaInfo::video_avc_packet) {
-                    transfer = new FlvVideoTransfer();
-                    transfers.push_back(transfer);
+                    // empty
                 } else if (mediainfo.format_type == MediaInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
                     transfers.push_back(transfer);
+                    transfer = new PtsComputeTransfer();
+                    transfers.push_back(transfer);
                     transfer = new PackageJoinTransfer();
                     transfers.push_back(transfer);
-                    transfer = new FlvVideoTransfer();
-                    transfers.push_back(transfer);
                 }
-            } else {
-                transfer = new FlvAudioTransfer();
+                transfer = new FlvVideoTransfer(9);
+                transfers.push_back(transfer);
+            } else if (mediainfo.type == ppbox::demux::MEDIA_TYPE_AUDI) {
+                transfer = new FlvAudioTransfer(8);
                 transfers.push_back(transfer);
             }
         }
 
-        void FlvMux::head_buffer(
+        void FlvMux::file_header(
             ppbox::demux::Sample & tag)
         {
-            boost::uint32_t offset = 0;
-            boost::uint32_t head_size = sizeof(FlvHeader);
-            file_head_buffer_.resize(head_size);
-            memcpy(&file_head_buffer_.at(0), (boost::uint8_t *)&flvheader_, sizeof(FlvHeader));
-            offset += sizeof(FlvHeader);
+            tag.data.clear();
+            tag.time = 0;
+            tag.ustime = 0;
+            tag.dts = 0;
+            tag.cts_delta = 0;
+            util::archive::ArchiveBuffer<char> file_header_buf(flv_file_header_buffer_, 13);
+            ppbox::demux::FLVOArchive flv_file_archive(file_header_buf);
+            flv_file_archive << flv_header_;
+            tag.data.push_back(boost::asio::buffer(
+                (boost::uint8_t *)&flv_file_header_buffer_, 13));
+        }
+
+        void FlvMux::stream_header(
+            boost::uint32_t index, 
+            ppbox::demux::Sample & tag)
+        {
+            assert(index < mediainfo().stream_infos.size());
+            boost::uint32_t total_head_size;
             boost::uint32_t spec_data_size = 0;
 
-            if (mediainfo().video_index != boost::uint32_t(-1)) {
-                ppbox::demux::MediaInfo const & stream_info = 
-                    mediainfo().stream_infos[mediainfo().video_index];
+            MediaInfoEx const & stream_info = mediainfo().stream_infos[index];
+            if (stream_info.type == ppbox::demux::MEDIA_TYPE_VIDE) {
                 spec_data_size = stream_info.format_data.size();
-                boost::uint32_t head_size = sizeof(VideoTagHeader)+11;
-                file_head_buffer_.resize(offset+head_size+spec_data_size+4);
-                flvtag_.TagType = TAG_TYPE_VIDEO;
-                setTagSizeAndTimestamp(flvtag_, spec_data_size+sizeof(VideoTagHeader), 0);
-                memcpy(&file_head_buffer_.at(0)+offset, (boost::uint8_t *)&flvtag_, 11);
-                offset += 11;
-                VideoTagHeader videotagheader;
-                if (stream_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
-                    videotagheader.VideoAttribute = 0x17;
-                    videotagheader.AVCPacketType = 0x0;
-                } else {
-                    videotagheader.VideoAttribute = 0x17;
-                    videotagheader.AVCPacketType = 0x0;
-                }
-                memset(&videotagheader.CompositionTime, 0, sizeof(videotagheader.CompositionTime));
-                memcpy( &file_head_buffer_.at(0)+offset,
-                    (boost::uint8_t *)&videotagheader,
-                    5);
-                offset += 5;
-                memcpy(&file_head_buffer_.at(0)+offset,
-                    &stream_info.format_data.at(0),
-                    spec_data_size);
-                offset += spec_data_size;
-                boost::uint32_t PreviousTagSize = spec_data_size + sizeof(VideoTagHeader) + 11;
-                PreviousTagSize = BytesOrder::host_to_big_endian_long(PreviousTagSize);
-                memcpy(&file_head_buffer_.at(0)+offset,
-                    (unsigned char const *)&PreviousTagSize,
-                    4);
-                offset += 4;
-            }
+                flv_tag_header_.Type = 0x09;
+                flv_tag_header_.Filter = 0;
+                flv_tag_header_.Reserved = 0;
+                flv_tag_header_.DataSize = framework::system::UInt24(spec_data_size+5);
+                flv_tag_header_.Timestamp = framework::system::UInt24(0);
+                flv_tag_header_.TimestampExtended = 0;
+                flv_tag_header_.StreamID = framework::system::UInt24(0);
+                util::archive::ArchiveBuffer<char> buf(video_header_buffer_, 16);
+                ppbox::demux::FLVOArchive flv_archive(buf);
+                flv_archive << flv_tag_header_;
 
-            if (mediainfo().audio_index != boost::uint32_t(-1)) {
-                ppbox::demux::MediaInfo const & stream_info = 
-                    mediainfo().stream_infos[mediainfo().audio_index];
-                boost::uint32_t head_size = sizeof(AudioTagHeader)+11;
-                boost::uint32_t spec_data_size =  stream_info.format_data.size();
-                file_head_buffer_.resize(offset+head_size+spec_data_size+4);
-                flvtag_.TagType = TAG_TYPE_AUDIO;
-                setTagSizeAndTimestamp(flvtag_, spec_data_size+sizeof(AudioTagHeader), 0);
-                memcpy(&file_head_buffer_.at(0)+offset, (boost::uint8_t *)&flvtag_, 11);
-                offset += 11;
-                AudioTagHeader audiotagheader;
-                if (stream_info.sub_type == ppbox::demux::AUDIO_TYPE_MP4A) {
-                    audiotagheader.SoundAttribute = 0xAF;
-                    audiotagheader.AACPacketType = 0x0;
-                } else if (stream_info.sub_type == ppbox::demux::AUDIO_TYPE_WMA2) {
-                    audiotagheader.SoundAttribute = 0xDF;
-                    audiotagheader.AACPacketType = 0x0;
+                if (stream_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
+                    flv_video_tag_header_.FrameType = 1;
+                    flv_video_tag_header_.CodecID = VideoCodec::FLV_CODECID_H264;
+                    flv_video_tag_header_.AVCPacketType = 0;
                 } else {
-                    audiotagheader.SoundAttribute = 0xAF;
-                    audiotagheader.AACPacketType = 0x0;
+                    flv_video_tag_header_.FrameType = 1;
+                    flv_video_tag_header_.CodecID = VideoCodec::FLV_CODECID_H264;
+                    flv_video_tag_header_.AVCPacketType = 0;
                 }
-                memcpy(&file_head_buffer_.at(0)+offset,
-                    (boost::uint8_t *)&audiotagheader,
-                    2);
-                offset += 2;
-                memcpy(&file_head_buffer_.at(0)+offset,
-                    &stream_info.format_data.at(0),
-                    spec_data_size);
-                offset += spec_data_size;
-                boost::uint32_t PreviousTagSize = spec_data_size + sizeof(AudioTagHeader) + 11;
-                PreviousTagSize = BytesOrder::host_to_big_endian_long(PreviousTagSize);
-                memcpy(&file_head_buffer_.at(0)+offset,
-                    (unsigned char const *)&PreviousTagSize,
-                    4);
-                offset += 4;
+                flv_video_tag_header_.CompositionTime = framework::system::UInt24(0);
+                flv_archive << flv_video_tag_header_;
+                tag.data.push_back(boost::asio::buffer(
+                    (boost::uint8_t *)&video_header_buffer_, 16));
+                tag.data.push_back(boost::asio::buffer(stream_info.format_data));
+                video_header_size_ = spec_data_size + 16;
+                video_header_size_ = framework::system::BytesOrder::big_endian_to_host_long(video_header_size_);
+                tag.data.push_back(boost::asio::buffer(
+                    (boost::uint8_t *)&video_header_size_, 4));
+
+            } else if (stream_info.type == ppbox::demux::MEDIA_TYPE_AUDI) {
+                spec_data_size = stream_info.format_data.size();
+                flv_tag_header_.Type = 0x08;
+                flv_tag_header_.Filter = 0;
+                flv_tag_header_.Reserved = 0;
+                flv_tag_header_.DataSize = framework::system::UInt24(spec_data_size+2);
+                flv_tag_header_.Timestamp = framework::system::UInt24(0);
+                flv_tag_header_.TimestampExtended = 0;
+                flv_tag_header_.StreamID = framework::system::UInt24(0);
+                util::archive::ArchiveBuffer<char> buf(audio_header_buffer_, 13);
+                ppbox::demux::FLVOArchive flv_archive(buf);
+                flv_archive << flv_tag_header_;
+
+                switch(stream_info.sub_type)
+                {
+                case ppbox::demux::AUDIO_TYPE_MP4A:
+                    flv_audio_tag_header_.SoundFormat = 10;
+                    break;
+                case ppbox::demux::AUDIO_TYPE_MP1A:
+                    flv_audio_tag_header_.SoundFormat = 2;
+                    break;
+                case ppbox::demux::AUDIO_TYPE_WMA2:
+                    flv_audio_tag_header_.SoundFormat = 11;
+                    break;
+                default:
+                    flv_audio_tag_header_.SoundFormat = 10;
+                    break;
+                }
+
+                if (stream_info.audio_format.sample_rate >= 44100 ) {
+                    flv_audio_tag_header_.SoundRate = 3;
+                } else if (stream_info.audio_format.sample_rate >= 24000 ){
+                    flv_audio_tag_header_.SoundRate = 2;
+                } else if (stream_info.audio_format.sample_rate >= 12000) {
+                    flv_audio_tag_header_.SoundRate = 1;
+                } else if (stream_info.audio_format.sample_rate >= 6000) {
+                    flv_audio_tag_header_.SoundRate = 0;
+                } else {
+                    flv_audio_tag_header_.SoundRate = 3;
+                }
+
+                if (stream_info.audio_format.channel_count <= 1) {
+                    // for aac always 1;
+                    flv_audio_tag_header_.SoundType = 1;
+                } else {
+                    flv_audio_tag_header_.SoundType = 1;
+                }
+
+                if (8 == stream_info.audio_format.sample_size) {
+                    flv_audio_tag_header_.SoundSize = 0;
+                } else {
+                    flv_audio_tag_header_.SoundSize = 1;
+                }
+                flv_audio_tag_header_.AACPacketType = 0;
+
+                flv_archive << flv_audio_tag_header_;
+                tag.data.push_back(boost::asio::buffer(
+                    (boost::uint8_t *)&audio_header_buffer_, 13));
+                tag.data.push_back(boost::asio::buffer(stream_info.format_data));
+                audio_header_size_ = spec_data_size + 13;
+                audio_header_size_ = framework::system::BytesOrder::big_endian_to_host_long(audio_header_size_);
+                tag.data.push_back(boost::asio::buffer(
+                    (boost::uint8_t *)&audio_header_size_, 4));
             }
-            tag.data.clear();
-            tag.data.push_back(boost::asio::buffer(&file_head_buffer_.at(0), file_head_buffer_.size()));
         }
 
     } // namespace mux

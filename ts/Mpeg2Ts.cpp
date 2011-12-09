@@ -7,6 +7,7 @@ using namespace ppbox::mux;
 
 #include <util/buffers/BufferCopy.h>
 #include <util/buffers/BufferSize.h>
+#include <util/archive/ArchiveBuffer.h>
 
 #include <bento4/Core/Ap4ByteStream.h>
 #include <bento4/Core/Ap4Sample.h>
@@ -24,19 +25,23 @@ namespace ppbox
         void Stream::WritePacketHeader(
             bool payload_start, 
             boost::uint32_t & payload_size,
+            boost::uint32_t & head_size, // in: spare size, out: real size
             bool with_pcr,
             boost::uint64_t pcr,
-            std::vector<boost::uint8_t> & output)
+            boost::uint8_t * ptr)
         {
-            ts_header_->Seek(0);
-            boost::uint8_t header[4];
-            header[0] = AP4_MPEG2TS_SYNC_BYTE;
-            header[1] = ((payload_start?1:0)<<6) | (pid_ >> 8);
-            header[2] = pid_ & 0xFF;
-
+            util::archive::ArchiveBuffer<char> buf((char *)ptr, head_size);
+            TsOArchive ts_archive(buf);
+            transport_packet_.transport_error_indicator = 0;
+            if (payload_start) {
+                transport_packet_.payload_uint_start_indicator = 1;
+            } else {
+                transport_packet_.payload_uint_start_indicator = 0;
+            }
+            transport_packet_.transport_priority = 0;
+            transport_packet_.Pid = pid_;
             boost::uint32_t adaptation_field_size = 0;
             if (with_pcr) adaptation_field_size += 2+AP4_MPEG2TS_PCR_ADAPTATION_SIZE;
-
             // clamp the payload size
             if (payload_size+adaptation_field_size > AP4_MPEG2TS_PACKET_PAYLOAD_SIZE) {
                 payload_size = AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-adaptation_field_size;
@@ -45,43 +50,51 @@ namespace ppbox
             if (adaptation_field_size+payload_size < AP4_MPEG2TS_PACKET_PAYLOAD_SIZE) {
                 adaptation_field_size = AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-payload_size;
             }
-            
+            transport_packet_.transport_scrambling_control = 0;
             if (adaptation_field_size == 0) {
-                // no adaptation field
-                header[3] = (1<<4) | ((continuity_counter_++)&0x0F);
-                ts_header_->Write(header, 4);
+                transport_packet_.adaptat_field_control = 1;
+                transport_packet_.continuity_counter = (continuity_counter_++)&0x0F;
+                ts_archive << transport_packet_;
+                head_size = 4;
             } else {
                 // adaptation field present
-                header[3] = (3<<4) | ((continuity_counter_++)&0x0F);
-                ts_header_->Write(header, 4);
+                transport_packet_.adaptat_field_control = 3;
+                transport_packet_.continuity_counter = (continuity_counter_++)&0x0F;
+                ts_archive << transport_packet_;
                 if (adaptation_field_size == 1) {
                     // just one byte (stuffing)
-                    ts_header_->WriteUI08(0);
+                    adapation_field_.adaptation_field_length = 0;
                 } else {
                     // two or more bytes (stuffing and/or PCR)
-                    ts_header_->WriteUI08(adaptation_field_size-1);
-                    ts_header_->WriteUI08(with_pcr?(1<<4):0);
+                    adapation_field_.adaptation_field_length = adaptation_field_size-1;
+                    adapation_field_.discontinuity_indicator = 0;
+                    adapation_field_.random_access_indicator = 0;
+                    adapation_field_.elementary_stream_priority_indicator = 0;
+                    adapation_field_.PCR_flag = 0;
+                    adapation_field_.OPCR_flag = 0;
+                    adapation_field_.splicing_point_flag = 0;
+                    adapation_field_.transport_private_data_flag = 0;
+                    adapation_field_.adaptation_field_extension_flag = 0;
                     unsigned int pcr_size = 0;
                     if (with_pcr) {
+                        adapation_field_.PCR_flag = 1;
                         pcr_size = AP4_MPEG2TS_PCR_ADAPTATION_SIZE;
-                        AP4_UI64 pcr_base = pcr/300;
-                        AP4_UI32 pcr_ext  = (AP4_UI32)(pcr%300);
-                        AP4_BitWriter writer(pcr_size);
-                        writer.Write((AP4_UI32)(pcr_base>>32), 1);
-                        writer.Write((AP4_UI32)pcr_base, 32);
-                        writer.Write(0x3F, 6);
-                        writer.Write(pcr_ext, 9);
-                        ts_header_->Write(writer.GetData(), pcr_size);
+                        boost::uint64_t pcr_base = pcr/300;
+                        boost::uint32_t pcr_ext  = (boost::uint32_t)(pcr%300);
+                        adapation_field_.program_clock_reference_base = pcr_base >> 1;
+                        adapation_field_.program_clock_reference_base_last1bit = pcr_base & 0x01;
+                        adapation_field_.pcr_reserved = 0x3F;
+                        adapation_field_.program_clock_reference_extension = pcr_ext;
                     }
-                    if (adaptation_field_size > 2) {
-                        ts_header_->Write(StuffingBytes, adaptation_field_size-pcr_size-2);
+                    head_size = adaptation_field_size + 4;
+                    boost::int32_t suffer_size = adaptation_field_size-pcr_size-2;
+                    if (adaptation_field_size > 2 && suffer_size >= 1) {
+                        adapation_field_.stuffing_bytes.resize(suffer_size);
+                        adapation_field_.stuffing_bytes.assign(suffer_size, 255);
                     }
                 }
+                ts_archive << adapation_field_;
             }
-            AP4_Position pos;
-            ts_header_->Tell(pos);
-            output.resize(pos);
-            memcpy(&output.at(0), ts_header_->GetData(), pos);
         }
 
     } // namespace mux

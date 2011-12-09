@@ -22,7 +22,7 @@ namespace ppbox
 
             virtual void transfer(ppbox::demux::Sample & sample);
 
-            virtual void get_rtp_info(ppbox::demux::MediaInfo & info);
+            virtual void get_rtp_info(MediaInfoEx & info);
 
             virtual void on_seek(boost::uint32_t time, boost::uint32_t play_time);
 
