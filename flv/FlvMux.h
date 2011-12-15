@@ -5,8 +5,7 @@
 #include "ppbox/mux/Muxer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
-#include <ppbox/demux/flv/FlvTagType.h>
-//#include "ppbox/mux/flv/FlvMetadata.h"
+#include <ppbox/avformat/flv/FlvTagType.h>
 
 namespace ppbox
 {
@@ -23,8 +22,7 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo,
-                std::vector<Transfer *> & transfer);
+                MediaInfoEx & mediainfo);
 
             void file_header(
                 ppbox::demux::Sample & tag);
@@ -34,10 +32,10 @@ namespace ppbox
                 ppbox::demux::Sample & tag);
 
         private:
-            ppbox::demux::FlvHeader flv_header_;
-            ppbox::demux::FlvTagHeader flv_tag_header_;
-            ppbox::demux::FlvAudioTagHeader flv_audio_tag_header_;
-            ppbox::demux::FlvVideoTagHeader flv_video_tag_header_;
+            ppbox::avformat::FlvHeader flv_header_;
+            ppbox::avformat::FlvTagHeader flv_tag_header_;
+            ppbox::avformat::FlvAudioTagHeader flv_audio_tag_header_;
+            ppbox::avformat::FlvVideoTagHeader flv_video_tag_header_;
             char audio_header_buffer_[13];
             char video_header_buffer_[16];
             char flv_file_header_buffer_[13];

@@ -22,15 +22,14 @@ namespace ppbox
         }
 
         void RtpTsMux::add_stream(
-            MediaInfoEx & mediainfo,
-            std::vector<Transfer *> & transfers)
+            MediaInfoEx & mediainfo)
         {
-            TsMux::add_stream(mediainfo, transfers);
+            TsMux::add_stream(mediainfo);
             if (rtp_ts_transfer_ == NULL) {
                 rtp_ts_transfer_ = new RtpTsTransfer(*this, map_id_);
             }
             Transfer * transfer = new MergeTransfer(rtp_ts_transfer_);
-            transfers.push_back(transfer);
+            mediainfo.transfers.push_back(transfer);
 
             if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
                 rtp_ts_transfer_->get_rtp_info(mediainfo);

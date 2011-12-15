@@ -80,43 +80,42 @@ namespace ppbox
         }
 
         void TsMux::add_stream(
-            MediaInfoEx & mediainfo,
-            std::vector<Transfer *> & transfers)
+            MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;
             if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
                 if (mediainfo.format_type == MediaInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                     transfer = new StreamJoinTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                 } else if (mediainfo.format_type == MediaInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                 }
                 transfer = new TsTransfer(
                     video_pid_,
                     video_stream_id_,
                     video_stream_type_,
                     mediainfo.time_scale);
-                transfers.push_back(transfer);
+                mediainfo.transfers.push_back(transfer);
                 has_video_ = true;
             } else if (mediainfo.type == ppbox::demux::MEDIA_TYPE_AUDI) {
                 has_audio_ = true;
                 if (mediainfo.sub_type == ppbox::demux::AUDIO_TYPE_MP4A) {
                     transfer = new AdtsAudioTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                 } else if (mediainfo.sub_type == ppbox::demux::AUDIO_TYPE_MP1A) {
                     audio_stream_type_ = AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_3;
                 }
                 if (is_merge_audio_) {
                     transfer = new AudioMergeTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                 }
                 transfer = new TsTransfer(audio_pid_, audio_stream_id_, audio_stream_type_, mediainfo.time_scale);
-                transfers.push_back(transfer);
+                mediainfo.transfers.push_back(transfer);
             }
         }
 

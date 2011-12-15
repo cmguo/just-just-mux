@@ -5,13 +5,12 @@
 #include "ppbox/mux/tinyvlc.h"
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
-#include "ppbox/mux/H264Nalu.h"
-#include "ppbox/mux/decode/AvcDecode.h"
-
 #include "ppbox/mux/rtp/RtpPacket.h"
 #include <ppbox/demux/base/BufferDemuxer.h>
 
-#include <ppbox/demux/asf/AsfObjectType.h>
+#include <ppbox/avformat/asf/AsfObjectType.h>
+#include <ppbox/avformat/codec/AvcCodec.h>
+using namespace ppbox::avformat;
 using namespace ppbox::demux;
 using namespace boost::system;
 
@@ -40,30 +39,23 @@ namespace ppbox
                 } else {
                     media_info_.duration   = video_duration;
                 }
+                media_info_.filesize = media_info_.duration * 1000;
                 MediaInfoEx media_info;
                 for (size_t i = 0; i < media_info_.stream_count; ++i) {
                     demuxer_->get_media_info(i, media_info, ec);
                     if (ec) {
                         break;
                     } else {
-                        mediainfo_translater(media_info, ec);
-                        if (ec)
-                            break;
-                        else {
-                            media_info.attachment = NULL;
-                            media_info_.stream_infos.push_back(media_info);
-                            // add attachment
-                            if (media_info.type == ppbox::demux::MEDIA_TYPE_VIDE 
-                                && media_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
-                                media_info_.stream_infos[i].decode = new AvcDecode();
-                                media_info_.stream_infos[i].decode->config(
-                                    media_info.format_data, media_info_.stream_infos[i].config);
-                            }
-
-                            std::vector<Transfer *> transfers;
-                            add_stream(media_info_.stream_infos[i], transfers);
-                            stream_transfers_.push_back(transfers);
+                        media_info.attachment = NULL;
+                        media_info_.stream_infos.push_back(media_info);
+                        // add attachment
+                        if (media_info.type == ppbox::demux::MEDIA_TYPE_VIDE 
+                            && media_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
+                            media_info_.stream_infos[i].decode = new AvcCodec();
+                            media_info_.stream_infos[i].decode->config(
+                                media_info.format_data, media_info_.stream_infos[i].config);
                         }
+                        add_stream(media_info_.stream_infos[i]);
                     }
                 }
             }
@@ -140,6 +132,14 @@ namespace ppbox
             return ec;
         }
 
+        error_code Muxer::byte_seek(
+            boost::uint32_t & offset,
+            boost::system::error_code & ec)
+        {
+            boost::uint32_t seek_time = (offset * media_info_.duration) / media_info_.filesize;
+            return seek(seek_time, ec);
+        }
+
         error_code Muxer::pause(
             error_code & ec)
         {
@@ -171,8 +171,7 @@ namespace ppbox
         void Muxer::close(void)
         {
             demuxer_ = NULL;
-            release_transfer();
-            release_decode();
+            release_mediainfo();
         }
 
         boost::uint32_t & Muxer::current_time(void)
@@ -231,86 +230,34 @@ namespace ppbox
         {
             get_sample(sample, ec);
             if (!ec) {
-                std::vector<Transfer *> & stream_transfer = stream_transfers_[sample.itrack];
-                //if (sample_.flags & Sample::stream_changed) {
                 MediaInfoEx & mediainfo = media_info_.stream_infos[sample.itrack];
-                for(boost::uint32_t i = 0; i < stream_transfer.size(); ++i) {
-                    stream_transfer[i]->transfer(mediainfo);
+                //if (sample_.flags & Sample::stream_changed) {
+                for(boost::uint32_t i = 0; i < mediainfo.transfers.size(); ++i) {
+                    mediainfo.transfers[i]->transfer(mediainfo);
                 }
                 //}
 
-                for(boost::uint32_t i = 0; i < stream_transfer.size(); ++i) {
-                    stream_transfer[i]->transfer(sample);
+                for(boost::uint32_t i = 0; i < mediainfo.transfers.size(); ++i) {
+                    mediainfo.transfers[i]->transfer(sample);
                 }
             }
             return ec;
         }
 
-        error_code Muxer::mediainfo_translater(
-            MediaInfoEx & stream_info,
-            error_code & ec)
-        {
-            if (stream_info.sub_type == VIDEO_TYPE_AVC1 
-                && stream_info.format_type == MediaInfo::video_avc_byte_stream) {
-                    Buffer_Array config_list;
-                    H264Nalu::process_live_video_config(
-                        &stream_info.format_data.at(0),
-                        stream_info.format_data.size(),
-                        config_list);
-                    AvcConfig avc_config((boost::uint32_t)framework::memory::MemoryPage::align_page(stream_info.format_data.size() * 2));
-                    if (config_list.size() >= 2) {
-                        Buffer_Array spss;
-                        Buffer_Array ppss;
-                        spss.push_back(config_list[config_list.size()-2]);
-                        ppss.push_back(config_list[config_list.size()-1]);
-                        avc_config.creat(0x01, 0x64, 0x00, 0x15, 0x04, spss, ppss);
-                        stream_info.format_data.resize(avc_config.data_size());
-                        memcpy(&stream_info.format_data.at(0), avc_config.data(), avc_config.data_size());
-                    } else {
-                        ec = error::mux_invalid_sample;
-                    }
-            } else if (stream_info.format_type == MediaInfo::audio_microsoft_wave) {
-                boost::uint8_t cbuf[1024];
-                memset(cbuf, 0, sizeof(cbuf));
-                memcpy(cbuf, &stream_info.format_data.at(0), stream_info.format_data.size());
-                util::archive::ArchiveBuffer<boost::uint8_t> buf(
-                    cbuf,
-                    sizeof(cbuf), 
-                    stream_info.format_data.size());
-                ASF_Audio_Media_Type asf_audio_type;
-                ASFArchive archive(buf);
-                archive >> asf_audio_type;
-                if (asf_audio_type.CodecSpecificDataSize == 0) {
-                    stream_info.format_data.clear();
-                } else {
-                    stream_info.format_data.assign(
-                        asf_audio_type.CodecSpecificData.begin(), 
-                        asf_audio_type.CodecSpecificData.end());
-                }
-            }
-            return ec;
-        }
-
-        void Muxer::release_transfer(void)
-        {
-            for (boost::uint32_t i = 0; i < stream_transfers_.size(); ++i) {
-                std::vector<Transfer *> & stream_transfer = stream_transfers_[i];
-                for(boost::uint32_t j = 0; j < stream_transfer.size(); ++j) {
-                    delete stream_transfer[j];
-                }
-                stream_transfer.clear();
-            }
-            stream_transfers_.clear();
-        }
-
-        void Muxer::release_decode(void)
+        void Muxer::release_mediainfo(void)
         {
             for (boost::uint32_t i = 0; i < media_info_.stream_infos.size(); ++i) {
                 if (media_info_.stream_infos[i].decode) {
                     delete media_info_.stream_infos[i].decode;
                     media_info_.stream_infos[i].decode = NULL;
                 }
+                for (boost::uint32_t j = 0; j < media_info_.stream_infos[i].transfers.size(); ++j) {
+                    delete media_info_.stream_infos[i].transfers[j];
+                }
+                media_info_.stream_infos[i].transfers.clear();
             }
+            media_info_.stream_infos.clear();
         }
+
     }
 }

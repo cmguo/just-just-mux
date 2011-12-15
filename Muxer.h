@@ -44,8 +44,7 @@ namespace ppbox
 
         protected:
             virtual void add_stream(
-                MediaInfoEx & mediainfo,
-                std::vector<Transfer *> & transfer) = 0;
+                MediaInfoEx & mediainfo) = 0;
 
             virtual void file_header(ppbox::demux::Sample & tag) = 0;
 
@@ -69,6 +68,10 @@ namespace ppbox
 
             virtual boost::system::error_code seek(
                 boost::uint32_t & time,
+                boost::system::error_code & ec);
+
+            boost::system::error_code byte_seek(
+                boost::uint32_t & offset,
                 boost::system::error_code & ec);
 
             boost::system::error_code pause(
@@ -105,15 +108,7 @@ namespace ppbox
                 ppbox::demux::Sample & sample,
                 boost::system::error_code & ec);
 
-            boost::system::error_code mediainfo_translater(
-                MediaInfoEx & stream_info,
-                boost::system::error_code & ec);
-
-            void create_transfer(void);
-
-            void release_transfer(void);
-
-            void release_decode(void);
+            void release_mediainfo(void);
 
         private:
             demux::BufferDemuxer * demuxer_;
@@ -121,9 +116,8 @@ namespace ppbox
             bool paused_;
             boost::uint32_t play_time_; // ms
             MediaFileInfo media_info_;
-            // For reset
+            // For reset 
             boost::uint32_t read_step_;
-            std::vector<std::vector<Transfer *> > stream_transfers_;
             DemuxFilter demux_filter_;
             KeyFrameFilter key_filter_;
 

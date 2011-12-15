@@ -29,8 +29,7 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo,
-                std::vector<Transfer *> & transfer);
+                MediaInfoEx & mediainfo);
 
             void file_header(
                 ppbox::demux::Sample & tag);

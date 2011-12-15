@@ -28,7 +28,7 @@ namespace ppbox
             virtual void transfer(MediaInfoEx & mediainfo);
 
         private:
-            ppbox::demux::FlvVideoTagHeader videotagheader_;
+            ppbox::avformat::FlvVideoTagHeader videotagheader_;
             char video_tag_header_[16];
 
         };

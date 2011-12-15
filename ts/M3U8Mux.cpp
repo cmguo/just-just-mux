@@ -12,10 +12,9 @@ namespace ppbox
     {
 
         void M3U8Mux::add_stream(
-            MediaInfoEx & mediainfo,
-            std::vector<Transfer *> & transfer)
+            MediaInfoEx & mediainfo)
         {
-            TsMux::add_stream(mediainfo, transfer);
+            TsMux::add_stream(mediainfo);
         }
 
         void M3U8Mux::file_header(

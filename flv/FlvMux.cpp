@@ -8,6 +8,7 @@
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
 using namespace ppbox::demux;
+using namespace ppbox::avformat;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;
@@ -26,8 +27,7 @@ namespace ppbox
         }
 
         void FlvMux::add_stream(
-            MediaInfoEx & mediainfo,
-            std::vector<Transfer *> & transfers)
+            MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;
             if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
@@ -35,17 +35,17 @@ namespace ppbox
                     // empty
                 } else if (mediainfo.format_type == MediaInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                     transfer = new PackageJoinTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                 }
                 transfer = new FlvVideoTransfer(9);
-                transfers.push_back(transfer);
+                mediainfo.transfers.push_back(transfer);
             } else if (mediainfo.type == ppbox::demux::MEDIA_TYPE_AUDI) {
                 transfer = new FlvAudioTransfer(8);
-                transfers.push_back(transfer);
+                mediainfo.transfers.push_back(transfer);
             }
         }
 
@@ -58,7 +58,7 @@ namespace ppbox
             tag.dts = 0;
             tag.cts_delta = 0;
             util::archive::ArchiveBuffer<char> file_header_buf(flv_file_header_buffer_, 13);
-            ppbox::demux::FLVOArchive flv_file_archive(file_header_buf);
+            ppbox::avformat::FLVOArchive flv_file_archive(file_header_buf);
             flv_file_archive << flv_header_;
             tag.data.push_back(boost::asio::buffer(
                 (boost::uint8_t *)&flv_file_header_buffer_, 13));
@@ -83,7 +83,7 @@ namespace ppbox
                 flv_tag_header_.TimestampExtended = 0;
                 flv_tag_header_.StreamID = framework::system::UInt24(0);
                 util::archive::ArchiveBuffer<char> buf(video_header_buffer_, 16);
-                ppbox::demux::FLVOArchive flv_archive(buf);
+                ppbox::avformat::FLVOArchive flv_archive(buf);
                 flv_archive << flv_tag_header_;
 
                 if (stream_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
@@ -115,7 +115,7 @@ namespace ppbox
                 flv_tag_header_.TimestampExtended = 0;
                 flv_tag_header_.StreamID = framework::system::UInt24(0);
                 util::archive::ArchiveBuffer<char> buf(audio_header_buffer_, 13);
-                ppbox::demux::FLVOArchive flv_archive(buf);
+                ppbox::avformat::FLVOArchive flv_archive(buf);
                 flv_archive << flv_tag_header_;
 
                 switch(stream_info.sub_type)

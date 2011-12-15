@@ -3,7 +3,8 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
-#include "ppbox/mux/AvcConfig.h"
+
+#include <ppbox/avformat/codec/AvcConfig.h>
 
 #include <framework/system/BytesOrder.h>
 
@@ -18,7 +19,8 @@ namespace ppbox
             if (sample.idesc != sample_description_index_) {
                 sample_description_index_ = sample.idesc;
                 MediaInfoEx const * video_info = (MediaInfoEx const *)sample.media_info;
-                AvcConfig const * stream_config = (AvcConfig const *)video_info->config;;
+                ppbox::avformat::AvcConfig const * stream_config = 
+                    (ppbox::avformat::AvcConfig const *)video_info->config;;
                 nalu_length_ = stream_config->nalu_lengthSize();
                 // start code
                 nalu_start_code_.clear();

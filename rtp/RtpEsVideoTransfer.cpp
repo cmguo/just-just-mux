@@ -2,7 +2,9 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
-#include "ppbox/mux/AvcConfig.h"
+
+#include <ppbox/avformat/codec/AvcConfig.h>
+using namespace ppbox::avformat;
 
 #include <util/buffers/BufferCopy.h>
 

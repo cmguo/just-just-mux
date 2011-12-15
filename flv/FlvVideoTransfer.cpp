@@ -3,8 +3,9 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
-#include <ppbox/demux/flv/FlvFormat.h>
+#include <ppbox/avformat/flv/FlvFormat.h>
 using namespace ppbox::demux;
+using namespace ppbox::avformat;
 
 using namespace framework::system;
 
@@ -26,7 +27,7 @@ namespace ppbox
             videotagheader_.CompositionTime = framework::system::UInt24(
                 framework::system::BytesOrder::host_to_big_endian(CompositionTime));
             util::archive::ArchiveBuffer<char> buf(video_tag_header_, 16);
-            ppbox::demux::FLVOArchive flv_archive(buf);
+            ppbox::avformat::FLVOArchive flv_archive(buf);
             flv_archive << videotagheader_;
             boost::uint32_t data_length = sample.size;
             setTagSizeAndTimestamp(data_length+5, sample.time);

@@ -2,11 +2,10 @@
 #define   _PPBOX_MUX_FLV_TRANSFER_
 
 #include "ppbox/mux/MuxerBase.h"
-//#include "ppbox/mux/flv/FlvMetadata.h"
 #include "ppbox/mux/transfer/Transfer.h"
 
-#include <ppbox/demux/flv/FlvFormat.h>
-#include <ppbox/demux/flv/FlvTagType.h>
+#include <ppbox/avformat/flv/FlvFormat.h>
+#include <ppbox/avformat/flv/FlvTagType.h>
 #include <framework/system/BytesOrder.h>
 #include <util/buffers/BufferSize.h>
 #include <util/archive/ArchiveBuffer.h>
@@ -42,7 +41,7 @@ namespace ppbox
             boost::asio::const_buffer tag_buffer()
             {
                 util::archive::ArchiveBuffer<char> buf(tag_header_, 16);
-                ppbox::demux::FLVOArchive flv_archive(buf);
+                ppbox::avformat::FLVOArchive flv_archive(buf);
                 flv_archive << flvtag_;
                 return boost::asio::buffer(boost::asio::buffer(tag_header_, 11));
             }
@@ -51,7 +50,7 @@ namespace ppbox
             boost::uint32_t previous_tag_size_;
 
         private:
-            ppbox::demux::FlvTagHeader   flvtag_;
+            ppbox::avformat::FlvTagHeader   flvtag_;
             char tag_header_[16];
 
         };

@@ -4,7 +4,6 @@
 #define      _PPBOX_MUX_TS_MPEG2TS_H_
 
 #include "ppbox/mux/MuxerBase.h"
-#include "ppbox/mux/AvcConfig.h"
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/ts/MpegTsType.h"
 

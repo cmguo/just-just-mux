@@ -17,35 +17,33 @@ namespace ppbox
     {
 
         void RtpEsMux::add_stream(
-            MediaInfoEx & mediainfo,
-            std::vector<Transfer *> & transfers)
+            MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;
             if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
                 if (mediainfo.format_type == MediaInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
                     //transfer = new StreamJoinTransfer();
                     //transfers.push_back(transfer);
                 } else if (mediainfo.format_type == MediaInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    transfers.push_back(transfer);
-
+                    mediainfo.transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    transfers.push_back(transfer);
+                    mediainfo.transfers.push_back(transfer);
 
                     //transfer = new PackageJoinTransfer();
-                    //transfers.push_back(transfer);
+                    //mediainfo.transfers.push_back(transfer);
                     //transfer = new PackageSplitTransfer();
-                    //transfers.push_back(transfer);
+                    //mediainfo.transfers.push_back(transfer);
                 }
                 RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this, video_map_id_, 1436);
-                transfers.push_back(rtp_transfer);
+                mediainfo.transfers.push_back(rtp_transfer);
                 rtp_transfer->get_rtp_info(mediainfo);
                 transfers_.push_back(rtp_transfer);
             } else if (ppbox::demux::MEDIA_TYPE_AUDI == mediainfo.type){
                 RtpTransfer * rtp_transfer = new RtpEsAudioTransfer(*this, audio_map_id_);
-                transfers.push_back(rtp_transfer);
+                mediainfo.transfers.push_back(rtp_transfer);
                 rtp_transfer->get_rtp_info(mediainfo);
                 transfers_.push_back(rtp_transfer);
             }
