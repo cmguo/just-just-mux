@@ -27,9 +27,10 @@ namespace ppbox
         {
         }
 
-        void RtpTsTransfer::transfer(ppbox::demux::Sample & sample)
+        void RtpTsTransfer::transfer(
+            ppbox::demux::Sample & sample)
         {
-            RtpTransfer::clear();
+            RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / sample.media_info->time_scale);
             std::vector<size_t> const & off_segs = 
                 *(std::vector<size_t> const *)sample.context;
             std::deque<boost::asio::const_buffer>::const_iterator buf_beg = sample.data.begin();
@@ -86,9 +87,10 @@ namespace ppbox
             rep_info().seek_time = time;
         }
 
-        void RtpTsTransfer::header_rtp_packet(ppbox::demux::Sample & tag)
+        void RtpTsTransfer::header_rtp_packet(
+            ppbox::demux::Sample & tag)
         {
-            RtpTransfer::clear();
+            RtpTransfer::clear(0);
             RtpPacket p(rep_info().timestamp, true);
             p.push_buffers(tag.data);
             push_packet(p);

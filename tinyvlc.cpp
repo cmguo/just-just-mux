@@ -239,7 +239,7 @@ namespace ppbox
 
         void NaluParser::parse_frame(Bitstream & bs)
         {
-            assert(got_pps_ && got_sps_);
+            //assert(got_pps_ && got_sps_);
             // skip slice type
             boost::uint8_t nalu_type = (boost::uint8_t)bs.read_bits_flc(8);
             cur_nal_header_ = *(Nal_header *)&nalu_type;

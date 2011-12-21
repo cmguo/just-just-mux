@@ -868,31 +868,35 @@ namespace ppbox
             MessageQType* pMsgType = NULL;
 
             while(!exit_) {
-                if( msgq_->timed_pop(pMsgType,boost::posix_time::milliseconds(300*1000)) )
+                if( msgq_->timed_pop(pMsgType,boost::posix_time::milliseconds(10*1000)) )
                 {
                     LOG_SECTION();
 
                     boost::uint32_t session_id = pMsgType->session_id_;
                     PlayControl msg = pMsgType->msg_;
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin msg, session:" << session_id 
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin, session:" << session_id 
                         << ", msg:" << play_event_str[msg]
                         << ", status:" << status_string());
 
                     thread_command(pMsgType);
 
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended msg, session:" << session_id 
-                        << " msg:" << play_event_str[msg]
-                        << " status:" << status_string());
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended, session:" << session_id 
+                        << ", msg:" << play_event_str[msg]
+                        << ", status:" << status_string());
                 }
                 else if (cur_mov_ && cur_mov_->delay)
                 {
                     //超时处理位置
                     LOG_SECTION();
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin msg, session:0, msg:PC_Timeout, status:" << status_string());
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin, session:0, msg:PC_Timeout, status:" << status_string());
 
                     thread_timeout();
 
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended msg, session:0, msg:PC_Timeout, status:" << status_string());
+                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended, session:0, msg:PC_Timeout, status:" << status_string());
+                }
+                else
+                {
+                    std::cout << "[thread_dispatch] idle" << std::endl;
                 }
             }
 
@@ -943,8 +947,13 @@ namespace ppbox
             boost::posix_time::ptime start_time;
             boost::system::error_code  ec;
 
-            while (msgq_->empty())
+            while (true) 
             {
+                if (!msgq_->empty()) {
+                    LOG_S(Logger::kLevelEvent, "[internal_play] new message arrived");
+                    break;
+                }
+
                 ec.clear();
                 ppbox::demux::Sample  tag ;
                 cur_mov_->muxer->read(tag,ec);
@@ -964,36 +973,35 @@ namespace ppbox
                         break;
                     }
 
+                    if (!start_time_valid) {
+                        start_time = 
+                            boost::posix_time::microsec_clock::universal_time()
+                            - boost::posix_time::microseconds(tag.ustime);
+                        start_time_valid = true;
+                    }
+                    boost::posix_time::ptime now = 
+                        boost::posix_time::microsec_clock::universal_time();
+                    boost::posix_time::ptime send_time = 
+                        start_time + boost::posix_time::microseconds(tag.ustime);
 
                     //限速模块
-                    if(playmode_ && tag.itrack == audio_type_)
+                    if(playmode_  && tag.itrack == audio_type_)
                     {
-                        if (!start_time_valid) {
-                            start_time = 
-                                boost::posix_time::microsec_clock::universal_time()
-                                - boost::posix_time::microseconds(tag.ustime);
-                            start_time_valid = true;
-                        }
-                        boost::posix_time::ptime now = 
-                            boost::posix_time::microsec_clock::universal_time();
-                        boost::uint64_t now_time = 
-                            (now - start_time).total_microseconds();
-
-                        if (tag.ustime > now_time)
+                        if (send_time > now)
                         {
-                            //std::cout<<"Sleep :"<<tag.ustime - now_time<<std::endl;
-                            boost::this_thread::sleep(boost::posix_time::microseconds(tag.ustime - now_time));
+                            //std::cout<<"Sleep :"<< (send_time - now).total_microseconds() << std::endl;
+                            boost::this_thread::sleep(send_time - now);
                         }
                     }
                     
                     //输出音视频信息
                     if(tag.itrack < sink_.size())
                     {
-                        ec = sink_[tag.itrack]->write(tag);
+                        ec = sink_[tag.itrack]->write(send_time, tag);
                     }
                     else
                     {
-                        ec = default_sink_->write(tag);
+                        ec = default_sink_->write(send_time, tag);
                     }
                 }
                 else
@@ -1018,7 +1026,7 @@ namespace ppbox
                 {
                     if(ec != boost::asio::error::would_block )
                     {
-                        LOG_S(Logger::kLevelError, "[internal_play] exiting... ec:"<<ec.message());
+                        LOG_S(Logger::kLevelError, "[internal_play] on_error, ec: "<<ec.message());
 
                         playing_ = false;
                         play_resq_(ec);
@@ -1031,6 +1039,7 @@ namespace ppbox
                 }
             }
 
+            LOG_S(Logger::kLevelEvent, "[internal_play] exiting...");
             //playing_ = false;
             return ec;
         }

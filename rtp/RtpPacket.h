@@ -66,8 +66,9 @@ namespace ppbox
         };
 
         struct RtpSplitContent
+            : std::vector<RtpPacket>
         {
-            std::vector<RtpPacket> packets;
+            boost::uint64_t ustime; // cts
         };
 
         struct RtpInfo

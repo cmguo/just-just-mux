@@ -39,7 +39,7 @@ namespace ppbox
                 } else {
                     media_info_.duration   = video_duration;
                 }
-                media_info_.filesize = media_info_.duration * 1000;
+                media_info_.filesize = 0;
                 MediaInfoEx media_info;
                 for (size_t i = 0; i < media_info_.stream_count; ++i) {
                     demuxer_->get_media_info(i, media_info, ec);

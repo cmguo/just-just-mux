@@ -20,7 +20,8 @@ namespace ppbox
             : public Transfer
         {
         public:
-            RtpTransfer(boost::uint8_t type)
+            RtpTransfer(
+                boost::uint8_t type)
             {
                 static size_t g_ssrc = 0;
                 if (g_ssrc == 0) {
@@ -37,20 +38,23 @@ namespace ppbox
             {
             }
 
-            virtual void get_rtp_info(MediaInfoEx & info)
+            virtual void get_rtp_info(
+                MediaInfoEx & info)
             {
             }
 
-            virtual void on_seek(boost::uint32_t time, boost::uint32_t play_time)
+            virtual void on_seek(
+                boost::uint32_t time, 
+                boost::uint32_t play_time)
             {
             }
 
-            void clear(void)
+            void clear(
+                boost::uint64_t cts_ustime)
             {
-                packets.clear();
+                packets_.clear();
+                packets_.ustime = cts_ustime;
             }
-
-            RtpHead rtp_head_;
 
         protected:
             void push_packet(
@@ -62,12 +66,12 @@ namespace ppbox
                 packet.timestamp = framework::system::BytesOrder::host_to_big_endian(
                     rtp_head_.timestamp + packet.timestamp);
                 packet.ssrc = rtp_head_.ssrc;
-                packets.push_back(packet);
+                packets_.push_back(packet);
             }
 
-            std::vector<RtpPacket> & rtp_packets(void)
+            RtpSplitContent const & rtp_packets(void) const
             {
-                return packets;
+                return packets_;
             }
 
             RtpInfo & rep_info(void)
@@ -75,9 +79,10 @@ namespace ppbox
                 return rtp_info_;
             }
 
-        private:
+        protected:
+            RtpHead rtp_head_;
             RtpInfo rtp_info_;
-            std::vector<RtpPacket> packets;
+            RtpSplitContent packets_;
         };
     }
 }

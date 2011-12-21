@@ -28,6 +28,7 @@ namespace ppbox
                 : got_sps_(false)
                 , got_pps_(false)
                 , is_ready(false)
+                , pic_order_cnt_type(0)
                 , pic_order_cnt_lsb(0)
             {
             }

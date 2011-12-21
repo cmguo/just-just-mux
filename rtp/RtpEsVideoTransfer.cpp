@@ -44,17 +44,21 @@ namespace ppbox
         {
         }
 
-        void RtpEsVideoTransfer::transfer(ppbox::demux::Sample & sample)
+        void RtpEsVideoTransfer::transfer(
+            ppbox::demux::Sample & sample)
         {
-            RtpTransfer::clear();
             MediaInfoEx const * video_info = (MediaInfoEx const *)sample.media_info;
             NaluList & nalus = *(NaluList *)sample.context;
 
             boost::uint32_t cts_time = boost::uint32_t(
-                ((boost::uint64_t)sample.dts + sample.cts_delta) * 90000 / video_info->time_scale);
+                ((boost::uint64_t)sample.dts /*+ sample.cts_delta*/) * 90000 / video_info->time_scale);
+            //std::cout << "video dts = " << sample.dts << std::endl;
+            //std::cout << "video cts_delta = " << sample.cts_delta << std::endl;
+            //std::cout << "video cts = " << sample.dts + sample.cts_delta << std::endl;
+
+            RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / video_info->time_scale);
 
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
-
             // add two sps pps rtp packet
             if (sample.idesc != sample_description_index_) {
                 sample_description_index_ = sample.idesc;
@@ -75,32 +79,32 @@ namespace ppbox
 
             for (size_t i = 0; i < nalus.size(); ++i) {
                 size_t l = nalus[i].size;
-                if (l > (mtu_size_+2)) {
+                if (l > (mtu_size_)) {
                     boost::uint8_t b = nalus[i].begin.dereference_byte();
                     prefix_[0][0] = (b & 0xE0) | 28;
                     prefix_[0][1] = (b | 0x80) & 0x9F;
                     nalus[i].begin.increment_byte(limit);
                     --l;
                     RtpPacket p(cts_time, false);
-                    p.size = mtu_size_+2;
                     MyBuffersPosition pos = nalus[i].begin;
-                    nalus[i].begin.increment_bytes(limit, mtu_size_);
+                    nalus[i].begin.increment_bytes(limit, mtu_size_ - 2);
                     p.push_buffers(boost::asio::buffer(prefix_[0], 2));
                     p.push_buffers(MyBufferIterator(limit, pos, nalus[i].begin), MyBufferIterator());
+                    p.size = mtu_size_;
                     push_packet(p);
-                    l -= mtu_size_;
+                    l -= mtu_size_ - 2;
                     prefix_[1][0] = prefix_[0][0];
                     prefix_[1][1] = prefix_[0][1] & 0x7F;
-                    while (l > mtu_size_) {
+                    while (l > mtu_size_ - 2) {
                         RtpPacket p(cts_time, false);
                         //p.size = 1438;
-                        p.size = mtu_size_;
                         MyBuffersPosition pos1 = nalus[i].begin;
-                        nalus[i].begin.increment_bytes(limit, mtu_size_);
+                        nalus[i].begin.increment_bytes(limit, mtu_size_ - 2);
                         p.push_buffers(boost::asio::buffer(prefix_[1], 2));
                         p.push_buffers(MyBufferIterator(limit, pos1, nalus[i].begin), MyBufferIterator());
+                        p.size = mtu_size_;
                         push_packet(p);
-                        l -= mtu_size_;
+                        l -= mtu_size_ - 2;
                     };
                     prefix_[2][0] = prefix_[1][0];
                     prefix_[2][1] = prefix_[1][1] | 0x40;

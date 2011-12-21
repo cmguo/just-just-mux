@@ -8,6 +8,7 @@
 #include "ppbox/mux/rtp/RtpEsAudioTransfer.h"
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
+#include "ppbox/mux/transfer/ParseH264Transfer.h"
 
 using namespace ppbox::demux;
 
@@ -24,18 +25,13 @@ namespace ppbox
                 if (mediainfo.format_type == MediaInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
                     mediainfo.transfers.push_back(transfer);
-                    //transfer = new StreamJoinTransfer();
-                    //transfers.push_back(transfer);
+                    //transfer = new ParseH264Transfer();
+                    //mediainfo.transfers.push_back(transfer);
                 } else if (mediainfo.format_type == MediaInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
                     mediainfo.transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
                     mediainfo.transfers.push_back(transfer);
-
-                    //transfer = new PackageJoinTransfer();
-                    //mediainfo.transfers.push_back(transfer);
-                    //transfer = new PackageSplitTransfer();
-                    //mediainfo.transfers.push_back(transfer);
                 }
                 RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this, video_map_id_, 1436);
                 mediainfo.transfers.push_back(rtp_transfer);

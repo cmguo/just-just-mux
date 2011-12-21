@@ -3,6 +3,8 @@
 
 #include <framework/system/LogicError.h>
 
+#include <boost/date_time/posix_time/conversion.hpp>
+
 namespace ppbox
 {
     namespace demux
@@ -21,15 +23,20 @@ namespace ppbox
                 seq_ = 0;
             }
 
-            virtual ~Sink(){}
-
-            virtual boost::system::error_code write( ppbox::demux::Sample&)
+            virtual ~Sink()
             {
-				return boost::system::error_code();
+            }
+
+            virtual boost::system::error_code write(
+                boost::posix_time::ptime const & time_send, 
+                ppbox::demux::Sample & sample)
+            {
+                return boost::system::error_code();
                 //return framework::system::logic_error::not_supported;
             }
 
-            virtual boost::system::error_code on_finish( boost::system::error_code const &)
+            virtual boost::system::error_code on_finish(
+                boost::system::error_code const &)
             {
                 return boost::system::error_code();
             }

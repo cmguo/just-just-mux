@@ -71,16 +71,18 @@ namespace ppbox
         {
         }
 
-
         void RtpEsAudioTransfer::transfer(ppbox::demux::Sample & sample)
         {
-            RtpTransfer::clear();
-            boost::uint32_t buffer_length = util::buffers::buffer_size(sample.data);
-            au_header_section_[2] =  (boost::uint8_t)(buffer_length >> 5);
-            au_header_section_[3] = (boost::uint8_t)((buffer_length << 3) | (index_++ & 0x07));
+            au_header_section_[2] =  (boost::uint8_t)(sample.size >> 5);
+            au_header_section_[3] = (boost::uint8_t)((sample.size << 3) /*| (index_++ & 0x07)*/);
 
+            //std::cout << "audio dts = " << sample.dts << std::endl;
+            //std::cout << "audio cts_delta = " << sample.cts_delta << std::endl;
+            //std::cout << "audio cts = " << sample.dts + sample.cts_delta << std::endl;
+
+            RtpTransfer::clear(sample.ustime);
             RtpPacket packet(
-                sample.dts + sample.cts_delta, 
+                (sample.dts + sample.cts_delta) * time_scale_, 
                 true);
             packet.size = sample.size + 4;
             packet.push_buffers(boost::asio::buffer(au_header_section_, 4));
@@ -92,27 +94,34 @@ namespace ppbox
         void RtpEsAudioTransfer::get_rtp_info(MediaInfoEx & info)
         {
             using namespace framework::string;
-            std::string map_id_str = format(rtp_head_.mpt);
 
             //InterBitsReader reader(&info.format_data.at(0), info.format_data.size());
             //boost::uint8_t object_type = (boost::uint8_t)reader.read_bits(5);
 
+            boost::uint32_t rtp_time_scale = 48000;
+            if ((rtp_time_scale % info.time_scale) == 0) {
+                time_scale_ = rtp_time_scale / info.time_scale;
+            } else {
+                rtp_time_scale = info.time_scale;
+                time_scale_ = 1;
+            }
+
+            std::string map_id_str = format(rtp_head_.mpt);
             rep_info().sdp = "m=audio 0 RTP/AVP " + map_id_str + "\r\n";
             rep_info().sdp += "a=rtpmap:" + map_id_str + " mpeg4-generic/" 
-                + format(info.time_scale) 
+                + format(rtp_time_scale)
                 + "/" + format(info.audio_format.channel_count) + "\r\n";
             rep_info().sdp += "a=fmtp:" + map_id_str 
-                + " profile-level-id=41"
-                + "; config=" + Base16::encode(std::string((char const *)&info.format_data.at(0), info.format_data.size()))
-                + "; streamType=5"
-                + "; objectType=64"
-                + "; mode=AAC-hbr"
-                + "; sizeLength=13"
-                + "; indexLength=3"
-                + "; indexDeltaLength=3"
+                + " streamType=5"
+                + ";profile-level-id=41"
+                //+ ";objecttype=64"
+                + ";mode=AAC-hbr"
+                + ";sizeLength=13"
+                + ";indexLength=3"
+                + ";indexDeltaLength=3"
+                + ";config=" + Base16::encode(std::string((char const *)&info.format_data.at(0), info.format_data.size()))
                 + "\r\n";
             rep_info().sdp += "a=control:index=" + format(info.index) + "\r\n";
-            time_scale_ = info.time_scale;
 
             rep_info().stream_index = info.index;
             rep_info().timestamp = rtp_head_.timestamp;
@@ -125,8 +134,8 @@ namespace ppbox
 
         void RtpEsAudioTransfer::on_seek(boost::uint32_t time, boost::uint32_t play_time)
         {
-            boost::uint32_t time_offset = boost::uint64_t(time) * time_scale_ / 1000;
-            boost::uint32_t play_time_offset = boost::uint64_t(play_time+10000) * time_scale_ / 1000;
+            boost::uint32_t time_offset = boost::uint64_t(time) * time_scale_;
+            boost::uint32_t play_time_offset = boost::uint64_t(play_time + 10000) * time_scale_;
             rtp_head_.timestamp += play_time_offset;
             rep_info().timestamp = rtp_head_.timestamp + time_offset;
             rep_info().seek_time = time;
