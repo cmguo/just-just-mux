@@ -19,11 +19,13 @@ namespace ppbox
             : RtpTransfer(type)
             , mtu_size_(1436)
             , sample_description_index_(boost::uint32_t(-1))
+            ,use_dts_(0)
         {
             muxer.Config().register_module("RtpESVideo")
                 << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
                 << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
-                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc);
+                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc)
+                << CONFIG_PARAM_NAME_RDWR("usedts", use_dts_);
         }
 
         RtpEsVideoTransfer::RtpEsVideoTransfer(
@@ -33,11 +35,13 @@ namespace ppbox
             : RtpTransfer(type)
             , mtu_size_(mtu_size)
             , sample_description_index_(boost::uint32_t(-1))
+            ,use_dts_(0)
         {
             muxer.Config().register_module("RtpESVideo")
                 << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
                 << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
-                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc);
+                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc)
+                << CONFIG_PARAM_NAME_RDWR("usedts", use_dts_);
         }
 
         RtpEsVideoTransfer::~RtpEsVideoTransfer()
@@ -50,8 +54,15 @@ namespace ppbox
             MediaInfoEx const * video_info = (MediaInfoEx const *)sample.media_info;
             NaluList & nalus = *(NaluList *)sample.context;
 
-            boost::uint32_t cts_time = boost::uint32_t(
-                ((boost::uint64_t)sample.dts /*+ sample.cts_delta*/) * 90000 / video_info->time_scale);
+            boost::uint32_t cts_time = 0;
+            if (use_dts_) {
+                cts_time = boost::uint32_t(
+                    ((boost::uint64_t)sample.dts) * 90000 / video_info->time_scale);
+            } else {
+                cts_time = cts_time = boost::uint32_t(
+                    ((boost::uint64_t)sample.dts + sample.cts_delta) * 90000 / video_info->time_scale);
+            }
+            
             //std::cout << "video dts = " << sample.dts << std::endl;
             //std::cout << "video cts_delta = " << sample.cts_delta << std::endl;
             //std::cout << "video cts = " << sample.dts + sample.cts_delta << std::endl;

@@ -41,6 +41,8 @@ namespace ppbox
             std::vector<boost::uint8_t> sps_;
             std::vector<boost::uint8_t> pps_;
 
+            boost::uint32_t use_dts_;
+
         };
     }
 }
