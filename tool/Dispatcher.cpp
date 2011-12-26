@@ -6,7 +6,7 @@
 #include "ppbox/mux/MuxError.h"
 
 #include <ppbox/demux/DemuxerModule.h>
-#include <ppbox/demux/pptv/PptvDemuxer.h>
+#include <ppbox/demux/base/BufferDemuxer.h>
 #include <ppbox/demux/base/DemuxerError.h>
 #include <ppbox/demux/base/SourceError.h>
 
@@ -816,7 +816,7 @@ namespace ppbox
         void Dispatcher::open_call_back_mux(
             const boost::uint32_t session_id,
             boost::system::error_code const & ec,
-            ppbox::demux::PptvDemuxer * muxer)
+            ppbox::demux::BufferDemuxer * muxer)
         {
             msgq_->push(new MessageQType(PC_Callback,ec,muxer));
             return;

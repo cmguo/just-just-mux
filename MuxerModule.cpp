@@ -7,9 +7,8 @@
 #include "ppbox/mux/ts/M3U8Mux.h"
 #include "ppbox/mux/rtp/RtpEsMux.h"
 #include "ppbox/mux/rtp/RtpTsMux.h"
-using namespace ppbox::demux;
 
-#include <ppbox/demux/pptv/PptvDemuxer.h>
+using namespace ppbox::demux;
 
 #include <boost/bind.hpp>
 using namespace boost::system;
@@ -74,7 +73,7 @@ namespace ppbox
         void MuxerModule::open_callback(
             MuxerInfo * info,
             error_code const & ec,
-            ppbox::demux::PptvDemuxer * demuxer)
+            ppbox::demux::BufferDemuxer * demuxer)
         {
             error_code lec = ec;
             if (!lec) {

@@ -8,6 +8,7 @@
 
 #include <ppbox/common/CommonModuleBase.h>
 #include <ppbox/demux/DemuxerModule.h>
+#include <ppbox/demux/base/BufferDemuxer.h>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/function.hpp>
@@ -18,7 +19,6 @@ namespace ppbox
 {
     namespace mux
     {
-
         struct MuxerInfo;
 
         class MuxerModule
@@ -91,7 +91,7 @@ namespace ppbox
             void open_callback(
                 MuxerInfo * info,
                 boost::system::error_code const & ec,
-                ppbox::demux::PptvDemuxer * demuxer);
+                ppbox::demux::BufferDemuxer * demuxer);
 
         private:
             ppbox::demux::DemuxerModule & demux_mod_;

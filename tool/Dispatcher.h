@@ -17,7 +17,6 @@ namespace ppbox
     {
         class BufferDemuxer;
         class DemuxerModule;
-        class PptvDemuxer;
     }
 
     namespace mux
@@ -145,7 +144,7 @@ namespace ppbox
             void open_call_back_mux(
                 const boost::uint32_t,
                 boost::system::error_code const &,
-                ppbox::demux::PptvDemuxer *);
+                ppbox::demux::BufferDemuxer *);
 
             void clear_send(boost::system::error_code const & ec);
 
