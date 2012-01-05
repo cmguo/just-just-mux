@@ -1,24 +1,24 @@
 // MuxerModule.h
 
-#ifndef   _PPBOX_MUXER_MODULE_H_
-#define   _PPBOX_MUXER_MODULE_H_
+#ifndef _PPBOX_MUXER_MODULE_H_
+#define _PPBOX_MUXER_MODULE_H_
 
 #include "ppbox/mux/Muxer.h"
 #include "ppbox/mux/MuxerType.h"
 
-#include <ppbox/common/CommonModuleBase.h>
-#include <ppbox/demux/DemuxerModule.h>
-#include <ppbox/demux/base/BufferDemuxer.h>
-
 #include <boost/thread/mutex.hpp>
 #include <boost/function.hpp>
-#include <map>
-#include <vector>
 
 namespace ppbox
 {
+    namespace demux
+    {
+        class DemuxerModule;
+    }
+
     namespace mux
     {
+
         struct MuxerInfo;
 
         class MuxerModule
@@ -32,30 +32,13 @@ namespace ppbox
 
         public:
             MuxerModule(
-                util::daemon::Daemon & daemon)
-                : ppbox::common::CommonModuleBase<MuxerModule>(daemon, "muxer")
-                , demux_mod_(util::daemon::use_module<ppbox::demux::DemuxerModule>(daemon))
-            {
-                type_map_["ts"] = MuxerType::TS;
-                type_map_["flv"] = MuxerType::FLV;
-                type_map_["rtp-es"] = MuxerType::RTPES;
-                type_map_["rtp-ts"] = MuxerType::RTPTS;
-                type_map_["m3u8"] = MuxerType::m3u8;
-            }
+                util::daemon::Daemon & daemon);
 
-            ~MuxerModule()
-            {
-            }
+            ~MuxerModule();
 
-            virtual boost::system::error_code startup()
-            {
-                boost::system::error_code ec;
-                return ec;
-            }
+            virtual boost::system::error_code startup();
 
-            virtual void shutdown()
-            {
-            }
+            virtual void shutdown();
 
         public:
             void async_open(

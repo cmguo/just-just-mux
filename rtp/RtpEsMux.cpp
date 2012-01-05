@@ -6,6 +6,7 @@
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 #include "ppbox/mux/rtp/RtpEsAudioTransfer.h"
+#include "ppbox/mux/rtp/RtpAudioMpegTransfer.h"
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/ParseH264Transfer.h"
@@ -38,7 +39,12 @@ namespace ppbox
                 rtp_transfer->get_rtp_info(mediainfo);
                 transfers_.push_back(rtp_transfer);
             } else if (ppbox::demux::MEDIA_TYPE_AUDI == mediainfo.type){
-                RtpTransfer * rtp_transfer = new RtpEsAudioTransfer(*this, audio_map_id_);
+                RtpTransfer * rtp_transfer = NULL;
+                if (mediainfo.sub_type == demux::AUDIO_TYPE_MP1A) {
+                    rtp_transfer = new RtpAudioMpegTransfer(*this, audio_map_id_);
+                } else {
+                    rtp_transfer = new RtpEsAudioTransfer(*this, audio_map_id_);
+                }
                 mediainfo.transfers.push_back(rtp_transfer);
                 rtp_transfer->get_rtp_info(mediainfo);
                 transfers_.push_back(rtp_transfer);

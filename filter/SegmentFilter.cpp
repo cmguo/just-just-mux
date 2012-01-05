@@ -17,6 +17,7 @@ namespace ppbox
             if (is_save_sample_) {
                 sample = sample_;
                 is_save_sample_ = false;
+                ec.clear();
             } else {
                 Filter::get_sample(sample, ec);
             }

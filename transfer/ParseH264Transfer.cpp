@@ -30,6 +30,11 @@ namespace ppbox
                     // skip
                 }
             } // End for
+            if (nalu_parser_.is_sync_) {
+                sample.flags |= ppbox::demux::Sample::sync;
+            } else {
+                sample.flags = 0;
+            }
         }
 
     }

@@ -4,7 +4,7 @@
 #define   _PPBOX_MUX_TRANSFER_MERGE_TRANSFER_H_
 
 #include "ppbox/mux/transfer/Transfer.h"
-
+#include <ppbox/mux/MuxerBase.h>
 
 namespace ppbox
 {
@@ -20,7 +20,14 @@ namespace ppbox
             {
             }
 
-            void transfer(ppbox::demux::Sample & sample)
+            virtual void transfer(
+                MediaInfoEx & mediainfoex)
+            {
+                transfer_->transfer(mediainfoex);
+            };
+
+            void transfer(
+                ppbox::demux::Sample & sample)
             {
                 transfer_->transfer(sample);
             }

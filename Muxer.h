@@ -46,12 +46,12 @@ namespace ppbox
             virtual void add_stream(
                 MediaInfoEx & mediainfo) = 0;
 
-            virtual void file_header(ppbox::demux::Sample & tag) = 0;
+            virtual void file_header(
+                ppbox::demux::Sample & tag) = 0;
 
             virtual void stream_header(
                 boost::uint32_t index, 
-                ppbox::demux::Sample & tag
-                ) = 0;
+                ppbox::demux::Sample & tag) = 0;
 
         public:
             virtual boost::system::error_code open(
@@ -108,14 +108,19 @@ namespace ppbox
                 ppbox::demux::Sample & sample,
                 boost::system::error_code & ec);
 
+            boost::system::error_code open_impl(
+                boost::system::error_code & ec);
+
             void release_mediainfo(void);
+
+        protected:
+            MediaFileInfo media_info_;
 
         private:
             demux::BufferDemuxer * demuxer_;
             framework::container::List<Filter> filters_;
             bool paused_;
             boost::uint32_t play_time_; // ms
-            MediaFileInfo media_info_;
             // For reset 
             boost::uint32_t read_step_;
             DemuxFilter demux_filter_;

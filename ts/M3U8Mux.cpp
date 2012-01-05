@@ -42,13 +42,13 @@ namespace ppbox
                     Muxer::seek(seek_time, ec);
                     if (!ec || ec == boost::asio::error::would_block) {
                         segment_filter_.segment_end_time() 
-                            = segment_index * m3u8_protocol_.segment_duration() * 1000000;
+                            = (boost::uint64_t)segment_index * m3u8_protocol_.segment_duration() * 1000000;
                     } else {
                         return ec;
                     }
                 } else {
                     segment_filter_.segment_end_time() 
-                        = segment_index * m3u8_protocol_.segment_duration() * 1000000;
+                        = (boost::uint64_t)segment_index * m3u8_protocol_.segment_duration() * 1000000;
                 }
                 begin_index_ = segment_index;
             }

@@ -28,6 +28,7 @@ namespace ppbox
                 : got_sps_(false)
                 , got_pps_(false)
                 , is_ready(false)
+                , is_sync_(false)
                 , pic_order_cnt_type(0)
                 , pic_order_cnt_lsb(0)
             {
@@ -48,6 +49,7 @@ namespace ppbox
             bool got_pps_;
             bool is_ready;
             Nal_header cur_nal_header_;
+            bool is_sync_;
 
             // SPS struct
             char profile_idc;

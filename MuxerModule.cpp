@@ -3,11 +3,13 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerModule.h"
 #include "ppbox/mux/flv/FlvMux.h"
+#include "ppbox/mux/asf/AsfMux.h"
 #include "ppbox/mux/ts/TsMux.h"
 #include "ppbox/mux/ts/M3U8Mux.h"
 #include "ppbox/mux/rtp/RtpEsMux.h"
 #include "ppbox/mux/rtp/RtpTsMux.h"
 
+#include <ppbox/demux/DemuxerModule.h>
 using namespace ppbox::demux;
 
 #include <boost/bind.hpp>
@@ -19,6 +21,7 @@ namespace ppbox
 {
     namespace mux
     {
+
         struct MuxerInfo
         {
             MuxerInfo(Muxer * imuxer)
@@ -53,6 +56,33 @@ namespace ppbox
                 size_t id_;
             };
         };
+
+        MuxerModule::MuxerModule(
+            util::daemon::Daemon & daemon)
+            : ppbox::common::CommonModuleBase<MuxerModule>(daemon, "muxer")
+            , demux_mod_(util::daemon::use_module<ppbox::demux::DemuxerModule>(daemon))
+        {
+            type_map_["asf"] = MuxerType::ASF;
+            type_map_["ts"] = MuxerType::TS;
+            type_map_["flv"] = MuxerType::FLV;
+            type_map_["rtp-es"] = MuxerType::RTPES;
+            type_map_["rtp-ts"] = MuxerType::RTPTS;
+            type_map_["m3u8"] = MuxerType::m3u8;
+        }
+
+        MuxerModule::~MuxerModule()
+        {
+        }
+
+        error_code MuxerModule::startup()
+        {
+            error_code ec;
+            return ec;
+        }
+
+        void MuxerModule::shutdown()
+        {
+        }
 
         void MuxerModule::async_open(
             std::string playlink,
@@ -152,6 +182,9 @@ namespace ppbox
             }
             Muxer * muxer = NULL;
             switch(muxer_type) {
+                case MuxerType::ASF:
+                    muxer = new AsfMux;
+                    break;
                 case MuxerType::FLV:
                     muxer = new FlvMux;
                     break;

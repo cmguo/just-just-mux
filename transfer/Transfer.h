@@ -23,9 +23,13 @@ namespace ppbox
             {
             }
 
-            virtual void transfer(MediaInfoEx & mediainfo) {};
+            virtual void transfer(
+                MediaInfoEx & mediainfo)
+            {
+            };
 
-            virtual void transfer(ppbox::demux::Sample & sample) = 0;
+            virtual void transfer(
+                ppbox::demux::Sample & sample) = 0;
 
         };
     }

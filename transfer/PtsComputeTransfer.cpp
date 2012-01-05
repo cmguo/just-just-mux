@@ -45,6 +45,13 @@ namespace ppbox
             } else {
                 sample.cts_delta = 0;
             }
+
+            // iphoneÂ¼ÖÆÊ¹ÓÃ
+            if (nalu_parser_.is_sync_) {
+                sample.flags |= ppbox::demux::Sample::sync;
+            } else {
+                sample.flags = 0;
+            }
         }
 
     }

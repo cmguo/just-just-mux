@@ -241,6 +241,7 @@ namespace ppbox
         {
             //assert(got_pps_ && got_sps_);
             // skip slice type
+            is_sync_ = false;
             boost::uint8_t nalu_type = (boost::uint8_t)bs.read_bits_flc(8);
             cur_nal_header_ = *(Nal_header *)&nalu_type;
 
@@ -266,6 +267,9 @@ namespace ppbox
                 //} else {
                 //    std::cout << "B frame [" << pic_order_cnt_lsb << "]" << std::endl;
                 //}
+                if (slice_type == 7) {
+                    is_sync_ = true;
+                }
                 if( pic_order_present_flag &&  !field_pic_flag )
                     parse_se_v(delta_pic_order_cnt_bottom);
             }

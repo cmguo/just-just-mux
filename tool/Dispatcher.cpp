@@ -973,7 +973,7 @@ namespace ppbox
                         break;
                     }
 
-                    if (!start_time_valid) {
+                    if (!start_time_valid && tag.itrack != boost::uint32_t(-1)) {
                         start_time = 
                             boost::posix_time::microsec_clock::universal_time()
                             - boost::posix_time::microseconds(tag.ustime);

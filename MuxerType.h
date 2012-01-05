@@ -12,6 +12,7 @@ namespace ppbox
             enum Enum
             {
                 NONE,
+                ASF,
                 FLV,
                 TS,
                 RTPES,

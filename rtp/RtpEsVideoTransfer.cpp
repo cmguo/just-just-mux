@@ -57,17 +57,17 @@ namespace ppbox
             boost::uint32_t cts_time = 0;
             if (use_dts_) {
                 cts_time = boost::uint32_t(
-                    ((boost::uint64_t)sample.dts) * 90000 / video_info->time_scale);
+                    sample.dts * 90000 / video_info->time_scale);
             } else {
-                cts_time = cts_time = boost::uint32_t(
-                    ((boost::uint64_t)sample.dts + sample.cts_delta) * 90000 / video_info->time_scale);
+                cts_time = boost::uint32_t(
+                    (sample.dts + sample.cts_delta) * 90000 / video_info->time_scale);
             }
             
             //std::cout << "video dts = " << sample.dts << std::endl;
             //std::cout << "video cts_delta = " << sample.cts_delta << std::endl;
             //std::cout << "video cts = " << sample.dts + sample.cts_delta << std::endl;
 
-            RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / video_info->time_scale);
+            RtpTransfer::clear(sample.ustime + (boost::uint64_t)sample.cts_delta * 1000000 / video_info->time_scale);
 
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             // add two sps pps rtp packet
