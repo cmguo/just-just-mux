@@ -4,6 +4,7 @@
 
 #include  "ppbox/mux/Muxer.h"
 
+#include  <boost/asio/streambuf.hpp>
 #include  <ppbox/avformat/asf/AsfGuid.h>
 #include  <ppbox/avformat/asf/AsfObjectType.h>
 
