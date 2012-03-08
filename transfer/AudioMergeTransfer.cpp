@@ -10,6 +10,16 @@ namespace ppbox
     namespace mux
     {
 
+        AudioMergeTransfer::AudioMergeTransfer()
+            : last_audio_dts_(-1)
+            , audio_data_size_(0)
+        {
+        }
+
+        AudioMergeTransfer::~AudioMergeTransfer()
+        {
+        }
+
         void AudioMergeTransfer::transfer(ppbox::demux::Sample & sample)
         {
             size_t audio_frame_size = sample.size;

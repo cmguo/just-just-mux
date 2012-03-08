@@ -22,30 +22,27 @@ namespace ppbox
         }
 
         void RtpAudioMpegTransfer::transfer(
-            MediaInfoEx & info)
+            MediaInfoEx & media)
         {
             using namespace framework::string;
 
             std::string map_id_str = format(rtp_head_.mpt);
             rtp_info_.sdp = "m=audio 0 RTP/AVP " + map_id_str + "\r\n";
             rtp_info_.sdp += "a=rtpmap:" + map_id_str + " mpa/90000" 
-                + "/" + format(info.audio_format.channel_count)
+                + "/" + format(media.audio_format.channel_count)
                 + "\r\n";
-            rtp_info_.sdp += "a=control:index=" + format(info.index) + "\r\n";
+            rtp_info_.sdp += "a=control:index=" + format(media.index) + "\r\n";
 
-            rtp_info_.stream_index = info.index;
+            rtp_info_.stream_index = media.index;
 
-            time_scale_in_ms_ = 90;
+            scale_.reset(media.time_scale, 90000);
         }
 
         void RtpAudioMpegTransfer::transfer(
             ppbox::demux::Sample & sample)
         {
-            MediaInfoEx const * audio_info = (MediaInfoEx const *)sample.media_info;
             RtpTransfer::clear(sample.ustime);
-            RtpPacket packet(
-                (sample.dts + sample.cts_delta) * 90000 / audio_info->time_scale, 
-                true);
+            RtpPacket packet(scale_.transfer(sample.dts), true);
             packet.size = sample.size + 4;
             packet.push_buffers(boost::asio::buffer(header_, 4));
             packet.push_buffers(sample.data);

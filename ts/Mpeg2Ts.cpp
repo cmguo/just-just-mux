@@ -38,7 +38,7 @@ namespace ppbox
             } else {
                 transport_packet_.payload_uint_start_indicator = 0;
             }
-            transport_packet_.transport_priority = 0;
+            transport_packet_.transport_priority = (pid_ == 0) ? 1 : 0;
             transport_packet_.Pid = pid_;
             boost::uint32_t adaptation_field_size = 0;
             if (with_pcr) adaptation_field_size += 2+AP4_MPEG2TS_PCR_ADAPTATION_SIZE;
@@ -79,8 +79,8 @@ namespace ppbox
                     if (with_pcr) {
                         adapation_field_.PCR_flag = 1;
                         pcr_size = AP4_MPEG2TS_PCR_ADAPTATION_SIZE;
-                        boost::uint64_t pcr_base = pcr/300;
-                        boost::uint32_t pcr_ext  = (boost::uint32_t)(pcr%300);
+                        boost::uint64_t pcr_base = pcr;
+                        boost::uint32_t pcr_ext  = 0;
                         adapation_field_.program_clock_reference_base = pcr_base >> 1;
                         adapation_field_.program_clock_reference_base_last1bit = pcr_base & 0x01;
                         adapation_field_.pcr_reserved = 0x3F;

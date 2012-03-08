@@ -30,7 +30,7 @@ namespace ppbox
             rtp_info_.sdp += "a=rtpmap:33 MP2T/90000\r\n";
             rtp_info_.sdp += "a=control:index=-1\r\n";
 
-            time_scale_in_ms_ = 90;
+            scale_.reset(90000, 90000);
         }
 
         void RtpTsTransfer::transfer(

@@ -13,7 +13,6 @@ namespace ppbox
             Muxer & muxer, 
             std::string const & name, 
             boost::uint8_t type)
-            : time_scale_in_ms_(1)
         {
             static size_t g_ssrc = 0;
             if (g_ssrc == 0) {
@@ -48,16 +47,22 @@ namespace ppbox
         }
 
         void RtpTransfer::on_seek(
-            boost::uint32_t time, 
-            boost::uint32_t play_time)
+            boost::uint32_t time)
         {
-            boost::uint32_t time_offset = time * time_scale_in_ms_;
-            boost::uint32_t play_time_offset = (play_time) * time_scale_in_ms_;
-            rtp_head_.timestamp += play_time_offset;
-            rtp_info_.timestamp = rtp_head_.timestamp + time_offset;
+            if (packets_.empty())
+                return;
+            boost::uint32_t last_timestamp = 
+                framework::system::BytesOrder::host_to_big_endian(packets_[0].timestamp);
+            std::cout << "last_timestamp = " << last_timestamp << std::endl;
+            boost::uint64_t time2 = framework::system::ScaleTransform::static_transfer(1000, scale_.scale_in(), time);
+            std::cout << "time2 = " << time2 << std::endl;
+            rtp_info_.timestamp = last_timestamp + scale_.scale_out() * 8;
+            std::cout << "rtp_info_.timestamp = " << rtp_info_.timestamp << std::endl;
+            rtp_head_.timestamp = rtp_info_.timestamp - scale_.transfer(time2);
+            std::cout << "rtp_head_.timestamp = " << rtp_head_.timestamp << std::endl;
             rtp_info_.sequence = rtp_head_.sequence;
             rtp_info_.seek_time = time;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

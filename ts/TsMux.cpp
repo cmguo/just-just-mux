@@ -81,8 +81,7 @@ namespace ppbox
         }
 
         TsMux::TsMux()
-            : is_merge_audio_(false)
-            , pat_(new Stream(0))
+            : pat_(new Stream(0))
             , pmt_(new Stream(AP4_MPEG2_TS_DEFAULT_PID_PMT))
             , has_audio_(false)
             , has_video_(false)
@@ -93,8 +92,6 @@ namespace ppbox
             , audio_stream_type_(AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_7)
             , video_stream_type_(AP4_MPEG2_STREAM_TYPE_AVC)
         {
-            config().register_module("TsMux")
-                << CONFIG_PARAM_NAME_RDWR("merge_audio", is_merge_audio_);
         }
 
         TsMux::~TsMux()
@@ -126,11 +123,7 @@ namespace ppbox
                     transfer = new PtsComputeTransfer();
                     mediainfo.transfers.push_back(transfer);
                 }
-                transfer = new TsTransfer(
-                    video_pid_,
-                    video_stream_id_,
-                    video_stream_type_,
-                    mediainfo.time_scale);
+                transfer = new TsTransfer(video_pid_, video_stream_id_);
                 mediainfo.transfers.push_back(transfer);
                 has_video_ = true;
             } else if (mediainfo.type == ppbox::demux::MEDIA_TYPE_AUDI) {
@@ -141,11 +134,7 @@ namespace ppbox
                 } else if (mediainfo.sub_type == ppbox::demux::AUDIO_TYPE_MP1A) {
                     audio_stream_type_ = AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_3;
                 }
-                if (is_merge_audio_) {
-                    transfer = new AudioMergeTransfer();
-                    mediainfo.transfers.push_back(transfer);
-                }
-                transfer = new TsTransfer(audio_pid_, audio_stream_id_, audio_stream_type_, mediainfo.time_scale);
+                transfer = new TsTransfer(audio_pid_, audio_stream_id_);
                 mediainfo.transfers.push_back(transfer);
             }
         }
@@ -185,7 +174,7 @@ namespace ppbox
             table_header.undef = 0;
             table_header.reserved = 3;
             table_header.section_length = 13;
-            table_header.transport_stream_id = 1;
+            table_header.transport_stream_id = 0;
             table_header.reserved1 = 3;
             table_header.version_number = 0;
             table_header.current_next_indicator = 1;
@@ -257,6 +246,15 @@ namespace ppbox
             ts_archive << table_header;
             ts_archive << pmt_section;
 
+            if (has_video_) {
+                StreamInfo stream_info;
+                stream_info.stream_type = video_stream_type_;
+                stream_info.reserved = 7;
+                stream_info.elementary_PID = video_pid_;
+                stream_info.reserved1 = 0xF;
+                stream_info.ES_info_length = 0;
+                ts_archive << stream_info;
+            }
             if (has_audio_) {
                 StreamInfo stream_info;
                 stream_info.stream_type = audio_stream_type_;
@@ -267,15 +265,6 @@ namespace ppbox
                 ts_archive << stream_info;
             }
 
-            if (has_video_) {
-                StreamInfo stream_info;
-                stream_info.stream_type = video_stream_type_;
-                stream_info.reserved = 7;
-                stream_info.elementary_PID = video_pid_;
-                stream_info.reserved1 = 0xF;
-                stream_info.ES_info_length = 0;
-                ts_archive << stream_info;
-            }
             boost::uint32_t crc = ComputeCRC(ptr+1+head_size, section_length-1);
             ts_archive & crc;
             std::vector<boost::uint8_t> suffer;

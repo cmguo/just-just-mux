@@ -10,6 +10,9 @@ using namespace ppbox::avformat;
 
 #include <util/buffers/BufferCopy.h>
 
+#include <framework/string/Base16.h>
+#include <framework/string/Base64.h>
+
 namespace ppbox
 {
     namespace mux
@@ -31,12 +34,12 @@ namespace ppbox
         }
 
         void RtpEsVideoTransfer::transfer(
-            MediaInfoEx & info)
+            MediaInfoEx & media)
         {
             using namespace framework::string;
             std::string map_id_str = format(rtp_head_.mpt);
 
-            boost::uint8_t const * p = &info.format_data.at(0) + 5;
+            boost::uint8_t const * p = &media.format_data.at(0) + 5;
             boost::uint8_t const * sps_buf = p;
             boost::uint8_t const * pps_buf = p;
             boost::uint16_t sps_len = 0;
@@ -71,46 +74,45 @@ namespace ppbox
 
             rtp_info_.sdp = "m=video 0 RTP/AVP " + map_id_str + "\r\n";
             rtp_info_.sdp += "a=rtpmap:" + map_id_str + " H264/90000\r\n";
-            rtp_info_.sdp += "a=framesize:" + map_id_str + " " + format(info.video_format.width)
-                + "-" + format(info.video_format.height) + "\r\n";
-            rtp_info_.sdp += "a=cliprect:0,0,"+format(info.video_format.height)+","+format(info.video_format.width)+ "\r\n";
+            rtp_info_.sdp += "a=framesize:" + map_id_str + " " + format(media.video_format.width)
+                + "-" + format(media.video_format.height) + "\r\n";
+            rtp_info_.sdp += "a=cliprect:0,0,"+format(media.video_format.height)+","+format(media.video_format.width)+ "\r\n";
             rtp_info_.sdp += "a=fmtp:" + map_id_str 
                 + " packetization-mode=1" 
                 + ";profile-level-id=" + profile_level_id_str
                 + ";sprop-parameter-sets=" + sps + "," + pps + "\r\n";
-            rtp_info_.sdp += "a=control:index=" + format(info.index) + "\r\n";
+            rtp_info_.sdp += "a=control:index=" + format(media.index) + "\r\n";
 
-            rtp_info_.stream_index = info.index;
+            rtp_info_.stream_index = media.index;
 
-            time_scale_in_ms_ = 90;
+            scale_.reset(media.time_scale, 90000);
         }
 
         void RtpEsVideoTransfer::transfer(
             ppbox::demux::Sample & sample)
         {
-            MediaInfoEx const * video_info = (MediaInfoEx const *)sample.media_info;
+            MediaInfoEx const & media = *(MediaInfoEx const *)sample.media_info;
             NaluList & nalus = *(NaluList *)sample.context;
 
             boost::uint32_t cts_time = 0;
             if (use_dts_) {
-                cts_time = boost::uint32_t(
-                    sample.dts * 90000 / video_info->time_scale);
+                cts_time = scale_.transfer(sample.dts);
+                assert(cts_time == sample.dts * 90000 / media.time_scale);
             } else {
-                cts_time = boost::uint32_t(
-                    (sample.dts + sample.cts_delta) * 90000 / video_info->time_scale);
+                cts_time = scale_.transfer(sample.dts + sample.cts_delta);
             }
             
             //std::cout << "video dts = " << sample.dts << std::endl;
             //std::cout << "video cts_delta = " << sample.cts_delta << std::endl;
-            //std::cout << "video cts = " << sample.dts + sample.cts_delta << std::endl;
+            //std::cout << "video cts = " << cts_time << std::endl;
 
-            RtpTransfer::clear(sample.ustime + (boost::uint64_t)sample.cts_delta * 1000000 / video_info->time_scale);
+            RtpTransfer::clear(sample.ustime + (boost::uint64_t)sample.cts_delta * 1000000 / media.time_scale);
 
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             // add two sps pps rtp packet
             if (sample.idesc != sample_description_index_) {
                 sample_description_index_ = sample.idesc;
-                AvcConfig const * stream_config = (AvcConfig const *)video_info->config;;
+                AvcConfig const * stream_config = (AvcConfig const *)media.config;;
 
                 RtpPacket sps_p(cts_time, false);
                 sps_p.size = stream_config->sequence_parameters()[0].size();

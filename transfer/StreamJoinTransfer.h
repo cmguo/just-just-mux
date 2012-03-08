@@ -13,21 +13,20 @@ namespace ppbox
             : public Transfer
         {
         public:
-            StreamJoinTransfer()
-                : sample_description_index_(boost::uint32_t(-1))
-            {
-            }
+            StreamJoinTransfer();
 
-            ~StreamJoinTransfer()
-            {
-            }
+            ~StreamJoinTransfer();
 
-            virtual void transfer(ppbox::demux::Sample & sample);
+            virtual void transfer(
+                ppbox::mux::MediaInfoEx & media);
+
+            virtual void transfer(
+                ppbox::demux::Sample & sample);
 
         private:
+            std::vector<boost::uint8_t> nalu_start_code_;
             std::vector<boost::uint8_t> access_unit_delimiter_;
             std::vector<boost::uint8_t> sps_pps_;
-            std::vector<boost::uint8_t> nalu_start_code_;
             boost::uint32_t sample_description_index_;
         };
     }

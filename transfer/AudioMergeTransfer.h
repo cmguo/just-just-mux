@@ -15,15 +15,9 @@ namespace ppbox
             : public Transfer
         {
         public:
-            AudioMergeTransfer()
-                : last_audio_dts_(-1)
-                , audio_data_size_(0)
-            {
-            }
+            AudioMergeTransfer();
 
-            ~AudioMergeTransfer()
-            {
-            }
+           ~AudioMergeTransfer();
 
             virtual void transfer(ppbox::demux::Sample & sample);
 

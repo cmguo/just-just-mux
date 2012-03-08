@@ -6,6 +6,8 @@
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/ts/Mpeg2Ts.h"
 
+#include <framework/system/ScaleTransform.h>
+
 namespace ppbox
 {
     namespace mux
@@ -16,32 +18,22 @@ namespace ppbox
         {
         public:
             TsTransfer(
-                boost::uint16_t pid,
-                boost::uint16_t stream_id,
-                boost::uint8_t stream_type,
-                boost::uint32_t timescale)
-                : Stream(pid)
-                , pid_(pid)
-                , stream_id_(stream_id)
-                , stream_type_(stream_type)
-                , timescale_(timescale)
-            {
-            }
+                boost::uint16_t pid, 
+                boost::uint16_t stream_id);
 
-            ~TsTransfer()
-            {
-            }
-
-            virtual void transfer(ppbox::demux::Sample & sample);
+            ~TsTransfer();
 
         private:
-            virtual void WritePES(
-                ppbox::demux::Sample & sample,
-                boost::uint64_t dts, 
-                bool with_dts, 
-                boost::uint64_t pts, 
-                bool with_pcr);
+            virtual void transfer(
+                ppbox::mux::MediaInfoEx & media);
 
+            virtual void transfer(
+                ppbox::demux::Sample & sample);
+
+            virtual void on_seek(
+                boost::uint32_t time);
+
+        private:
             template <typename ConstBuffers>
             void push_buffers(
                 ConstBuffers const & buffers1)
@@ -58,11 +50,11 @@ namespace ppbox
             }
 
         private:
-            boost::uint16_t pid_;
             boost::uint16_t stream_id_;
-            boost::uint8_t  stream_type_;
-            boost::uint32_t timescale_;
-
+            boost::uint8_t time_adjust_;
+            framework::system::ScaleTransform scale_;
+            bool with_pcr_;
+            bool with_dts_;
             // buffer
             std::vector<boost::uint8_t> ts_headers_;
             std::deque<boost::asio::const_buffer> ts_buffers_;

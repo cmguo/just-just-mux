@@ -886,10 +886,10 @@ namespace ppbox
 
                     LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended, session:0, msg:PC_Timeout, status:" << status_string());
                 }
-                else
-                {
-                    std::cout << "[thread_dispatch] idle" << std::endl;
-                }
+                //else
+                //{
+                //    std::cout << "[thread_dispatch] idle" << std::endl;
+                //}
             }
 
         }
@@ -947,7 +947,7 @@ namespace ppbox
             bool start_time_valid = false;
             //playing_ = true;
 
-            boost::uint64_t seek_end64 = -1;
+            boost::uint64_t seek_end64 = boost::uint64_t(-1);
             boost::posix_time::ptime start_time;
             boost::system::error_code  ec;
 

@@ -36,19 +36,22 @@ namespace ppbox
         {
             ec.clear();
             if (segment_index >= 1) {
-                if (begin_index_ + 1 != segment_index) {
+                if (begin_index_ + 1 != segment_index) 
+                {
+                    old_index_ = segment_index - 1;
                     boost::uint32_t seek_time = (segment_index - 1) * m3u8_protocol_.segment_duration();
                     seek_time *= 1000;
                     Muxer::seek(seek_time, ec);
                     if (!ec || ec == boost::asio::error::would_block) {
+                        segment_filter_.reset();
                         segment_filter_.segment_end_time() 
-                            = (boost::uint64_t)segment_index * m3u8_protocol_.segment_duration() * 1000000;
+                            = (boost::uint64_t)(segment_index-old_index_) * m3u8_protocol_.segment_duration() * 1000000;
                     } else {
                         return ec;
                     }
                 } else {
                     segment_filter_.segment_end_time() 
-                        = (boost::uint64_t)segment_index * m3u8_protocol_.segment_duration() * 1000000;
+                        = (boost::uint64_t)(segment_index - old_index_) * m3u8_protocol_.segment_duration() * 1000000;
                 }
                 begin_index_ = segment_index;
             }

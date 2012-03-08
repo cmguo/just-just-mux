@@ -7,9 +7,8 @@
 #include "ppbox/mux/transfer/Transfer.h"
 
 #include <framework/system/BytesOrder.h>
-#include <framework/string/Format.h>
-#include <framework/string/Base16.h>
-#include <framework/string/Base64.h>
+#include <framework/system/ScaleTransform.h>
+
 using namespace boost::system;
 
 namespace ppbox
@@ -36,8 +35,7 @@ namespace ppbox
 
         public:
             virtual void on_seek(
-                boost::uint32_t time, 
-                boost::uint32_t play_time);
+                boost::uint32_t time);
 
             virtual void setup();
 
@@ -65,7 +63,7 @@ namespace ppbox
             RtpHead rtp_head_;
             RtpInfo rtp_info_;
             RtpSplitContent packets_;
-            boost::uint32_t time_scale_in_ms_; 
+            framework::system::ScaleTransform scale_; 
         };
     }
 }

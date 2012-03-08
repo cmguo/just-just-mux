@@ -135,6 +135,11 @@ namespace ppbox
                     if (filters_.size() < 2) {
                         filters_.push_back(&key_filter_);
                     }
+                    for (boost::uint32_t i = 0; i < media_info_.stream_infos.size(); ++i) {
+                        for (boost::uint32_t j = 0; j < media_info_.stream_infos[i].transfers.size(); ++j) {
+                            media_info_.stream_infos[i].transfers[j]->on_seek(time);
+                        }
+                    }
                 }
             }
             return ec;

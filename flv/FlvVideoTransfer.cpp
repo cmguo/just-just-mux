@@ -16,7 +16,6 @@ namespace ppbox
 
         void FlvVideoTransfer::transfer(ppbox::demux::Sample & sample)
         {
-
             if(sample.flags & demux::Sample::sync) {
                 videotagheader_.FrameType = 1;
             } else {
@@ -24,8 +23,7 @@ namespace ppbox
             }
 
             boost::uint32_t CompositionTime = sample.cts_delta * 1000 / sample.media_info->time_scale;
-            videotagheader_.CompositionTime = framework::system::UInt24(
-                framework::system::BytesOrder::host_to_big_endian(CompositionTime));
+            videotagheader_.CompositionTime = CompositionTime;
             util::archive::ArchiveBuffer<char> buf(video_tag_header_, 16);
             ppbox::avformat::FLVOArchive flv_archive(buf);
             flv_archive << videotagheader_;

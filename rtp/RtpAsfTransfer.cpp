@@ -6,6 +6,7 @@
 #include "ppbox/mux/rtp/RtpAsfTransfer.h"
 
 #include <framework/string/Format.h>
+#include <framework/string/Base64.h>
 
 #include <util/buffers/BufferSize.h>
 #include <util/buffers/BufferCopy.h>
@@ -34,7 +35,6 @@ namespace ppbox
         void RtpAsfTransfer::transfer(
             MediaInfoEx & info)
         {
-            time_scale_in_ms_ = 1;
             std::string sdp;
             if (info.type == ppbox::demux::MEDIA_TYPE_VIDE) {
                 sdp = "m=video 0 RTP/AVP 96\r\n";
@@ -49,6 +49,8 @@ namespace ppbox
                 + framework::string::format(info.index)
                 + "\r\n";
             rtp_info_.sdp += sdp;
+
+            scale_.reset(1000, 1000);
         }
 
         void RtpAsfTransfer::transfer(
@@ -76,7 +78,7 @@ namespace ppbox
             std::string & sdp)
         {
             std::string asf_head;
-            asf_head.resize(util::buffers::buffer_size(tag.data));
+            asf_head.resize(util::buffers::buffers_size(tag.data));
             util::buffers::buffer_copy(boost::asio::buffer(&asf_head[0], asf_head.size()), tag.data);
             sdp += "a=maxps:1024\r\n";
             sdp += "a=pgmpu:data:application/vnd.ms.wms-hdr.asf1;base64," 

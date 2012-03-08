@@ -52,10 +52,6 @@ namespace ppbox
                 boost::uint32_t index, 
                 ppbox::demux::Sample & tag);
 
-            boost::system::error_code seek(
-                boost::uint32_t & time,
-                boost::system::error_code & ec);
-
         protected:
            void add_transfer(
                RtpTransfer * rtp_transfer);

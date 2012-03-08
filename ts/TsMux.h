@@ -34,7 +34,6 @@ namespace ppbox
             void WritePMT(boost::uint8_t * ptr);
 
         private:
-            bool is_merge_audio_;
             Stream * pat_;
             Stream * pmt_;
             bool has_audio_;
@@ -45,7 +44,6 @@ namespace ppbox
             boost::uint16_t video_stream_id_;
             boost::uint8_t audio_stream_type_;
             boost::uint8_t video_stream_type_;
-
             // buffer
             boost::uint8_t header_[512];
         };

@@ -17,6 +17,7 @@ namespace ppbox
         public:
             M3U8Mux()
                 : begin_index_(1)
+                , old_index_(0)
                 , m3u8_protocol_(*this)
                 , segment_filter_(Muxer::mediainfo())
             {
@@ -46,6 +47,7 @@ namespace ppbox
 
         private:
             boost::uint32_t begin_index_;
+            boost::uint32_t old_index_;;
             std::string full_path_;
             std::string m3u8_cache_;
             M3U8Protocol m3u8_protocol_;

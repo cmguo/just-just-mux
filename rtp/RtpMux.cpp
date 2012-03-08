@@ -52,20 +52,6 @@ namespace ppbox
             }
         }
 
-        error_code RtpMux::seek(
-            boost::uint32_t & time,
-            error_code & ec)
-        {
-            boost::uint32_t play_time = Muxer::current_time();
-            Muxer::seek(time, ec);
-            if (!ec || ec == boost::asio::error::would_block) {
-                for(boost::uint32_t i = 0; i < rtp_transfers_.size(); ++i) {
-                    rtp_transfers_[i]->on_seek(time, play_time);
-                }
-            }
-            return ec;
-        }
-
         void RtpMux::add_transfer(
             RtpTransfer * rtp_transfer)
         {
@@ -110,7 +96,7 @@ namespace ppbox
                 RtpInfo const & rtp_info = rtp_transfers_[i]->rtp_info();
                 if (rtp_info.setup) {
                     os << "url=" << rtp_info_out;
-                    os << "index=" << (boost::int32_t)rtp_info.stream_index;
+                    os << "/index=" << (boost::int32_t)rtp_info.stream_index;
                     os << ";seq=" << rtp_info.sequence;
                     os << ";rtptime=" << rtp_info.timestamp;
                     os << ",";
