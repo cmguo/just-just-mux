@@ -8,6 +8,7 @@
 #include "ppbox/mux/ts/M3U8Mux.h"
 #include "ppbox/mux/rtp/RtpEsMux.h"
 #include "ppbox/mux/rtp/RtpTsMux.h"
+#include "ppbox/mux/rtp/RtpAsfMux.h"
 
 #include <ppbox/demux/DemuxerModule.h>
 using namespace ppbox::demux;
@@ -67,6 +68,7 @@ namespace ppbox
             type_map_["flv"] = MuxerType::FLV;
             type_map_["rtp-es"] = MuxerType::RTPES;
             type_map_["rtp-ts"] = MuxerType::RTPTS;
+            type_map_["rtp-asf"] = MuxerType::RTPASF;
             type_map_["m3u8"] = MuxerType::m3u8;
         }
 
@@ -196,6 +198,9 @@ namespace ppbox
                     break;
                 case MuxerType::RTPTS:
                     muxer = new RtpTsMux;
+                    break;
+                case MuxerType::RTPASF:
+                    muxer = new RtpAsfMux;
                     break;
                 case MuxerType::m3u8:
                     muxer = new M3U8Mux;

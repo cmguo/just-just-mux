@@ -44,14 +44,14 @@ namespace ppbox
 
             if (mediainfo.audio_format.sample_rate >= 44100 ) {
                 audiotagheader_.SoundRate = 3;
-            } else if (mediainfo.audio_format.sample_rate >= 24000 ){
+            } else if (mediainfo.audio_format.sample_rate >= 22000 ){
                 audiotagheader_.SoundRate = 2;
-            } else if (mediainfo.audio_format.sample_rate >= 12000) {
+            } else if (mediainfo.audio_format.sample_rate >= 11000) {
                 audiotagheader_.SoundRate = 1;
-            } else if (mediainfo.audio_format.sample_rate >= 6000) {
+            } else if (mediainfo.audio_format.sample_rate >= 5500) {
                 audiotagheader_.SoundRate = 0;
             } else {
-                audiotagheader_.SoundRate = 3;
+                audiotagheader_.SoundRate = 0;
             }
 
             if (mediainfo.audio_format.channel_count <= 1) {

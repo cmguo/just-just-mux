@@ -39,7 +39,7 @@ namespace ppbox
                  }
              }
              if (transfer_ == NULL)
-                 transfer_ = new AsfTransfer();
+                 transfer_ = new AsfTransfer(*this);
              mediainfoex.transfers.push_back(new MergeTransfer(transfer_));
 
             //structure ASF_Stream_Properties_Object
@@ -157,8 +157,8 @@ namespace ppbox
             file_object.Flag.BroadcastFlag = 1;
             //file_object.Flag.SeekableFlag = 0;
             file_object.Flag.Reserved = 1;
-            file_object.MinimumDataPacketSize = AsfTransfer::PACKET_LENGTH;
-            file_object.MaximumDataPacketSize = AsfTransfer::PACKET_LENGTH;
+            file_object.MinimumDataPacketSize = transfer_->packet_length();
+            file_object.MaximumDataPacketSize = transfer_->packet_length();
 
             ASFOArchiveChar oar_file(file_buf_);
             oar_file << file_object;

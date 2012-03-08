@@ -3,46 +3,62 @@
 #define _PPBOX_MUX_ASF_TRANSFER_H_
 
 #include "ppbox/mux/transfer/Transfer.h"
-#include <ppbox/avformat/asf/AsfObjectType.h>
-#include <boost/asio/streambuf.hpp>
 #include <ppbox/mux/detail/BitsReader.h>
 
-using namespace ppbox::demux;
+#include <ppbox/avformat/asf/AsfObjectType.h>
+
+#include <boost/asio/streambuf.hpp>
+
 namespace ppbox
 {
     namespace mux
     {
+
         class AsfTransfer
             : public Transfer
         {
         public:
-            AsfTransfer();
+            AsfTransfer(
+                Muxer & muxer);
+
             ~AsfTransfer();
 
-            void add_packet(
-                Sample & sample, 
-                bool need_data_buf);
-
-            void add_payload(
-                Sample & sample,
-                MyBuffersLimit & limit,
-                MyBuffersPosition & pos1,
-                MyBuffersPosition & pos2,
-                size_t padding_size,
-                bool copy_flag);
-
+        public:
             virtual void transfer(
                 ppbox::demux::MediaInfo & mediainfo);
 
             virtual void transfer(
                 ppbox::demux::Sample & sample);
 
-            virtual void on_seek(
+        public:
+            void on_seek(
                 boost::uint32_t time);
 
+            boost::uint32_t packet_length() const
+            {
+                return packet_length_;
+            }	
+
         public:
-            static const boost::uint32_t PACKET_LENGTH = 4096;
-            static bool const single_payload_ = false;
+            struct AsfPacket
+            {
+                 size_t off_seg;
+                 size_t pad_len;
+                 bool key_frame;
+            };
+
+        private:
+            void add_packet(
+                ppbox::demux::Sample & sample, 
+                bool need_data_buf);
+
+            void add_payload(
+                ppbox::demux::Sample & sample,
+                MyBuffersLimit & limit,
+                MyBuffersPosition & pos1,
+                MyBuffersPosition & pos2,
+                size_t padding_size,
+                bool copy_flag);
 
         private:
             struct HeadBlock
@@ -117,11 +133,14 @@ namespace ppbox
                 HeadBlock * ptr_;
             };
 
-        private:
-            boost::uint32_t const max_packet_length_;
+        public:
+            boost::uint32_t packet_length_;
+            bool single_payload_;
 
+        private:
             std::deque<boost::asio::const_buffer> data_;//保存buffer的地址和长度记录
             size_t p_index_;                            //保存当前的packet在data_中下标值
+            std::vector<AsfPacket> packets_;
             boost::uint16_t packet_left_;               //当前packet内存剩余空间
             HeadBlockPointer head_beg_;
             HeadBlockPointer head_end_;
@@ -132,6 +151,7 @@ namespace ppbox
             boost::uint16_t packet_count_;              //记录当前Packet头部数目
             std::vector<boost::uint8_t> media_number_;
             boost::asio::streambuf pad_buf_;
+            boost::uint32_t max_packet_length_;
             ppbox::avformat::ASF_Packet packet_head_;
             std::vector<HeadBlock*> head_buf_ptr_;
         };

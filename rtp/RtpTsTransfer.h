@@ -1,10 +1,9 @@
 // RtpTsTransfer.h
 
-#ifndef   _PPBOX_MUX_RTP_TS_TRANSFER_H_
-#define   _PPBOX_MUX_RTP_TS_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_TS_TRANSFER_H_
+#define _PPBOX_MUX_RTP_TS_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpTransfer.h"
-#include "ppbox/mux/Muxer.h"
 
 namespace ppbox
 {
@@ -15,18 +14,18 @@ namespace ppbox
         {
         public:
             RtpTsTransfer(
-                Muxer & muxer,
-                boost::uint8_t type);
+                Muxer & muxer);
 
             ~RtpTsTransfer();
 
-            virtual void transfer(ppbox::demux::Sample & sample);
+            virtual void transfer(
+                MediaInfoEx & info);
 
-            virtual void get_rtp_info(MediaInfoEx & info);
+            virtual void transfer(
+                ppbox::demux::Sample & sample);
 
-            virtual void on_seek(boost::uint32_t time, boost::uint32_t play_time);
-
-            void header_rtp_packet(ppbox::demux::Sample & tag);
+            void header_rtp_packet(
+                ppbox::demux::Sample & tag);
         };
     }
 }

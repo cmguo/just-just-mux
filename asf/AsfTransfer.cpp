@@ -1,14 +1,20 @@
-//AsfTransfer.cpp
+// AsfTransfer.cpp
+
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/asf/AsfTransfer.h"
+#include "ppbox/mux/Muxer.h"
+
 #include <ppbox/avformat/asf/AsfObjectType.h>
+
 #include <util/archive/BigEndianBinaryOArchive.h>
 #include <util/archive/ArchiveBuffer.h>
+#include <util/buffers/BufferCopy.h>
+
 #include <boost/asio/streambuf.hpp>
-#include <ppbox/mux/detail/BitsReader.h>
 
 using namespace ppbox::demux;
 using namespace ppbox::avformat;
+
 size_t const PACKET_HEAD_LENGTH = 14;
 size_t const PAYLOAD_HEAD_LENGTH = 17;
 
@@ -16,8 +22,10 @@ namespace ppbox
 {
     namespace mux
     {
-        AsfTransfer::AsfTransfer()
-            : max_packet_length_(PACKET_LENGTH)
+        AsfTransfer::AsfTransfer(
+            Muxer & muxer)
+            : packet_length_(4096)
+            , single_payload_(false)
             , p_index_(0)
             , packet_left_(0)
             , head_beg_(new HeadBlock[256])
@@ -28,11 +36,17 @@ namespace ppbox
             , media_number_(0)
             , packet_head_(max_packet_length_)
         {
-            data_buf_[0] = new boost::uint8_t[PACKET_LENGTH];
-            data_buf_[1] = new boost::uint8_t[PACKET_LENGTH];
+            muxer.config().register_module("Asf")
+                << CONFIG_PARAM_NAME_RDWR("packet_length", packet_length_)
+                << CONFIG_PARAM_NAME_RDWR("single_payload", single_payload_);
+
+            max_packet_length_ = packet_length_;
+
+            data_buf_[0] = new boost::uint8_t[packet_length_];
+            data_buf_[1] = new boost::uint8_t[packet_length_];
             data_ptr_ = data_buf_[0];
-            pad_buf_.prepare(PACKET_LENGTH - PAYLOAD_HEAD_LENGTH - PACKET_HEAD_LENGTH);
-            pad_buf_.commit(PACKET_LENGTH - PAYLOAD_HEAD_LENGTH - PACKET_HEAD_LENGTH);
+            pad_buf_.prepare(packet_length_ - PAYLOAD_HEAD_LENGTH - PACKET_HEAD_LENGTH);
+            pad_buf_.commit(packet_length_ - PAYLOAD_HEAD_LENGTH - PACKET_HEAD_LENGTH);
 
             //最后一个HeadBlock保存当前内存的首地址
             HeadBlock * p = &(*head_beg_);
@@ -72,7 +86,7 @@ namespace ppbox
                     data_ptr_ == data_buf_[0] ? data_buf_[1] : data_buf_[0];
             }
 
-            packet_left_ = PACKET_LENGTH - PACKET_HEAD_LENGTH;
+            packet_left_ = packet_length_ - PACKET_HEAD_LENGTH;
             //设置packet头部.
             //ErrorCorrectionData
             packet_head_.ErrorCorrectionInfo.ErrorCorrectionDataLength = 2;
@@ -91,7 +105,7 @@ namespace ppbox
             packet_head_.PayLoadParseInfo.OffsetIntoMOLType = 3;
             packet_head_.PayLoadParseInfo.MediaObjNumType = 1;
             packet_head_.PayLoadParseInfo.StreamNumLengthType = 1;
-            //packet_head_.PayLoadParseInfo.PacketLenth = PACKET_LENGTH;
+            //packet_head_.PayLoadParseInfo.PacketLenth = packet_length_;
             //packet_head_.PayLoadParseInfo.Sequence = 0;
             packet_head_.PayLoadParseInfo.PaddingLength = 0;
             packet_head_.PayLoadParseInfo.SendTime = sample.time + 2000;
@@ -105,6 +119,11 @@ namespace ppbox
             head_pkt_ = head_end_;
             //填充到data_中
             p_index_ = data_.size();
+            AsfPacket pkt;
+            pkt.off_seg = p_index_;
+            pkt.pad_len = 0;
+            pkt.key_frame = false;
+            packets_.push_back(pkt);
             data_.push_back(boost::asio::buffer(head_end_->buf, PACKET_HEAD_LENGTH));
             head_end_++;
 
@@ -165,10 +184,12 @@ namespace ppbox
             size_t payload_size = pos2.skipped_bytes() - pos1.skipped_bytes();
             //payload头部构造
             payload_header.StreamNum = sample.itrack + 1;
-            if( Sample::sync & sample.flags )
+            if( Sample::sync & sample.flags ) {
                 payload_header.KeyFrameBit = 1;
-            else
+                packets_.back().key_frame = true;
+            } else {
                 payload_header.KeyFrameBit = 0;
+            }
             payload_header.MediaObjNum = media_number_[sample.itrack];
             payload_header.OffsetIntoMediaObj = pos1.skipped_bytes();
             payload_header.ReplicatedDataLen = 8;
@@ -216,11 +237,11 @@ namespace ppbox
 
             //若需要拷贝data
             if(copy_flag) {
-                assert(packet_left_< PACKET_LENGTH);
+                assert(packet_left_< packet_length_);
                 util::buffers::buffer_copy(
-                    boost::asio::buffer(data_ptr_ + PACKET_LENGTH - packet_left_, payload_size), 
+                    boost::asio::buffer(data_ptr_ + packet_length_ - packet_left_, payload_size), 
                     MyBuffers(MyBufferIterator(limit, pos1, pos2)));
-                data_.push_back(boost::asio::buffer(data_ptr_ + PACKET_LENGTH - packet_left_, payload_size));
+                data_.push_back(boost::asio::buffer(data_ptr_ + packet_length_ - packet_left_, payload_size));
             } else {
                 data_.insert(data_.end(), MyBufferIterator(limit, pos1, pos2), MyBufferIterator());
             }
@@ -235,6 +256,7 @@ namespace ppbox
                 packet_left_ -= padding_size;
                 assert(packet_left_ == 0);
                 data_.push_back(boost::asio::buffer(pad_buf_.data(), padding_size));
+                packets_.back().pad_len = padding_size;
             }
         }
 
@@ -251,11 +273,14 @@ namespace ppbox
             MyBuffersPosition pos1(limit);
             boost::uint32_t sample_remain = sample.size;
 
+            packets_[0] = packets_.back();
+            packets_.erase(packets_.begin() + 1, packets_.end());
+
             while (0 != sample_remain) {
                 if(sample_remain + PAYLOAD_HEAD_LENGTH * 2 < packet_left_) {
                     MyBuffersPosition pos2 = pos1;
                     pos1.increment_bytes(limit, sample_remain);
-                    if(single_payload_) {
+                    if (single_payload_) {
                         add_payload(sample, limit, pos2, pos1,
                             packet_left_ - (sample_remain + PAYLOAD_HEAD_LENGTH), false);
                         add_packet(sample, false);
@@ -277,9 +302,10 @@ namespace ppbox
                     sample_remain -= (packet_left_ - PAYLOAD_HEAD_LENGTH);
                     add_payload(sample, limit, pos2, pos1, 0, false);
                     assert(packet_left_ == 0);
-                    add_packet(sample, sample_remain < PACKET_LENGTH - PACKET_HEAD_LENGTH - PAYLOAD_HEAD_LENGTH * 2);
+                    add_packet(sample, sample_remain < packet_length_ - PACKET_HEAD_LENGTH - PAYLOAD_HEAD_LENGTH * 2);
                 }
             }//while
+
             if(!single_payload_)
                 assert(packet_left_ > PAYLOAD_HEAD_LENGTH);
 
@@ -291,8 +317,9 @@ namespace ppbox
             head_beg_ = head_pkt_;
 
             sample.size = 
-                single_payload_ ? PACKET_LENGTH : PACKET_LENGTH * packet_count_;
+                single_payload_ ? packet_length_ : packet_length_ * packet_count_;
             packet_count_ = 0;
+            sample.context = &packets_;
             if (sample.data.empty()) {
                 sample.data.push_back(boost::asio::buffer(pad_buf_.data(), 0));
             }
@@ -303,6 +330,7 @@ namespace ppbox
         {
             packet_count_ = 0;
             data_.clear();
+            packets_.clear();
             head_beg_ = head_end_;
 
             Sample sample;

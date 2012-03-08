@@ -427,18 +427,18 @@ namespace ppbox
                     n = 0;
                 }
             }
-			
+            
             if (!ec)
             {  
-				if((boost::uint32_t(-1) != param->end_))
-				{
+                if((boost::uint32_t(-1) != param->end_))
+                {
                     cur_mov_->muxer->reset();
                     ec.clear();
-				}
-				else
-				{
-					LOG_S(Logger::kLevelDebug,"[thread_seek] Not Send Head");
-				}
+                }
+                else
+                {
+                    LOG_S(Logger::kLevelDebug,"[thread_seek] Not Send Head");
+                }
             }
             else
             {

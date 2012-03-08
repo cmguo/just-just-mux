@@ -27,7 +27,7 @@ namespace ppbox
                 : seg_duration_(10)
                 , full_path_("")
             {
-                muxer.Config().register_module("M3U8")
+                muxer.config().register_module("M3U8")
                     << CONFIG_PARAM_NAME_RDWR("segment_duration", seg_duration_)
                     << CONFIG_PARAM_NAME_RDWR("full_path", full_path_);
             }

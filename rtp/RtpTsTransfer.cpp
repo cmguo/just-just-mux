@@ -1,6 +1,7 @@
 // RtpTsTransfer.cpp
 
 #include "ppbox/mux/Common.h"
+#include "ppbox/mux/Muxer.h"
 #include "ppbox/mux/ts/TsTransfer.h"
 #include "ppbox/mux/rtp/RtpTsTransfer.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
@@ -13,18 +14,23 @@ namespace ppbox
     {
 
         RtpTsTransfer::RtpTsTransfer(
-            Muxer & muxer,
-            boost::uint8_t type)
-            : RtpTransfer(type)
+            Muxer & muxer)
+            : RtpTransfer(muxer, "RtpTs", 33)
         {
-            muxer.Config().register_module("RtpTs")
-                << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
-                << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
-                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc);
         }
 
         RtpTsTransfer::~RtpTsTransfer()
         {
+        }
+
+        void RtpTsTransfer::transfer(
+            MediaInfoEx & info)
+        {
+            rtp_info_.sdp = "m=video 0 RTP/AVP 33\r\n";
+            rtp_info_.sdp += "a=rtpmap:33 MP2T/90000\r\n";
+            rtp_info_.sdp += "a=control:index=-1\r\n";
+
+            time_scale_in_ms_ = 90;
         }
 
         void RtpTsTransfer::transfer(
@@ -52,49 +58,17 @@ namespace ppbox
             p.push_buffers(buf_beg, buf_end);
             push_packet(p);
 
-            sample.context = (void*)&rtp_packets();
-        }
-
-
-        void RtpTsTransfer::get_rtp_info(MediaInfoEx & info)
-        {
-            rep_info().sdp   = "m=video 0 RTP/AVP 33\r\n";
-            rep_info().sdp += "a=rtpmap:33 MP2T/90000\r\n";
-            rep_info().sdp += "a=cliprect:0,0,"
-                + framework::string::format(info.video_format.height)+","
-                +framework::string::format(info.video_format.width)+"\r\n";
-            rep_info().sdp += "a=framesize: 33 " 
-                + framework::string::format(info.video_format.width)+ "-"
-                + framework::string::format(info.video_format.height) + "\r\n";
-            rep_info().sdp += "a=control:index=-1\r\n";
-
-            rep_info().stream_index = 0;
-            rep_info().timestamp = rtp_head_.timestamp;
-            rep_info().seek_time = 0;
-            rep_info().ssrc = rtp_head_.ssrc;
-            rep_info().sequence = rtp_head_.sequence;
-
-            info.attachment = (void*)&rep_info();
-        }
-
-        void RtpTsTransfer::on_seek(boost::uint32_t time, boost::uint32_t play_time)
-        {
-            boost::uint32_t time_offset = time * 90;
-            boost::uint32_t play_time_offset = (play_time) * 90;
-            rtp_head_.timestamp += play_time_offset;
-            rep_info().timestamp = rtp_head_.timestamp + time_offset;
-            rep_info().sequence = rtp_head_.sequence;
-            rep_info().seek_time = time;
+            sample.context = (void*)&packets_;
         }
 
         void RtpTsTransfer::header_rtp_packet(
             ppbox::demux::Sample & tag)
         {
             RtpTransfer::clear(0);
-            RtpPacket p(rep_info().timestamp, true);
+            RtpPacket p(rtp_info_.timestamp, true);
             p.push_buffers(tag.data);
             push_packet(p);
-            tag.context = (void*)&rtp_packets();
+            tag.context = (void*)&packets_;
         }
 
     }

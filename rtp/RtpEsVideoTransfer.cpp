@@ -1,7 +1,9 @@
 // RtpEsVideoTransfer.cpp
 
 #include "ppbox/mux/Common.h"
+#include "ppbox/mux/Muxer.h"
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
+#include "ppbox/mux/detail/BitsReader.h" // for Nalu
 
 #include <ppbox/avformat/codec/AvcConfig.h>
 using namespace ppbox::avformat;
@@ -14,38 +16,73 @@ namespace ppbox
     {
 
         RtpEsVideoTransfer::RtpEsVideoTransfer(
-            Muxer & muxer,
-            boost::uint8_t type)
-            : RtpTransfer(type)
+            Muxer & muxer)
+            : RtpTransfer(muxer, "RtpESVideo", 96)
             , mtu_size_(1436)
             , sample_description_index_(boost::uint32_t(-1))
-            ,use_dts_(0)
+            , use_dts_(0)
         {
-            muxer.Config().register_module("RtpESVideo")
-                << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
-                << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
-                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc)
-                << CONFIG_PARAM_NAME_RDWR("usedts", use_dts_);
-        }
-
-        RtpEsVideoTransfer::RtpEsVideoTransfer(
-            Muxer & muxer,
-            boost::uint8_t type,
-            boost::uint32_t mtu_size)
-            : RtpTransfer(type)
-            , mtu_size_(mtu_size)
-            , sample_description_index_(boost::uint32_t(-1))
-            ,use_dts_(0)
-        {
-            muxer.Config().register_module("RtpESVideo")
-                << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
-                << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
-                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc)
+            muxer.config().register_module("RtpESVideo")
                 << CONFIG_PARAM_NAME_RDWR("usedts", use_dts_);
         }
 
         RtpEsVideoTransfer::~RtpEsVideoTransfer()
         {
+        }
+
+        void RtpEsVideoTransfer::transfer(
+            MediaInfoEx & info)
+        {
+            using namespace framework::string;
+            std::string map_id_str = format(rtp_head_.mpt);
+
+            boost::uint8_t const * p = &info.format_data.at(0) + 5;
+            boost::uint8_t const * sps_buf = p;
+            boost::uint8_t const * pps_buf = p;
+            boost::uint16_t sps_len = 0;
+            boost::uint16_t pps_len = 0;
+            size_t n = (*p++) & 31;
+            for (size_t i = 0; i < n; ++i) {
+                size_t l = (*p++);
+                l = (l << 8) + (*p++);
+                sps_buf = p;
+                sps_len = l;
+                p += l;
+            }
+            n = (*p++);
+            for (size_t i = 0; i < n; ++i) {
+                size_t l = (*p++);
+                l = (l << 8) + (*p++);
+                pps_buf = p;
+                pps_len = l;
+                p += l;
+            }
+
+            boost::uint8_t profile_level_id[3] = {
+                sps_buf[1], 
+                sps_buf[2], 
+                sps_buf[3]
+            };
+
+            std::string profile_level_id_str = 
+                Base16::encode(std::string((char *)profile_level_id, 3));
+            std::string sps = Base64::encode(std::string((char *)sps_buf, sps_len));
+            std::string pps = Base64::encode(std::string((char *)pps_buf, pps_len));
+
+            rtp_info_.sdp = "m=video 0 RTP/AVP " + map_id_str + "\r\n";
+            rtp_info_.sdp += "a=rtpmap:" + map_id_str + " H264/90000\r\n";
+            rtp_info_.sdp += "a=framesize:" + map_id_str + " " + format(info.video_format.width)
+                + "-" + format(info.video_format.height) + "\r\n";
+            rtp_info_.sdp += "a=cliprect:0,0,"+format(info.video_format.height)+","+format(info.video_format.width)+ "\r\n";
+            rtp_info_.sdp += "a=fmtp:" + map_id_str 
+                + " packetization-mode=1" 
+                + ";profile-level-id=" + profile_level_id_str
+                + ";sprop-parameter-sets=" + sps + "," + pps + "\r\n";
+            rtp_info_.sdp += "a=control:index=" + format(info.index) + "\r\n";
+
+            rtp_info_.stream_index = info.index;
+
+            time_scale_in_ms_ = 90;
         }
 
         void RtpEsVideoTransfer::transfer(
@@ -77,14 +114,12 @@ namespace ppbox
 
                 RtpPacket sps_p(cts_time, false);
                 sps_p.size = stream_config->sequence_parameters()[0].size();
-                sps_ = stream_config->sequence_parameters()[0];
-                sps_p.push_buffers(boost::asio::buffer(sps_));
+                sps_p.push_buffers(boost::asio::buffer(stream_config->sequence_parameters()[0]));
                 push_packet(sps_p);
 
                 RtpPacket pps_p(cts_time, false);
                 pps_p.size = stream_config->picture_parameters()[0].size();
-                pps_ = stream_config->picture_parameters()[0];
-                pps_p.push_buffers(boost::asio::buffer(pps_));
+                pps_p.push_buffers(boost::asio::buffer(stream_config->picture_parameters()[0]));
                 push_packet(pps_p);
             }
 
@@ -132,76 +167,8 @@ namespace ppbox
                     push_packet(p);
                 }
             }
-            sample.context = (void*)&rtp_packets();
+            sample.context = (void*)&packets_;
         }
 
-        void RtpEsVideoTransfer::get_rtp_info(MediaInfoEx & info)
-        {
-            using namespace framework::string;
-            std::string map_id_str = format(rtp_head_.mpt);
-
-            boost::uint8_t const * p = &info.format_data.at(0) + 5;
-            boost::uint8_t const * sps_buf = p;
-            boost::uint8_t const * pps_buf = p;
-            boost::uint16_t sps_len = 0;
-            boost::uint16_t pps_len = 0;
-            size_t n = (*p++) & 31;
-            for (size_t i = 0; i < n; ++i) {
-                size_t l = (*p++);
-                l = (l << 8) + (*p++);
-                sps_buf = p;
-                sps_len = l;
-                p += l;
-            }
-            n = (*p++);
-            for (size_t i = 0; i < n; ++i) {
-                size_t l = (*p++);
-                l = (l << 8) + (*p++);
-                pps_buf = p;
-                pps_len = l;
-                p += l;
-            }
-
-            boost::uint8_t profile_level_id[3] = {
-                sps_buf[1], 
-                sps_buf[2], 
-                sps_buf[3]
-            };
-
-            std::string profile_level_id_str = 
-                Base16::encode(std::string((char *)profile_level_id, 3));
-            std::string sps = Base64::encode(std::string((char *)sps_buf, sps_len));
-            std::string pps = Base64::encode(std::string((char *)pps_buf, pps_len));
-
-            rep_info().sdp = "m=video 0 RTP/AVP " + map_id_str + "\r\n";
-            rep_info().sdp += "a=rtpmap:" + map_id_str + " H264/90000\r\n";
-            rep_info().sdp += "a=framesize:" + map_id_str + " " + format(info.video_format.width)
-                + "-" + format(info.video_format.height) + "\r\n";
-            rep_info().sdp += "a=cliprect:0,0,"+format(info.video_format.height)+","+format(info.video_format.width)+ "\r\n";
-            rep_info().sdp += "a=fmtp:" + map_id_str 
-                + " packetization-mode=1" 
-                + ";profile-level-id=" + profile_level_id_str
-                + ";sprop-parameter-sets=" + sps + "," + pps + "\r\n";
-            rep_info().sdp += "a=control:index=" + format(info.index) + "\r\n";
-
-            rep_info().stream_index = info.index;
-            rep_info().timestamp = rtp_head_.timestamp;
-            rep_info().seek_time = 0;
-            rep_info().ssrc = rtp_head_.ssrc;
-            rep_info().sequence = rtp_head_.sequence;
-
-            info.attachment = (void*)&rep_info();
-        }
-
-        void RtpEsVideoTransfer::on_seek(boost::uint32_t time, boost::uint32_t play_time)
-        {
-            boost::uint32_t time_offset = time * 90;
-            //boost::uint32_t play_time_offset = play_time * 90;
-            boost::uint32_t play_time_offset = (play_time+10000) * 90;
-            rtp_head_.timestamp += play_time_offset;
-            rep_info().timestamp = rtp_head_.timestamp + time_offset;
-            rep_info().sequence = rtp_head_.sequence;
-            rep_info().seek_time = time;
-        }
     }
 }

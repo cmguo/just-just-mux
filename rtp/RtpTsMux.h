@@ -1,28 +1,23 @@
 // RtpTsMux.h
 
-#ifndef   _PPBOX_MUX_RTP_TS_MUX_H_
-#define   _PPBOX_MUX_RTP_TS_MUX_H_
+#ifndef _PPBOX_MUX_RTP_TS_MUX_H_
+#define _PPBOX_MUX_RTP_TS_MUX_H_
 
 #include "ppbox/mux/ts/TsMux.h"
-#include "ppbox/mux/rtp/RtpPacket.h"
-
-#include <ppbox/demux/base/DemuxerBase.h>
+#include "ppbox/mux/rtp/RtpMux.h"
 
 namespace ppbox
 {
     namespace mux
     {
+
         class RtpTsTransfer;
 
         class RtpTsMux
-            : public TsMux
+            : public RtpMux
         {
         public:
-            RtpTsMux()
-                : map_id_(33)
-                , rtp_ts_transfer_(NULL)
-            {
-            }
+            RtpTsMux();
 
             ~RtpTsMux();
 
@@ -30,21 +25,15 @@ namespace ppbox
             void add_stream(
                 MediaInfoEx & mediainfo);
 
-            void file_header(ppbox::demux::Sample & tag);
-
-            void stream_header(
-                boost::uint32_t index, 
+            void file_header(
                 ppbox::demux::Sample & tag);
 
-            boost::system::error_code seek(
-                boost::uint32_t & time,
-                boost::system::error_code & ec);
-
         private:
-            boost::uint32_t map_id_;
+            TsMux ts_mux_;
             RtpTsTransfer * rtp_ts_transfer_;
         };
+
     }
 }
 
-#endif // End _PPBOX_MUX_RTP_TS_MUX_H_
+#endif // _PPBOX_MUX_RTP_TS_MUX_H_

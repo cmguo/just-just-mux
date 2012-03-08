@@ -24,9 +24,6 @@ namespace ppbox
             } else {
                 WritePES(sample, 0, false, dts, false);
             }
-            sample.data.assign(ts_buffers_.begin(), ts_buffers_.end());
-            sample.size = util::buffers::buffer_size(ts_buffers_);
-            sample.context = (void *)&off_segs_;
         }
 
         void TsTransfer::WritePES(
@@ -120,6 +117,7 @@ namespace ppbox
                 frame_size -= payload_size;
             }
             assert(ts_head_pad_size == 0);
+            sample.data.assign(ts_buffers_.begin(), ts_buffers_.end());
             sample.size = ts_total_size;
             sample.context = &off_segs_;
         }

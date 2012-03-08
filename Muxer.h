@@ -90,7 +90,7 @@ namespace ppbox
 
             boost::uint32_t & current_time(void);
 
-            framework::configure::Config & Config();
+            framework::configure::Config & config();
 
         protected:
             void add_filter(Filter & filter)

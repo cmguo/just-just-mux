@@ -2,6 +2,7 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/ts/TsMux.h"
+#include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
@@ -77,6 +78,36 @@ namespace ppbox
                 crc = (crc << 8) ^ CRC_Table[((crc >> 24) ^ *data++) & 0xFF];
             }
             return crc;
+        }
+
+        TsMux::TsMux()
+            : is_merge_audio_(false)
+            , pat_(new Stream(0))
+            , pmt_(new Stream(AP4_MPEG2_TS_DEFAULT_PID_PMT))
+            , has_audio_(false)
+            , has_video_(false)
+            , audio_pid_(AP4_MPEG2_TS_DEFAULT_PID_AUDIO)
+            , video_pid_(AP4_MPEG2_TS_DEFAULT_PID_VIDEO)
+            , audio_stream_id_(AP4_MPEG2_TS_DEFAULT_STREAM_ID_AUDIO)
+            , video_stream_id_(AP4_MPEG2_TS_DEFAULT_STREAM_ID_VIDEO)
+            , audio_stream_type_(AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_7)
+            , video_stream_type_(AP4_MPEG2_STREAM_TYPE_AVC)
+        {
+            config().register_module("TsMux")
+                << CONFIG_PARAM_NAME_RDWR("merge_audio", is_merge_audio_);
+        }
+
+        TsMux::~TsMux()
+        {
+            if (pat_) {
+                delete pat_;
+                pat_ = NULL;
+            }
+
+            if (pmt_) {
+                delete pmt_;
+                pmt_ = NULL;
+            }
         }
 
         void TsMux::add_stream(

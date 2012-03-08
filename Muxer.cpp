@@ -52,33 +52,29 @@ namespace ppbox
         error_code Muxer::open_impl(error_code & ec)
         {
             assert(demuxer_ != NULL);
+            media_info_.duration = demuxer_->get_duration(ec);
             media_info_.stream_count = demuxer_->get_media_count(ec);
-
             if (!ec) {
-                error_code lec;
-                boost::uint32_t video_duration = demuxer_->get_duration(lec);
-                if (lec) {
-                    media_info_.duration = 0;
-                } else {
-                    media_info_.duration   = video_duration;
-                }
                 media_info_.filesize = 0;
-                MediaInfoEx media_info;
                 for (size_t i = 0; i < media_info_.stream_count; ++i) {
+                    MediaInfoEx media_info;
                     demuxer_->get_media_info(i, media_info, ec);
                     if (ec) {
                         break;
                     } else {
                         media_info.attachment = NULL;
-                        media_info_.stream_infos.push_back(media_info);
                         // add attachment
                         if (media_info.type == ppbox::demux::MEDIA_TYPE_VIDE 
                             && media_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
-                                media_info_.stream_infos[i].decode = new AvcCodec();
-                                media_info_.stream_infos[i].decode->config(
-                                    media_info.format_data, media_info_.stream_infos[i].config);
+                                media_info.decode = new AvcCodec();
+                                media_info.decode->config(
+                                    media_info.format_data, media_info.config);
                         }
-                        add_stream(media_info_.stream_infos[i]);
+                        add_stream(media_info);
+                        for(boost::uint32_t i = 0; i < media_info.transfers.size(); ++i) {
+                            media_info.transfers[i]->transfer(media_info);
+                        }
+                        media_info_.stream_infos.push_back(media_info);
                     }
                 }
             }
@@ -91,7 +87,8 @@ namespace ppbox
         {
             ec.clear();
             if (!is_open()) {
-                return error::mux_not_open;
+                ec = error::mux_not_open;
+                return ec;
             }
             if (paused_) {
                 paused_ = false;
@@ -195,7 +192,7 @@ namespace ppbox
             return media_info_;
         }
 
-        framework::configure::Config & Muxer::Config()
+        framework::configure::Config & Muxer::config()
         {
             return config_;
         }
@@ -245,11 +242,7 @@ namespace ppbox
                 //if (sample.flags & Sample::stream_changed) {
                     //release_mediainfo();
                     //open_impl(ec);
-                    for(boost::uint32_t i = 0; i < mediainfo.transfers.size(); ++i) {
-                        mediainfo.transfers[i]->transfer(mediainfo);
-                    }
                 //}
-
                 for(boost::uint32_t i = 0; i < mediainfo.transfers.size(); ++i) {
                     mediainfo.transfers[i]->transfer(sample);
                 }

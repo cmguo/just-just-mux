@@ -17,6 +17,7 @@ namespace ppbox
                 TS,
                 RTPES,
                 RTPTS,
+                RTPASF,
                 m3u8,
             };
         };

@@ -62,6 +62,7 @@ namespace ppbox
             flv_file_archive << flv_header_;
             tag.data.push_back(boost::asio::buffer(
                 (boost::uint8_t *)&flv_file_header_buffer_, 13));
+            tag.size = 13;
         }
 
         void FlvMux::stream_header(
@@ -69,8 +70,13 @@ namespace ppbox
             ppbox::demux::Sample & tag)
         {
             assert(index < mediainfo().stream_infos.size());
-            boost::uint32_t total_head_size;
             boost::uint32_t spec_data_size = 0;
+
+            tag.data.clear();
+            tag.time = 0;
+            tag.ustime = 0;
+            tag.dts = 0;
+            tag.cts_delta = 0;
 
             MediaInfoEx const & stream_info = mediainfo().stream_infos[index];
             if (stream_info.type == ppbox::demux::MEDIA_TYPE_VIDE) {
@@ -101,6 +107,7 @@ namespace ppbox
                     (boost::uint8_t *)&video_header_buffer_, 16));
                 tag.data.push_back(boost::asio::buffer(stream_info.format_data));
                 video_header_size_ = spec_data_size + 16;
+                tag.size = video_header_size_ + 4;
                 video_header_size_ = framework::system::BytesOrder::big_endian_to_host_long(video_header_size_);
                 tag.data.push_back(boost::asio::buffer(
                     (boost::uint8_t *)&video_header_size_, 4));
@@ -136,14 +143,14 @@ namespace ppbox
 
                 if (stream_info.audio_format.sample_rate >= 44100 ) {
                     flv_audio_tag_header_.SoundRate = 3;
-                } else if (stream_info.audio_format.sample_rate >= 24000 ){
+                } else if (stream_info.audio_format.sample_rate >= 22000 ){
                     flv_audio_tag_header_.SoundRate = 2;
-                } else if (stream_info.audio_format.sample_rate >= 12000) {
+                } else if (stream_info.audio_format.sample_rate >= 11000) {
                     flv_audio_tag_header_.SoundRate = 1;
-                } else if (stream_info.audio_format.sample_rate >= 6000) {
+                } else if (stream_info.audio_format.sample_rate >= 5500) {
                     flv_audio_tag_header_.SoundRate = 0;
                 } else {
-                    flv_audio_tag_header_.SoundRate = 3;
+                    flv_audio_tag_header_.SoundRate = 0;
                 }
 
                 if (stream_info.audio_format.channel_count <= 1) {
@@ -165,6 +172,7 @@ namespace ppbox
                     (boost::uint8_t *)&audio_header_buffer_, 13));
                 tag.data.push_back(boost::asio::buffer(stream_info.format_data));
                 audio_header_size_ = spec_data_size + 13;
+                tag.size = audio_header_size_ + 4;
                 audio_header_size_ = framework::system::BytesOrder::big_endian_to_host_long(audio_header_size_);
                 tag.data.push_back(boost::asio::buffer(
                     (boost::uint8_t *)&audio_header_size_, 4));

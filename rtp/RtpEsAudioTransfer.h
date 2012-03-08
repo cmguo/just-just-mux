@@ -1,30 +1,29 @@
 // RtpEsAudioTransfer.h
 
-#ifndef   _PPBOX_MUX_RTP_ES_AUDIO_TRANSFER_H_
-#define   _PPBOX_MUX_RTP_ES_AUDIO_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_ES_AUDIO_TRANSFER_H_
+#define _PPBOX_MUX_RTP_ES_AUDIO_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpTransfer.h"
-#include "ppbox/mux/Muxer.h"
 
 namespace ppbox
 {
     namespace mux
     {
+
         class RtpEsAudioTransfer
             : public RtpTransfer
         {
         public:
             RtpEsAudioTransfer(
-                Muxer & muxer,
-                boost::uint8_t type);
+                Muxer & muxer);
 
             ~RtpEsAudioTransfer();
 
-            virtual void transfer(ppbox::demux::Sample & sample);
+            virtual void transfer(
+                MediaInfoEx & info);
 
-            virtual void get_rtp_info(MediaInfoEx & info);
-
-            virtual void on_seek(boost::uint32_t time, boost::uint32_t play_time);
+            virtual void transfer(
+                ppbox::demux::Sample & sample);
 
         private:
             boost::uint32_t time_scale_;

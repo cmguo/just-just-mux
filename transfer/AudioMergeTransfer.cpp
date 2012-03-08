@@ -3,6 +3,8 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/AudioMergeTransfer.h"
 
+#include <util/buffers/BufferCopy.h>
+
 namespace ppbox
 {
     namespace mux

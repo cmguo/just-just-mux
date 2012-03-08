@@ -16,39 +16,32 @@ namespace ppbox
 {
     namespace mux
     {
+
         class RtpTransfer
             : public Transfer
         {
         public:
             RtpTransfer(
-                boost::uint8_t type)
+                Muxer & muxer, 
+                std::string const & name, 
+                boost::uint8_t type);
+
+            virtual ~RtpTransfer();
+
+        public:
+            RtpInfo const & rtp_info() const
             {
-                static size_t g_ssrc = 0;
-                if (g_ssrc == 0) {
-                    g_ssrc = rand();
-                }
-                rtp_head_.vpxcc = 0x80;
-                rtp_head_.mpt = type;
-                rtp_head_.sequence = rand();
-                rtp_head_.timestamp = rand();
-                rtp_head_.ssrc = framework::system::BytesOrder::host_to_big_endian(g_ssrc++);
+                return rtp_info_;
             }
 
-            virtual ~RtpTransfer()
-            {
-            }
-
-            virtual void get_rtp_info(
-                MediaInfoEx & info)
-            {
-            }
-
+        public:
             virtual void on_seek(
                 boost::uint32_t time, 
-                boost::uint32_t play_time)
-            {
-            }
+                boost::uint32_t play_time);
 
+            virtual void setup();
+
+        protected:
             void clear(
                 boost::uint64_t cts_ustime)
             {
@@ -56,7 +49,6 @@ namespace ppbox
                 packets_.ustime = cts_ustime;
             }
 
-        protected:
             void push_packet(
                 RtpPacket & packet)
             {
@@ -69,20 +61,11 @@ namespace ppbox
                 packets_.push_back(packet);
             }
 
-            RtpSplitContent const & rtp_packets(void) const
-            {
-                return packets_;
-            }
-
-            RtpInfo & rep_info(void)
-            {
-                return rtp_info_;
-            }
-
         protected:
             RtpHead rtp_head_;
             RtpInfo rtp_info_;
             RtpSplitContent packets_;
+            boost::uint32_t time_scale_in_ms_; 
         };
     }
 }

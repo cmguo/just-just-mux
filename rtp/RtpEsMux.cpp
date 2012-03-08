@@ -18,6 +18,14 @@ namespace ppbox
     namespace mux
     {
 
+        RtpEsMux::RtpEsMux()
+        {
+        }
+
+        RtpEsMux::~RtpEsMux()
+        {
+        }
+
         void RtpEsMux::add_stream(
             MediaInfoEx & mediainfo)
         {
@@ -34,47 +42,19 @@ namespace ppbox
                     transfer = new PtsComputeTransfer();
                     mediainfo.transfers.push_back(transfer);
                 }
-                RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this, video_map_id_, 1436);
+                RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this);
                 mediainfo.transfers.push_back(rtp_transfer);
-                rtp_transfer->get_rtp_info(mediainfo);
-                transfers_.push_back(rtp_transfer);
+                add_transfer(rtp_transfer);
             } else if (ppbox::demux::MEDIA_TYPE_AUDI == mediainfo.type){
                 RtpTransfer * rtp_transfer = NULL;
                 if (mediainfo.sub_type == demux::AUDIO_TYPE_MP1A) {
-                    rtp_transfer = new RtpAudioMpegTransfer(*this, audio_map_id_);
+                    rtp_transfer = new RtpAudioMpegTransfer(*this);
                 } else {
-                    rtp_transfer = new RtpEsAudioTransfer(*this, audio_map_id_);
+                    rtp_transfer = new RtpEsAudioTransfer(*this);
                 }
                 mediainfo.transfers.push_back(rtp_transfer);
-                rtp_transfer->get_rtp_info(mediainfo);
-                transfers_.push_back(rtp_transfer);
+                add_transfer(rtp_transfer);
             }
-        }
-
-        void RtpEsMux::file_header(ppbox::demux::Sample & tag)
-        {
-            tag.data.clear();
-        }
-
-        void RtpEsMux::stream_header(
-            boost::uint32_t index, 
-            ppbox::demux::Sample & tag)
-        {
-            tag.data.clear();
-        }
-
-        error_code RtpEsMux::seek(
-            boost::uint32_t & time,
-            error_code & ec)
-        {
-            boost::uint32_t play_time = Muxer::current_time();
-            Muxer::seek(time, ec);
-            if (!ec || ec == boost::asio::error::would_block) {
-                for(boost::uint32_t i = 0; i < transfers_.size(); ++i) {
-                    transfers_[i]->on_seek(time, play_time);
-                }
-            }
-            return ec;
         }
 
     } // namespace mux

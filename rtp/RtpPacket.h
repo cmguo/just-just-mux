@@ -79,6 +79,7 @@ namespace ppbox
             boost::uint32_t ssrc;
             boost::uint16_t sequence;
             std::string sdp;
+            bool setup;
         };
 
     } // namespace mux
