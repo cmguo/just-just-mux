@@ -102,6 +102,7 @@ namespace ppbox
 
         boost::system::error_code RtpMux::get_rtp_info(
             std::string & rtp_info_out, 
+            boost::uint32_t & seek_time, 
             boost::system::error_code & ec)
         {
             std::ostringstream os;
@@ -109,10 +110,11 @@ namespace ppbox
                 RtpInfo const & rtp_info = rtp_transfers_[i]->rtp_info();
                 if (rtp_info.setup) {
                     os << "url=" << rtp_info_out;
-                    os << "/index=" << rtp_info.stream_index;
+                    os << "index=" << (boost::int32_t)rtp_info.stream_index;
                     os << ";seq=" << rtp_info.sequence;
                     os << ";rtptime=" << rtp_info.timestamp;
                     os << ",";
+                    seek_time = rtp_info.seek_time;
                 }
             }
             rtp_info_out = os.str();

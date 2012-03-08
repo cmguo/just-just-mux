@@ -147,6 +147,7 @@ namespace ppbox
                 ppbox::demux::BufferDemuxer *);
 
             void clear_send(boost::system::error_code const & ec);
+            void clear();
 
             struct Movie;
             void clear_movie(Movie* movie,boost::system::error_code const & ec);

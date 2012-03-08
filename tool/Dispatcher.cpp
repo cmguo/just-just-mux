@@ -40,24 +40,15 @@ namespace ppbox
             default_sink_ = &empty_sink_;
             default_sink_->attach();
 
-            video_type_ = 0;
-            audio_type_ = 0;
-            playing_ = false;
-            exit_ = false;
-            playmode_ = true;
-
             msgq_ = new MessageQueue<MessageQType*>;
-
-            cur_mov_= NULL;
-            append_mov_ = NULL;
-
-
+            clear();
         }
 
         Dispatcher::~Dispatcher()
         {
             if (dispatch_thread_) 
             {
+                msgq_->push(new MessageQType(PC_Exit,0));
                 dispatch_thread_->join();
                 delete dispatch_thread_;
                 dispatch_thread_ = NULL;
@@ -182,6 +173,7 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::start()
         {
+            clear();
             dispatch_thread_ = new boost::thread(
                 boost::bind(&Dispatcher::thread_dispatch, this));
             return error_code();
@@ -934,6 +926,18 @@ namespace ppbox
                 delete pp;
             }
             movie->sessions.clear();
+        }
+
+        void Dispatcher::clear()
+        {
+            video_type_ = 0;
+            audio_type_ = 0;
+            playing_ = false;
+            exit_ = false;
+            playmode_ = true;
+            //msgq_->
+            cur_mov_= NULL;
+            append_mov_ = NULL;
         }
 
         boost::system::error_code Dispatcher::play()

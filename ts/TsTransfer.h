@@ -68,7 +68,6 @@ namespace ppbox
             std::deque<boost::asio::const_buffer> ts_buffers_;
             std::vector<size_t> off_segs_;
             char pes_heaher_buffer_[19];
-            boost::uint32_t pes_header_size_;
         };
     }
 }

@@ -44,7 +44,7 @@ namespace ppbox
                     begin_index = 1;
                     lines = boost::uint32_t(duration / (seg_duration_ * 1000));
                 } else {
-                    lines = 5;
+                    lines = 3;
                 }
 
                 std::string line = M3U8_BEGIN;

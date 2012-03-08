@@ -38,6 +38,7 @@ namespace ppbox
 
             virtual boost::system::error_code get_rtp_info(
                 std::string & rtp_info_out, 
+                boost::uint32_t & seek_time,
                 boost::system::error_code & ec);
 
         public:

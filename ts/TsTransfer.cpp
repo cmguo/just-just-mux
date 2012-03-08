@@ -17,12 +17,14 @@ namespace ppbox
                 (MediaInfoEx const *)sample.media_info;
             boost::uint64_t dts = sample.dts;
             boost::uint64_t cts = sample.dts + (boost::int32_t)sample.cts_delta;
-            dts = AP4_ConvertTime(dts, timescale_, 90000);
-            cts = AP4_ConvertTime(cts, timescale_, 90000);
+            //dts = AP4_ConvertTime(dts, timescale_, 90000);
+            //cts = AP4_ConvertTime(cts, timescale_, 90000);
+            dts = dts * 90000 / timescale_;
+            cts = cts * 90000 / timescale_;
             if (stream_info->type == ppbox::demux::MEDIA_TYPE_VIDE) {
                 WritePES(sample, dts, true, cts, true);
             } else {
-                WritePES(sample, 0, false, dts, false);
+                WritePES(sample, dts, false, cts, false);
             }
         }
 
@@ -33,19 +35,24 @@ namespace ppbox
             boost::uint64_t pts, 
             bool with_pcr)
         {
+            MediaInfoEx const * stream_info = 
+                (MediaInfoEx const *)sample.media_info;
             boost::uint32_t frame_size = sample.size;
             ts_buffers_.clear();
             ts_headers_.clear();
             if (frame_size == 0) {
                 return;
             }
+            //dts += 117000;
+            //pts += 117000;
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             MyBuffersPosition position(limit);
-            pes_header_size_ = 14+(with_dts?5:0);
+            size_t pes_header_size = 14 + (with_dts ? 5 : 0);
             PESPacket pes_packet;
             pes_packet.stream_id = stream_id_;
-            pes_packet.PES_packet_length = 
-                stream_id_ == AP4_MPEG2_TS_DEFAULT_STREAM_ID_VIDEO ? 0 : (frame_size+pes_header_size_-6);
+            assert (frame_size + pes_header_size - 6 < 655356);
+            pes_packet.PES_packet_length = (stream_info->type == ppbox::demux::MEDIA_TYPE_VIDE)
+                ? 0 : (frame_size + pes_header_size - 6);
             pes_packet.PES_scrambling_control = 0;
             pes_packet.PES_priority = 0;
             pes_packet.data_alignment_indicator = 1;
@@ -58,7 +65,7 @@ namespace ppbox
             pes_packet.additional_copy_info_flag = 0;
             pes_packet.PES_CRC_flag = 0;
             pes_packet.PES_extension_flag = 0;
-            pes_packet.PES_header_data_length = pes_header_size_-9;
+            pes_packet.PES_header_data_length = pes_header_size - 9;
             pes_packet.reserved1 = with_dts ? 3 : 2;
             pes_packet.Pts32_30 = (pts >> 30) & 7;
             pes_packet.pts_marker_bit1 = 1;
@@ -67,7 +74,7 @@ namespace ppbox
             pes_packet.Pts14_0 = pts & 0x7FFF;
             pes_packet.pts_marker_bit3 = 1;
             if (with_dts) {
-                pes_packet.reserved2 = 3;
+                pes_packet.reserved2 = 1;
                 pes_packet.Dts32_30 = (dts >> 30) & 7;
                 pes_packet.dts_marker_bit1 = 1;
                 pes_packet.Dts29_15 = (dts>>15) & 0x7FFF;;
@@ -76,12 +83,14 @@ namespace ppbox
                 pes_packet.dts_marker_bit3 = 1;
             }
 
-            util::archive::ArchiveBuffer<char> buf(pes_heaher_buffer_, pes_header_size_);
+            //dts -= 117000;
+            //pts -= 117000;
+            util::archive::ArchiveBuffer<char> buf(pes_heaher_buffer_, pes_header_size);
             TsOArchive ts_archive(buf);
             ts_archive << pes_packet;
 
             bool first_packet = true;
-            frame_size += pes_header_size_; // add size of PES header
+            frame_size += pes_header_size; // add size of PES header
 
             boost::uint32_t ts_count = (frame_size + (with_pcr ? 8 : 0) + AP4_MPEG2TS_PACKET_PAYLOAD_SIZE - 1) / AP4_MPEG2TS_PACKET_PAYLOAD_SIZE;
             boost::uint32_t ts_total_size = ts_count * (AP4_MPEG2TS_PACKET_PAYLOAD_SIZE + 4);
@@ -102,8 +111,8 @@ namespace ppbox
                     ts_buffers_.push_back(boost::asio::buffer(ptr, head_size));
                     ts_head_pad_size -= head_size;
                     ptr += head_size;
-                    push_buffers(boost::asio::buffer(pes_heaher_buffer_, pes_header_size_));
-                    position.increment_bytes(limit, payload_size-pes_header_size_);
+                    push_buffers(boost::asio::buffer(pes_heaher_buffer_, pes_header_size));
+                    position.increment_bytes(limit, payload_size - pes_header_size);
                     push_buffers(MyBufferIterator(limit, begin, position), MyBufferIterator());
                     first_packet = false;
                 } else {
