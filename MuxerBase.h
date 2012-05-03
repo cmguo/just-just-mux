@@ -4,6 +4,7 @@
 
 #include "ppbox/avformat/codec/Codec.h"
 #include <ppbox/demux/base/DemuxerBase.h>
+#include <ppbox/demux/base/SourceBase.h>
 
 #include <boost/asio/buffer.hpp>
 
@@ -35,14 +36,13 @@ namespace ppbox
         struct MediaFileInfo
         {
             MediaFileInfo()
-                : duration(0)
-                , stream_count(0)
+                : stream_count(0)
                 , filesize(0)
                 , attachment(NULL)
             {
             }
 
-            boost::uint32_t duration;
+            ppbox::demux::DurationInfo duration_info;
             boost::uint32_t stream_count;
             boost::uint32_t filesize;
             void * attachment;

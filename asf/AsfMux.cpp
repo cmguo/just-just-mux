@@ -153,7 +153,7 @@ namespace ppbox
             file_object.ObjLength = 104;
             file_object.FileId.generate();
             file_object.FileSize = 104;
-            file_object.PlayDuration = media_info_.duration;
+            file_object.PlayDuration = media_info_.duration_info.total;
             file_object.Flag.BroadcastFlag = 1;
             //file_object.Flag.SeekableFlag = 0;
             file_object.Flag.Reserved = 1;

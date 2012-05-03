@@ -407,6 +407,8 @@ namespace ppbox
             cur_mov_->muxer->seek(param->beg_,ec);
 
             size_t n = 0;
+            boost::uint32_t buffertime = 0;
+            //cur_mov_->muxer->get_buffer_time(buffertime, ec);
             while (ec == boost::asio::error::would_block) {
                 boost::this_thread::sleep(boost::posix_time::milliseconds(100));
                 ++n;
@@ -416,12 +418,13 @@ namespace ppbox
                 }
                 if (n == 5) {
                     cur_mov_->muxer->seek(param->beg_,ec);
+                    //cur_mov_->muxer->get_buffer_time(buffertime, ec);
                     n = 0;
                 }
             }
             
             if (!ec)
-            {  
+            {
                 if((boost::uint32_t(-1) != param->end_))
                 {
                     cur_mov_->muxer->reset();
@@ -964,6 +967,10 @@ namespace ppbox
 
                 if (!ec)
                 {
+                    boost::uint32_t buffer_time = 0;
+                    boost::system::error_code ec_3;
+                    //cur_mov_->muxer->get_buffer_time(buffer_time, ec_3);
+
                     //限制播放的最大时长
                     if (tag.ustime > seek_end64)
                     {
@@ -1038,8 +1045,9 @@ namespace ppbox
                         break;
                     }
                     boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-                    start_time_valid = false;
                     
+                    start_time_valid = false;
+
                 }
             }
 

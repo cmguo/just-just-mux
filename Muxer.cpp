@@ -52,7 +52,7 @@ namespace ppbox
         error_code Muxer::open_impl(error_code & ec)
         {
             assert(demuxer_ != NULL);
-            media_info_.duration = demuxer_->get_duration(ec);
+            demuxer_->get_duration(media_info_.duration_info, ec);
             media_info_.stream_count = demuxer_->get_media_count(ec);
             if (!ec) {
                 media_info_.filesize = 0;
@@ -149,7 +149,7 @@ namespace ppbox
             boost::uint32_t & offset,
             boost::system::error_code & ec)
         {
-            boost::uint32_t seek_time = (offset * media_info_.duration) / media_info_.filesize;
+            boost::uint32_t seek_time = (offset * media_info_.duration_info.total) / media_info_.filesize;
             return seek(seek_time, ec);
         }
 

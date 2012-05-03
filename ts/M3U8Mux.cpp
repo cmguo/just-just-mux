@@ -60,7 +60,7 @@ namespace ppbox
 
         MediaFileInfo & M3U8Mux::mediainfo(void)
         {
-            m3u8_cache_ = m3u8_protocol_.create(begin_index_, Muxer::mediainfo().duration);
+            m3u8_cache_ = m3u8_protocol_.create(begin_index_, Muxer::mediainfo().duration_info.total);
             Muxer::mediainfo().attachment = (void*)&m3u8_cache_;
             return Muxer::mediainfo();
         }
