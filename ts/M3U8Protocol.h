@@ -7,6 +7,14 @@
 
 namespace ppbox
 {
+    namespace demux
+    {
+        struct DurationInfo;
+    }
+}
+
+namespace ppbox
+{
     namespace mux
     {
         class Muxer;
@@ -20,11 +28,11 @@ namespace ppbox
 
             std::string create(
                 boost::uint32_t begin_index,
-                boost::uint32_t duration);
+                ppbox::demux::DurationInfo const & info);
 
             std::string create(
              boost::uint32_t begin_index,
-             boost::uint32_t duration,
+             ppbox::demux::DurationInfo const & info,
              std::string full_path);
 
             std::string create(

@@ -14,6 +14,7 @@ namespace ppbox
     namespace demux
     {
         class BufferDemuxer;
+        struct DurationInfo;
     }
 
     namespace mux
@@ -72,6 +73,10 @@ namespace ppbox
 
             boost::system::error_code byte_seek(
                 boost::uint32_t & offset,
+                boost::system::error_code & ec);
+
+            boost::system::error_code get_duration(
+                ppbox::demux::DurationInfo & info, 
                 boost::system::error_code & ec);
 
             boost::system::error_code pause(

@@ -37,17 +37,17 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
             boost::uint32_t begin_index,
-            boost::uint32_t duration)
+            ppbox::demux::DurationInfo const & info)
         {
             boost::uint32_t lines = 0;
             boost::uint32_t Redundancy_size = 3;
-            if (duration > 0) {
+            if (info.total > 0) {
                 begin_index = 1;
-                lines = boost::uint32_t(duration / (seg_duration_ * 1000));
+                lines = boost::uint32_t(info.total / (seg_duration_ * 1000));
                 create(begin_index, lines, true);
             } else {
-                boost::uint32_t buffer_time_ms = back_seek_time_;
-                lines = buffer_time_ms  / seg_duration_ + Redundancy_size;
+                boost::uint32_t buffer_time = info.end - info.begin;
+                lines = buffer_time / seg_duration_ + Redundancy_size;
                 boost::uint32_t end_index = 0;
                 if (context_.empty()) {
                     begin_index = 1;
@@ -64,11 +64,11 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
          boost::uint32_t begin_index,
-         boost::uint32_t duration,
+         ppbox::demux::DurationInfo const & info,
          std::string full_path)
         {
             full_path_ = full_path;
-            return create(begin_index, duration);
+            return create(begin_index, info);
         }
 
         std::string M3U8Protocol::create(

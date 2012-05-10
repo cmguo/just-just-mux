@@ -144,8 +144,6 @@ namespace ppbox
             mux_info->demuxer = demuxer;
             mux_info->muxer->open(mux_info->demuxer, ec);
             if (!ec) {
-                boost::uint32_t seek_time = 0;
-                mux_info->muxer->seek(seek_time, ec);
                 return mux_info->muxer;
             }
             return NULL;

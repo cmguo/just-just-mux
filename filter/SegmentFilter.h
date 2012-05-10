@@ -35,13 +35,6 @@ namespace ppbox
                 return segent_end_time_;
             }
 
-            void reset()
-            {
-                fisrt_idr_timestamp_us_ = boost::uint64_t(-1);
-                is_save_sample_ = false;
-                segent_end_time_ = 0;
-            }
-
         private:
             boost::uint64_t segent_end_time_;
             boost::uint64_t fisrt_idr_timestamp_us_;

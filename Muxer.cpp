@@ -153,6 +153,18 @@ namespace ppbox
             return seek(seek_time, ec);
         }
 
+        error_code Muxer::get_duration(
+            DurationInfo & info, 
+            error_code & ec)
+        {
+            if (!is_open()) {
+                ec = error::mux_not_open;
+            } else {
+                demuxer_->get_duration(info, ec);
+            }
+            return ec;
+        }
+
         error_code Muxer::pause(
             error_code & ec)
         {
