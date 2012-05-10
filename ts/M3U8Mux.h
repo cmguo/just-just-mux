@@ -15,17 +15,9 @@ namespace ppbox
             : public TsMux
         {
         public:
-            M3U8Mux()
-                : begin_index_(1)
-                , m3u8_protocol_(*this)
-                , segment_filter_(Muxer::mediainfo())
-            {
-                add_filter(segment_filter_);
-            }
+            M3U8Mux();
 
-            ~M3U8Mux()
-            {
-            }
+            ~M3U8Mux();
 
         public:
             void add_stream(
