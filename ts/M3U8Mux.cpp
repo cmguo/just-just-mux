@@ -53,6 +53,7 @@ namespace ppbox
                     seek_time *= 1000;
                     Muxer::seek(seek_time, ec);
                     if (!ec || ec == boost::asio::error::would_block) {
+                        segment_filter_.reset();
                         segment_filter_.segment_end_time() 
                             = (boost::uint64_t)segment_index * m3u8_protocol_.segment_duration() * 1000000;
                     } else {

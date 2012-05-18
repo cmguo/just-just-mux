@@ -26,12 +26,15 @@ namespace ppbox
                 if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1)
                     && media_file_info().stream_infos[sample.itrack].type == ppbox::demux::MEDIA_TYPE_VIDE
                     && (sample.flags & demux::Sample::sync)) {
-                        fisrt_idr_timestamp_us_ = sample.ustime;
+                        // fisrt_idr_timestamp_us_ = sample.ustime;
+                        fisrt_idr_timestamp_us_ = 0;
                 } else {
                     if (media_file_info().stream_infos[sample.itrack].type == ppbox::demux::MEDIA_TYPE_VIDE
                         && (sample.flags & demux::Sample::sync)) {
                             if ((sample.ustime - fisrt_idr_timestamp_us_) 
                                 >= segent_end_time_ ) {
+                                    std::cout << "m3u8 segment end time: " << segent_end_time_ 
+                                        << " last sample time: " << sample.ustime << std::endl;
                                     ec = error::mux_segment_end;
                                     is_save_sample_ = true;
                                     sample_ = sample;
