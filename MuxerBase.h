@@ -42,7 +42,7 @@ namespace ppbox
             {
             }
 
-            ppbox::demux::DurationInfo duration_info;
+            ppbox::cdn::DurationInfo duration_info;
             boost::uint32_t stream_count;
             boost::uint32_t filesize;
             void * attachment;

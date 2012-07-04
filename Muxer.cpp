@@ -154,7 +154,7 @@ namespace ppbox
         }
 
         error_code Muxer::get_duration(
-            DurationInfo & info, 
+            ppbox::cdn::DurationInfo & info, 
             error_code & ec)
         {
             if (!is_open()) {

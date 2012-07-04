@@ -14,7 +14,11 @@ namespace ppbox
     namespace demux
     {
         class BufferDemuxer;
-        struct DurationInfo;
+    }
+
+    namespace cdn
+    {
+         struct DurationInfo;
     }
 
     namespace mux
@@ -76,7 +80,7 @@ namespace ppbox
                 boost::system::error_code & ec);
 
             boost::system::error_code get_duration(
-                ppbox::demux::DurationInfo & info, 
+                ppbox::cdn::DurationInfo & info, 
                 boost::system::error_code & ec);
 
             boost::system::error_code pause(

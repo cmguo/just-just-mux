@@ -7,7 +7,7 @@
 
 namespace ppbox
 {
-    namespace demux
+    namespace cdn
     {
         struct DurationInfo;
     }
@@ -28,11 +28,11 @@ namespace ppbox
 
             std::string create(
                 boost::uint32_t begin_index,
-                ppbox::demux::DurationInfo const & info);
+                ppbox::cdn::DurationInfo const & info);
 
             std::string create(
              boost::uint32_t begin_index,
-             ppbox::demux::DurationInfo const & info,
+             ppbox::cdn::DurationInfo const & info,
              std::string full_path);
 
             std::string create(
