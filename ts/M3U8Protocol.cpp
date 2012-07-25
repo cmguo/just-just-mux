@@ -4,6 +4,7 @@
 #include "ppbox/mux/ts/M3U8Protocol.h"
 #include "ppbox/mux/Muxer.h"
 
+
 #include <framework/string/Format.h>
 #include <sstream>
 #include <iostream>
@@ -37,7 +38,7 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
             boost::uint32_t begin_index,
-            ppbox::cdn::DurationInfo const & info)
+            ppbox::common::DurationInfo const & info)
         {
             boost::uint32_t lines = 0;
             boost::uint32_t Redundancy_size = 3;
@@ -64,7 +65,7 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
          boost::uint32_t begin_index,
-         ppbox::cdn::DurationInfo const & info,
+         ppbox::common::DurationInfo const & info,
          std::string full_path)
         {
             full_path_ = full_path;
