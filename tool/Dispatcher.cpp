@@ -75,8 +75,7 @@ namespace ppbox
             session_id = g_session_id++;
 
             LOG_S(Logger::kLevelEvent, "[open] session_id:"<<session_id<<
-                " playlink:"<<play_link
-                <<" params:"<<params.to_string()<<" format:"<<format);
+                " playlink:"<<play_link<<" format:"<<format);
 
             msgq_->push(new MessageQType(PC_Open,session_id,resp,play_link,params,format,need_session));
 
@@ -235,7 +234,6 @@ namespace ppbox
                 {
                     param->play_link_ = cur_mov_->play_link;
                     param->format_ = cur_mov_->format;
-                    cur_mov_->params = cur_mov_->params;
                 }
             }
 
@@ -310,10 +308,10 @@ namespace ppbox
                 else //  if (param->play_link_ != append_mov_->play_link)
                 {
                     // opening, opened, cancelling, cancel_delay, close_delay
-                    if(append_mov_->muxer != NULL) 
+                    if(append_mov_->demuxer != NULL) 
                     {
                         //openned close_delay
-                        // append_mov_->muxer->close();  //切换muxer
+                        //切换muxer
                         ec.clear();
                         append_mov_->muxer = muxer_module().open(
                             append_mov_->demuxer,
@@ -326,10 +324,17 @@ namespace ppbox
             else
             {//openning openned cancelling, cancel_delay, close_delay
                 //play_link 相同 type也相同
-                parse_params(append_mov_->muxer,param->params_);
                 if (append_mov_->demuxer != NULL)
                 {
                     // close_delay  openned
+                    if (append_mov_->muxer == NULL)
+                    {
+                        append_mov_->muxer = muxer_module().open(
+                            append_mov_->demuxer,
+                            param->format_,
+                            append_mov_->mux_close_token);
+                    }
+                    parse_params(append_mov_->muxer,param->params_);
                     if (param->need_session) {
                         boost::uint32_t iseek = 0;
                         append_mov_->muxer->seek(iseek,ec);
@@ -728,7 +733,8 @@ namespace ppbox
             assert(NULL != pMsgType);
             session_id = pMsgType->session_id_;
 
-            if ( (pMsgType->msg_ > PC_Session) && (NULL != cur_mov_ &&session_id !=0 && cur_mov_->muxer != NULL && session_id != cur_mov_->session_id) )
+            if ( (pMsgType->msg_ > PC_Session) && 
+                ((NULL == cur_mov_ || cur_mov_->muxer == NULL) || (session_id > 0 && session_id != cur_mov_->session_id)))
             {
                 boost::system::error_code ec1 = ppbox::mux::error::mux_not_open;
 

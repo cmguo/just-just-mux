@@ -6,9 +6,10 @@
 
 #include <ppbox/avformat/flv/FlvFormat.h>
 #include <ppbox/avformat/flv/FlvTagType.h>
-#include <framework/system/BytesOrder.h>
-#include <util/buffers/BufferSize.h>
+
 #include <util/archive/ArchiveBuffer.h>
+
+#include <framework/system/BytesOrder.h>
 
 namespace ppbox
 {

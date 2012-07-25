@@ -8,8 +8,7 @@
 #include <framework/string/Format.h>
 #include <framework/string/Base64.h>
 
-#include <util/buffers/BufferSize.h>
-#include <util/buffers/BufferCopy.h>
+#include <util/buffers/BuffersCopy.h>
 
 namespace ppbox
 {
@@ -79,7 +78,7 @@ namespace ppbox
         {
             std::string asf_head;
             asf_head.resize(util::buffers::buffers_size(tag.data));
-            util::buffers::buffer_copy(boost::asio::buffer(&asf_head[0], asf_head.size()), tag.data);
+            util::buffers::buffers_copy(boost::asio::buffer(&asf_head[0], asf_head.size()), tag.data);
             sdp += "a=maxps:1024\r\n";
             sdp += "a=pgmpu:data:application/vnd.ms.wms-hdr.asf1;base64," 
                 + framework::string::Base64::encode(asf_head) 

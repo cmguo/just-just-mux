@@ -5,8 +5,6 @@
 using namespace ppbox::demux;
 using namespace ppbox::mux;
 
-#include <util/buffers/BufferCopy.h>
-#include <util/buffers/BufferSize.h>
 #include <util/archive/ArchiveBuffer.h>
 
 #include <bento4/Core/Ap4ByteStream.h>
@@ -14,7 +12,6 @@ using namespace ppbox::mux;
 #include <bento4/Core/Ap4SampleDescription.h>
 #include <bento4/Core/Ap4Utils.h>
 
-#include <iostream>
 #include <stdio.h>
 
 namespace ppbox

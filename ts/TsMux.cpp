@@ -14,8 +14,6 @@
 
 using namespace ppbox::demux;
 
-#include <util/buffers/BufferCopy.h>
-#include <util/buffers/BufferSize.h>
 #include <util/archive/ArchiveBuffer.h>
 
 using namespace boost::system;

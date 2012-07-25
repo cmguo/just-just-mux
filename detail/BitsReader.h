@@ -5,7 +5,7 @@
 
 #include <util/buffers/BuffersFind.h>
 
-#include <util/buffers/BufferSize.h>
+#include <util/buffers/BuffersSize.h>
 
 namespace ppbox
 {

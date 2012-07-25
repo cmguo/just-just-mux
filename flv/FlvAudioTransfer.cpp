@@ -4,7 +4,6 @@
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 
 #include <framework/system/BytesOrder.h>
-#include <util/buffers/BufferSize.h>
 using namespace framework::system;
 
 namespace ppbox

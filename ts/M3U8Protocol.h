@@ -39,6 +39,7 @@ namespace ppbox
             std::string create(
                 boost::uint32_t begin,
                 boost::uint32_t end,
+                boost::uint32_t last_segment_time,
                 bool with_end_list);
 
             boost::uint32_t segment_duration(void);
