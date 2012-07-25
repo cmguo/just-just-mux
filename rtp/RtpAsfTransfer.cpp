@@ -44,7 +44,7 @@ namespace ppbox
             sdp += "a=stream:" 
                 + framework::string::format(info.index + 1)
                 + "\r\n";
-            sdp += "a=control:index="
+            sdp += "a=control:track"
                 + framework::string::format(info.index)
                 + "\r\n";
             rtp_info_.sdp += sdp;

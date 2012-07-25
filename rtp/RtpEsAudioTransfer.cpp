@@ -55,7 +55,7 @@ namespace ppbox
                 + ";indexDeltaLength=3"
                 + ";config=" + Base16::encode(std::string((char const *)&media.format_data.at(0), media.format_data.size()))
                 + "\r\n";
-            rtp_info_.sdp += "a=control:index=" + format(media.index) + "\r\n";
+            rtp_info_.sdp += "a=control:track" + format(media.index) + "\r\n";
 
             rtp_info_.stream_index = media.index;
         }

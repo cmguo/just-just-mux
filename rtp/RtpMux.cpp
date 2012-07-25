@@ -96,7 +96,10 @@ namespace ppbox
                 RtpInfo const & rtp_info = rtp_transfers_[i]->rtp_info();
                 if (rtp_info.setup) {
                     os << "url=" << rtp_info_out;
-                    os << "/index=" << (boost::int32_t)rtp_info.stream_index;
+                    if(rtp_info_out[rtp_info_out.size()-1] == '/')
+                        os << "track" << (boost::int32_t)rtp_info.stream_index;
+                    else
+                        os << "/track" << (boost::int32_t)rtp_info.stream_index;
                     os << ";seq=" << rtp_info.sequence;
                     os << ";rtptime=" << rtp_info.timestamp;
                     os << ",";

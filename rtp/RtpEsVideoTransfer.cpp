@@ -81,7 +81,7 @@ namespace ppbox
                 + " packetization-mode=1" 
                 + ";profile-level-id=" + profile_level_id_str
                 + ";sprop-parameter-sets=" + sps + "," + pps + "\r\n";
-            rtp_info_.sdp += "a=control:index=" + format(media.index) + "\r\n";
+            rtp_info_.sdp += "a=control:track" + format(media.index) + "\r\n";
 
             rtp_info_.stream_index = media.index;
 

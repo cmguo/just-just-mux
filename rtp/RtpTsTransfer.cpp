@@ -28,7 +28,7 @@ namespace ppbox
         {
             rtp_info_.sdp = "m=video 0 RTP/AVP 33\r\n";
             rtp_info_.sdp += "a=rtpmap:33 MP2T/90000\r\n";
-            rtp_info_.sdp += "a=control:index=-1\r\n";
+            rtp_info_.sdp += "a=control:track-1\r\n";
 
             scale_.reset(90000, 90000);
         }

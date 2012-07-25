@@ -31,7 +31,7 @@ namespace ppbox
             rtp_info_.sdp += "a=rtpmap:" + map_id_str + " mpa/90000" 
                 + "/" + format(media.audio_format.channel_count)
                 + "\r\n";
-            rtp_info_.sdp += "a=control:index=" + format(media.index) + "\r\n";
+            rtp_info_.sdp += "a=control:track" + format(media.index) + "\r\n";
 
             rtp_info_.stream_index = media.index;
 
