@@ -1,9 +1,10 @@
 // PackageJoinTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/elements.h"
 #include "ppbox/mux/transfer/PackageJoinTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
+
+#include <ppbox/avformat/codec/AvcNalu.h>
 
 #include <framework/system/BytesOrder.h>
 
@@ -22,9 +23,9 @@ namespace ppbox
             }
             Nalu const * nalu = NULL;
             for (boost::uint32_t i = 0; i < nalus->size(); ++i) {
-                Nal_header nalu_header = *(Nal_header*)&nalus->at(i).begin.dereference_byte();
-                if (nalu_header.nal_unit_type == NALUType::IDR 
-                    || nalu_header.nal_unit_type == NALUType::UNIDR) {
+                avformat::NaluHeader const nalu_header(nalus->at(i).begin.dereference_byte());
+                if (nalu_header.nal_unit_type == avformat::NaluHeader::IDR 
+                    || nalu_header.nal_unit_type == avformat::NaluHeader::UNIDR) {
                         nalu = &nalus->at(i);
                         break;
                 }

@@ -107,7 +107,6 @@ namespace ppbox
                 filters_.push_back(&filter);
             }
 
-
         private:
             boost::system::error_code get_sample(
                 ppbox::demux::Sample & sample,

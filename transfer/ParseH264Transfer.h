@@ -4,7 +4,6 @@
 #define _PPBOX_MUX_TRANSFER_PARSE_H264_TRANSFER_H_
 
 #include "ppbox/mux/transfer/Transfer.h"
-#include "ppbox/mux/tinyvlc.h"
 
 namespace ppbox
 {
@@ -22,10 +21,11 @@ namespace ppbox
             {
             }
 
-            void transfer(ppbox::demux::Sample & sample);
+            virtual void transfer(
+                ppbox::mux::MediaInfoEx & media);
 
-        private:
-            NaluParser nalu_parser_;
+            virtual void transfer(
+                ppbox::demux::Sample & sample);
         };
     }
 }

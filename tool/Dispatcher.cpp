@@ -10,6 +10,7 @@
 #include <ppbox/demux/base/DemuxerError.h>
 #include <ppbox/demux/base/SourceError.h>
 
+#include <framework/timer/TickCounter.h>
 #include <framework/system/LogicError.h>
 #include <framework/thread/MessageQueue.h>
 #include <framework/logger/LoggerStreamRecord.h>
@@ -24,6 +25,8 @@ using namespace boost::system;
 
 FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("Dispatcher", 0)
 
+#define TIMEOUT_VALUE 10000
+
 namespace ppbox
 {
     namespace mux
@@ -34,6 +37,7 @@ namespace ppbox
             , demuxer_module_(util::daemon::use_module<ppbox::demux::DemuxerModule>(daemon))
             , muxer_module_(util::daemon::use_module<MuxerModule>(daemon))
             , dispatch_thread_(NULL)
+            , timeout_(TIMEOUT_VALUE)
         {
             empty_sink_.attach();
 
@@ -61,7 +65,7 @@ namespace ppbox
                 msgq_ = NULL;
             }
         }
-       
+
         error_code Dispatcher::open(
             boost::uint32_t& session_id,
             std::string const & play_link,
@@ -232,6 +236,7 @@ namespace ppbox
                 }
                 else
                 {
+                    param->params_ = cur_mov_->params;
                     param->play_link_ = cur_mov_->play_link;
                     param->format_ = cur_mov_->format;
                 }
@@ -255,12 +260,12 @@ namespace ppbox
                 boost::system::error_code ec1 = boost::asio::error::operation_aborted;
                 // opening, opened, cancelling, cancel_delay, close_delay
                 /*for (Movie::Iter iter = append_mov_->sessions.begin();
-                    iter != append_mov_->sessions.end();
-                    ++iter)
+                iter != append_mov_->sessions.end();
+                ++iter)
                 {
-                    //io_srv_.post(boost::bind((*iter)->resq_,ec));
-                    (*iter)->resq_(ec1);
-                    delete (*iter);
+                //io_srv_.post(boost::bind((*iter)->resq_,ec));
+                (*iter)->resq_(ec1);
+                delete (*iter);
                 }
                 append_mov_->sessions.clear();*/
                 clear_movie(append_mov_,ec1);
@@ -294,11 +299,11 @@ namespace ppbox
                         }
                         else
                         {
-                               append_mov_->demuxer = NULL;
-                               demuxer_module().async_open(
-                                   param->play_link_,
-                                   append_mov_->close_token,
-                                   boost::bind(&Dispatcher::open_call_back_mux,this,param->session_id_, _1, _2));
+                            append_mov_->demuxer = NULL;
+                            demuxer_module().async_open(
+                                param->play_link_,
+                                append_mov_->close_token,
+                                boost::bind(&Dispatcher::open_call_back_mux,this,param->session_id_, _1, _2));
                         }
                     }
                     // cancelling, wait
@@ -317,7 +322,7 @@ namespace ppbox
                             append_mov_->demuxer,
                             param->format_,
                             append_mov_->mux_close_token);
-                        parse_params(append_mov_->muxer,append_mov_->params);
+                        parse_params(append_mov_->params);
                     }
                 }
             }
@@ -334,7 +339,7 @@ namespace ppbox
                             param->format_,
                             append_mov_->mux_close_token);
                     }
-                    parse_params(append_mov_->muxer,param->params_);
+                    parse_params(param->params_);
                     if (param->need_session) {
                         boost::uint32_t iseek = 0;
                         append_mov_->muxer->seek(iseek,ec);
@@ -344,7 +349,7 @@ namespace ppbox
                 }
             }
             // closed, opening, opened, cancelling, cancel_delay, close_delay
-            
+
             append_mov_->format = param->format_;
 
             if (ec == boost::asio::error::would_block) 
@@ -381,7 +386,7 @@ namespace ppbox
             {
                 playing_ = true;
             }
-             return ec;
+            return ec;
         }
 
         boost::system::error_code Dispatcher::thread_record(MessageQType* &param)
@@ -417,8 +422,8 @@ namespace ppbox
             {
                 if(!play_resq_.empty())
                 {
-                   play_resq_(boost::asio::error::operation_aborted);
-                   session_callback_respone().swap(play_resq_);
+                    play_resq_(boost::asio::error::operation_aborted);
+                    session_callback_respone().swap(play_resq_);
                 }
                 play_resq_.swap(param->resq_);
                 playing_ = true;
@@ -427,7 +432,7 @@ namespace ppbox
 
             return ec;
         }
-        
+
         boost::system::error_code Dispatcher::thread_seek(MessageQType* &param)
         {
             boost::system::error_code ec;
@@ -451,7 +456,7 @@ namespace ppbox
                     n = 0;
                 }
             }
-            
+
             if (!ec)
             {
                 if((boost::uint32_t(-1) != param->end_))
@@ -468,7 +473,7 @@ namespace ppbox
             {
                 LOG_S(Logger::kLevelError,"[thread_seek] Seek code : "<<ec.value()<<" msg"<<ec.message());
             }
-            
+
             return ec;
         }
 
@@ -484,7 +489,7 @@ namespace ppbox
             boost::system::error_code ec;
             assert(NULL != cur_mov_);
             assert(NULL == cur_mov_->muxer);
-            
+
             if(cur_mov_->close_token)
             {
                 //openning cancel_delay
@@ -498,7 +503,7 @@ namespace ppbox
                     cur_mov_->muxer = muxer_module().open(cur_mov_->demuxer,
                         cur_mov_->format,
                         cur_mov_->mux_close_token);
-                    parse_params(cur_mov_->muxer,cur_mov_->params);
+                    parse_params(cur_mov_->params);
 
                     if (NULL == cur_mov_->muxer)
                     {
@@ -598,7 +603,7 @@ namespace ppbox
                 //assert(false);
                 return framework::system::logic_error::item_not_exist;
             }
-            
+
             if (NULL != cur_mov_->muxer)
             {
                 if (session_id == cur_mov_->session_id)
@@ -612,7 +617,7 @@ namespace ppbox
                 Movie::Iter iter = find_if(append_mov_->sessions.begin(), append_mov_->sessions.end() ,FindBySession(session_id));
                 if (iter != append_mov_->sessions.end())
                 {//openning wait
-                    
+
                     LOG_S(Logger::kLevelError, "[thread_close] find_if "<<session_id);
                     MessageQType *pMsg = (*iter);
                     append_mov_->sessions.erase(iter);
@@ -634,7 +639,7 @@ namespace ppbox
                     {
                         //append_mov_->session_id = append_mov_->sessions[append_mov_->sessions.size()-1]->session_id_;
                     }
-                    
+
                 }/*end  (iter != append_mov_->sessions.end()) */
             }
             return error_code();
@@ -650,12 +655,12 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::thread_timeout()
         {
-            
+
             boost::system::error_code ec;
             if(NULL == append_mov_)
                 return error_code();
 
-                //openning canceling cancel_delay colose_delay openned
+            //openning canceling cancel_delay colose_delay openned
 
             if(cur_mov_->delay)
             {//close_delay cancel_delay canceling
@@ -664,7 +669,7 @@ namespace ppbox
                     muxer_module().close(append_mov_->mux_close_token,ec);
                     cur_mov_->muxer = NULL;
                 }
-         
+
                 if (cur_mov_->close_token) {
                     demuxer_module().close(cur_mov_->close_token,ec);
                     cur_mov_->close_token = 0;
@@ -718,7 +723,7 @@ namespace ppbox
                     sink_.resize(control, &empty_sink_);
                     sink_.push_back(sink);
                 }
-                
+
             }
             return ec;
         }
@@ -738,8 +743,7 @@ namespace ppbox
             {
                 boost::system::error_code ec1 = ppbox::mux::error::mux_not_open;
 
-                LOG_S(Logger::kLevelError, "[thread_command] session_id:"<<session_id<<
-                    " old_id:"<<cur_mov_->session_id);
+                LOG_S(Logger::kLevelError, "[thread_command] session_id:"<<session_id);
 
                 if (!pMsgType->resq_.empty()) {
                     pMsgType->resq_(ec1);
@@ -848,7 +852,7 @@ namespace ppbox
 
             if (playing_)
                 play();
-            
+
             return boost::system::error_code();
         }
 
@@ -903,12 +907,58 @@ namespace ppbox
             return status_str[index];
         }
 
+        boost::system::error_code Dispatcher::wait(
+            framework::timer::ClockTime::time_type& expire)
+        {
+            while(framework::timer::ClockTime::time_type::now() < expire)
+            {
+                if(!msgq_->empty())
+                    break;
+
+                boost::system::error_code ec1,ec2;
+                for (boost::int32_t ii = 0; ii < 10; ++ii)
+                {
+                    boost::uint32_t buffer_time = cur_mov_->demuxer->get_buffer_time(ec1,ec2);
+                    if (ec2 == boost::asio::error::would_block)
+                    {
+                        break;
+                    }
+                    else if (ec2)
+                    {
+                        return ec2;
+                    }
+                }
+
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+            }
+            return boost::system::error_code();
+        }
+
         void Dispatcher::thread_dispatch()
         {
             MessageQType* pMsgType = NULL;
 
-            while(!exit_) {
-                if( msgq_->timed_pop(pMsgType,boost::posix_time::milliseconds(10*1000)) )
+            while(!exit_) 
+            {
+                if(NULL == cur_mov_) timeout_=TIMEOUT_VALUE;
+                framework::timer::ClockTime::time_type expire = 
+                    framework::timer::ClockTime::time_type::now() 
+                    + framework::timer::ClockTime::duration_type::milliseconds(timeout_);
+                if(cur_mov_ && cur_mov_->demuxer)
+                {
+                    boost::system::error_code ec = wait(expire);
+                }
+
+                framework::timer::ClockTime::time_type new_expire = 
+                    framework::timer::ClockTime::time_type::now() ;
+                if (expire < new_expire)
+                {
+                    LOG_SECTION();
+                    thread_timeout();
+                    continue;
+                }
+
+                if( msgq_->timed_pop(pMsgType,boost::posix_time::milliseconds((expire-new_expire).total_milliseconds())))
                 {
                     LOG_SECTION();
 
@@ -916,28 +966,21 @@ namespace ppbox
                     PlayControl msg = pMsgType->msg_;
                     LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin, session:" << session_id 
                         << ", msg:" << play_event_str[msg]
-                        << ", status:" << status_string());
+                    << ", status:" << status_string());
 
                     thread_command(pMsgType);
 
                     LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended, session:" << session_id 
                         << ", msg:" << play_event_str[msg]
-                        << ", status:" << status_string());
+                    << ", status:" << status_string());
                 }
-                else if (cur_mov_ && cur_mov_->delay)
+                else
                 {
-                    //超时处理位置
                     LOG_SECTION();
                     LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin, session:0, msg:PC_Timeout, status:" << status_string());
-
                     thread_timeout();
-
                     LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended, session:0, msg:PC_Timeout, status:" << status_string());
                 }
-                //else
-                //{
-                //    std::cout << "[thread_dispatch] idle" << std::endl;
-                //}
             }
 
         }
@@ -1041,24 +1084,73 @@ namespace ppbox
                         start_time + boost::posix_time::microseconds(tag.ustime);
 
                     //限速模块
-                    if(playmode_  && tag.itrack == audio_type_)
+                    if(playmode_ && tag.itrack == audio_type_)
                     {
                         if (send_time > now)
                         {
                             //std::cout<<"Sleep :"<< (send_time - now).total_microseconds() << std::endl;
                             boost::this_thread::sleep(send_time - now);
                         }
+
                     }
-                    
-                    //输出音视频信息
-                    if(tag.itrack < sink_.size())
+
+                    do
                     {
-                        ec = sink_[tag.itrack]->write(send_time, tag);
-                    }
-                    else
-                    {
-                        ec = default_sink_->write(send_time, tag);
-                    }
+                        size_t isend = 0;
+                        //输出音视频信息
+                        if(tag.itrack < sink_.size())
+                        {
+                            isend = sink_[tag.itrack]->write(send_time, tag,ec);
+                        }
+                        else
+                        {
+                            isend = default_sink_->write(send_time, tag,ec);
+                        }
+
+                        //
+                        if (!msgq_->empty()) {
+                            break;
+                        }
+
+                        //if(isend > 0) std::cout<<"would_block total:"<<tag.size<<" isend:"<<isend<<std::endl;
+                        if(ec == boost::asio::error::would_block)
+                        {
+                            // 计算时间值 1 秒调一个get_buffer_time
+                            // tag 去除已发送的数据
+                            if(isend > 0)
+                            {
+                                tag.size = tag.size > isend?tag.size-isend:0;
+                                size_t size = 0;
+                                std::deque<boost::asio::const_buffer>::iterator iter = tag.data.begin();
+                                while(iter != tag.data.end())
+                                {
+                                    size_t size_new = boost::asio::buffer_size(*iter);
+                                    if(isend < (size+size_new))
+                                    {
+                                        (*iter) = (*iter) + (isend-size);
+                                        break;
+                                    }
+                                    else if(isend == (size+size_new))
+                                    {
+                                        tag.data.pop_front();
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        size += size_new;
+                                        tag.data.pop_front();
+                                    }
+                                    iter = tag.data.begin();
+                                }
+                                //去除 isend 大小数据
+                            }
+                            framework::timer::ClockTime::time_type expire = 
+                                framework::timer::ClockTime::time_type::now() 
+                                + framework::timer::ClockTime::duration_type::milliseconds(100);
+                            wait(expire);
+                        }
+
+                    }while(ec == boost::asio::error::would_block);
                 }
                 else
                 {
@@ -1115,19 +1207,34 @@ namespace ppbox
             }
             return ec;
         }
-        void Dispatcher::parse_config(ppbox::mux::Muxer *muxer,std::string key,std::string values)
+        void Dispatcher::parse_config(std::string key,std::string values)
         {
             std::vector<std::string> parms;
-            slice<std::string>(key, std::inserter(parms, parms.end()), ".");
-            if(parms.size() != 3 || parms[0] != "mux") return;
-            muxer->config().set(parms[1],parms[2],values);
+            framework::string::slice<std::string>(key, std::inserter(parms, parms.end()), ".");
+            if(parms.size() == 2)
+            {
+                if(parms[0] == "dispather" && parms[1] == "timeout")
+                {
+                    boost::uint32_t time_out = 0;
+                    framework::string::parse2(values, time_out);
+                    timeout_ = time_out*1000;
+                }
+            }
+            else if(parms.size() == 3)
+            {
+                if(parms[0] == "mux")
+                {
+                    cur_mov_->muxer->config().set(parms[1],parms[2],values);
+                }
+            }
         }
-        void Dispatcher::parse_params(ppbox::mux::Muxer *muxer,framework::string::Url params)
+        void Dispatcher::parse_params(framework::string::Url params)
         {
-            if (NULL == muxer) return;
+            if (NULL == cur_mov_ || NULL == cur_mov_->demuxer || NULL == cur_mov_->muxer) return;
+            timeout_ = TIMEOUT_VALUE;
             framework::string::Url::param_iterator iter = params.param_begin();
             for(; iter != params.param_end(); ++iter)
-                parse_config(muxer,(*iter).key(),(*iter).value());
+                parse_config((*iter).key(),(*iter).value());
         }
 
     } // namespace rtspd

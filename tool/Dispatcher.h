@@ -147,6 +147,7 @@ namespace ppbox
             boost::system::error_code thread_command(MessageQType*);
 
             boost::system::error_code play();
+            boost::system::error_code wait(framework::timer::ClockTime::time_type& expire);
             
             //线程函数
             void thread_dispatch();
@@ -163,8 +164,8 @@ namespace ppbox
             void clear_movie(Movie* movie,boost::system::error_code const & ec);
 
         private:
-            void parse_params(ppbox::mux::Muxer *muxer,framework::string::Url params);
-            void parse_config(ppbox::mux::Muxer *muxer,std::string key,std::string values);
+            void parse_params(framework::string::Url params);
+            void parse_config(std::string key,std::string values);
 
         private:
             struct Movie
@@ -245,6 +246,8 @@ namespace ppbox
 
             boost::uint32_t video_type_;          //视频索引值
             boost::uint32_t audio_type_;          //音频索引值
+
+            boost::uint32_t timeout_;
 
             framework::thread::MessageQueue<MessageQType*> * msgq_;  //消息队列
             //std::vector<Sink*> send_;

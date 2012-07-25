@@ -48,7 +48,9 @@ namespace ppbox
         {
             ec.clear();
             if (segment_index >= 1) {
-                if (begin_index_ + 1 != segment_index) {
+                if (begin_index_ + 1 != segment_index || !segment_filter_.is_sequence()) 
+                {
+                    old_index_ = segment_index - 1;
                     boost::uint32_t seek_time = (segment_index - 1) * m3u8_protocol_.segment_duration();
                     seek_time *= 1000;
                     Muxer::seek(seek_time, ec);

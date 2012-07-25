@@ -27,11 +27,13 @@ namespace ppbox
             {
             }
 
-            virtual boost::system::error_code write(
+            virtual size_t write(
                 boost::posix_time::ptime const & time_send, 
-                ppbox::demux::Sample & sample)
+                ppbox::demux::Sample & sample,
+                boost::system::error_code& ec)
             {
-                return boost::system::error_code();
+                ec = framework::system::logic_error::not_supported;
+                return 0;
                 //return framework::system::logic_error::not_supported;
             }
 

@@ -2,7 +2,6 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/Muxer.h"
-#include "ppbox/mux/tinyvlc.h"
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/rtp/RtpPacket.h"

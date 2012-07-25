@@ -53,13 +53,11 @@ namespace ppbox
                 return;
             boost::uint32_t last_timestamp = 
                 framework::system::BytesOrder::host_to_big_endian(packets_[0].timestamp);
-            std::cout << "last_timestamp = " << last_timestamp << std::endl;
-            boost::uint64_t time2 = framework::system::ScaleTransform::static_transfer(1000, scale_.scale_in(), time);
-            std::cout << "time2 = " << time2 << std::endl;
-            rtp_info_.timestamp = last_timestamp + scale_.scale_out() * 8;
-            std::cout << "rtp_info_.timestamp = " << rtp_info_.timestamp << std::endl;
-            rtp_head_.timestamp = rtp_info_.timestamp - scale_.transfer(time2);
-            std::cout << "rtp_head_.timestamp = " << rtp_head_.timestamp << std::endl;
+            // std::cout << "last_timestamp = " << last_timestamp << std::endl;
+            rtp_info_.timestamp = last_timestamp + scale_.scale_out() * 8; // add 8 seconds to keep distance from timestamp before
+            // std::cout << "rtp_info_.timestamp = " << rtp_info_.timestamp << std::endl;
+            rtp_head_.timestamp = rtp_info_.timestamp - scale_.static_transfer(1000, scale_.scale_out(), time);
+            // std::cout << "rtp_head_.timestamp = " << rtp_head_.timestamp << std::endl;
             rtp_info_.sequence = rtp_head_.sequence;
             rtp_info_.seek_time = time;
         }
