@@ -47,6 +47,14 @@ namespace ppbox
                 bool need_session,
                 session_callback_respone const &);
 
+            boost::system::error_code open(
+                boost::uint32_t& session_id,
+                std::string const & play_link,
+                framework::string::Url const & params,
+                std::string const & format,
+                bool need_session,
+                session_callback_respone const &);
+
             boost::system::error_code seek(
                 const boost::uint32_t session_id
                 ,const boost::uint32_t begin
@@ -92,6 +100,7 @@ namespace ppbox
             boost::system::error_code close(
                 const boost::uint32_t session_id);
 
+            boost::system::error_code kill();
             boost::system::error_code stop();
             boost::system::error_code start();
 
@@ -110,6 +119,7 @@ namespace ppbox
             virtual boost::system::error_code thread_resume(MessageQType* &param);
             virtual boost::system::error_code thread_pause(MessageQType* &param);
             virtual boost::system::error_code thread_close(MessageQType* &param);
+            virtual boost::system::error_code thread_kill(MessageQType* &param);
             virtual boost::system::error_code thread_stop(MessageQType* &param);
             virtual boost::system::error_code thread_callback(MessageQType* &param);
 
@@ -153,6 +163,10 @@ namespace ppbox
             void clear_movie(Movie* movie,boost::system::error_code const & ec);
 
         private:
+            void parse_params(ppbox::mux::Muxer *muxer,framework::string::Url params);
+            void parse_config(ppbox::mux::Muxer *muxer,std::string key,std::string values);
+
+        private:
             struct Movie
             {
                 Movie()
@@ -175,6 +189,7 @@ namespace ppbox
                 {
 
                     play_link = msg->play_link_;
+                    params = msg->params_;
                     format = msg->format_;
                     
                     clear();
@@ -199,6 +214,7 @@ namespace ppbox
                 }
                     
                 std::string play_link;
+                framework::string::Url params;
                 std::string format;
                 boost::uint32_t session_id;
 
@@ -216,7 +232,9 @@ namespace ppbox
             };
             
         private:
-            util::daemon::Daemon & daemon_;
+            util::daemon::Daemon& daemon_;
+            ppbox::demux::DemuxerModule& demuxer_module_;
+            ppbox::mux::MuxerModule& muxer_module_;
 
             boost::thread * dispatch_thread_;    //œﬂ≥Ã÷∏’Î
 

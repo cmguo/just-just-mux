@@ -227,7 +227,7 @@ namespace ppbox
                 boost::uint32_t end = demuxer_->get_end_time(ec, ec_buf);
                 if (!ec) {
                     buffer_time = end > cur ? (end-cur) : 0;
-                    if (ec_buf == boost::asio::error::eof) {
+                    if (ec_buf == source_error::no_more_segment) {
                         ec = ec_buf;
                     }
                 }

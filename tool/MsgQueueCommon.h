@@ -1,8 +1,9 @@
 #ifndef _PPBOX_MUX_MSGQ_COMMON_H_
 #define _PPBOX_MUX_MSGQ_COMMON_H_
 
-#include <string>
+#include <framework/string/Url.h>
 
+#include <string>
 
 namespace ppbox
 {
@@ -19,6 +20,7 @@ namespace ppbox
         {
             PC_Open,  //打开链接
             PC_Close,  //  关闭播放,回调回来后复用
+            PC_Kill, //立即关闭串
             PC_Callback,  //打开状态,回调函数交给线程处理
             PC_Exit,   //线程退出
             PC_Session, 
@@ -106,12 +108,14 @@ namespace ppbox
                 boost::uint32_t session_id,
                 const session_callback_respone& resq,
                 std::string play_link,
+                framework::string::Url params,
                 std::string format,
                 bool need_session)
                 :msg_(msg),
                 session_id_(session_id),
                 resq_(resq),
                 play_link_(play_link),
+                params_(params),
                 format_(format),
                 need_session(need_session)
             {
@@ -142,6 +146,7 @@ namespace ppbox
 
             //Open
             std::string play_link_;
+            framework::string::Url params_;
             std::string format_;
             bool need_session;
 

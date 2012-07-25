@@ -28,10 +28,11 @@ namespace ppbox
 {
     namespace mux
     {
-
         Dispatcher::Dispatcher(
             util::daemon::Daemon & daemon)
             : daemon_(daemon)
+            , demuxer_module_(util::daemon::use_module<ppbox::demux::DemuxerModule>(daemon))
+            , muxer_module_(util::daemon::use_module<MuxerModule>(daemon))
             , dispatch_thread_(NULL)
         {
             empty_sink_.attach();
@@ -64,6 +65,7 @@ namespace ppbox
         error_code Dispatcher::open(
             boost::uint32_t& session_id,
             std::string const & play_link,
+            framework::string::Url const & params,
             std::string const & format,
             bool need_session,
             session_callback_respone const & resp
@@ -73,11 +75,23 @@ namespace ppbox
             session_id = g_session_id++;
 
             LOG_S(Logger::kLevelEvent, "[open] session_id:"<<session_id<<
-                " playlink:"<<play_link<<" format:"<<format);
+                " playlink:"<<play_link
+                <<" params:"<<params.to_string()<<" format:"<<format);
 
-            msgq_->push(new MessageQType(PC_Open,session_id,resp,play_link,format,need_session));
+            msgq_->push(new MessageQType(PC_Open,session_id,resp,play_link,params,format,need_session));
 
             return error_code();
+        }
+
+        error_code Dispatcher::open(
+            boost::uint32_t& session_id,
+            std::string const & play_link,
+            std::string const & format,
+            bool need_session,
+            session_callback_respone const & resp
+            )
+        {
+            return open(session_id,play_link,framework::string::Url(""),format,need_session,resp);
         }
 
         boost::system::error_code Dispatcher::setup(
@@ -171,6 +185,13 @@ namespace ppbox
             return error_code();
         }
 
+        error_code Dispatcher::kill()
+        {
+            LOG_S(Logger::kLevelEvent, "[kill]");
+            msgq_->push(new MessageQType(PC_Kill,0)); 
+            return error_code();
+        }
+
         boost::system::error_code Dispatcher::start()
         {
             clear();
@@ -191,12 +212,12 @@ namespace ppbox
 
         ppbox::demux::DemuxerModule & Dispatcher::demuxer_module()
         {
-            return util::daemon::use_module<demux::DemuxerModule>(daemon_);
+            return demuxer_module_;
         }
 
         MuxerModule & Dispatcher::muxer_module()
         {
-            return util::daemon::use_module<mux::MuxerModule>(daemon_);
+            return muxer_module_;
         }
 
         boost::system::error_code Dispatcher::thread_open(MessageQType* &param)
@@ -214,6 +235,7 @@ namespace ppbox
                 {
                     param->play_link_ = cur_mov_->play_link;
                     param->format_ = cur_mov_->format;
+                    cur_mov_->params = cur_mov_->params;
                 }
             }
 
@@ -297,12 +319,14 @@ namespace ppbox
                             append_mov_->demuxer,
                             param->format_,
                             append_mov_->mux_close_token);
+                        parse_params(append_mov_->muxer,append_mov_->params);
                     }
                 }
             }
             else
             {//openning openned cancelling, cancel_delay, close_delay
                 //play_link 相同 type也相同
+                parse_params(append_mov_->muxer,param->params_);
                 if (append_mov_->demuxer != NULL)
                 {
                     // close_delay  openned
@@ -469,6 +493,7 @@ namespace ppbox
                     cur_mov_->muxer = muxer_module().open(cur_mov_->demuxer,
                         cur_mov_->format,
                         cur_mov_->mux_close_token);
+                    parse_params(cur_mov_->muxer,cur_mov_->params);
 
                     if (NULL == cur_mov_->muxer)
                     {
@@ -608,6 +633,14 @@ namespace ppbox
                 }/*end  (iter != append_mov_->sessions.end()) */
             }
             return error_code();
+        }
+
+        boost::system::error_code Dispatcher::thread_kill(MessageQType* &param)
+        {
+            if(NULL == cur_mov_) return boost::system::error_code();
+            param->session_id_ = cur_mov_->session_id;
+            thread_close(param);
+            return thread_timeout();
         }
 
         boost::system::error_code Dispatcher::thread_timeout()
@@ -763,6 +796,11 @@ namespace ppbox
                     ec = thread_close(pMsgType);
                 }
                 break;
+            case PC_Kill:
+                {
+                    ec = thread_kill(pMsgType);
+                }
+                break;
             case PC_Callback:
                 {
                     ec = thread_callback(pMsgType);
@@ -827,9 +865,10 @@ namespace ppbox
             "closed_2", 
             "close_delay", 
         };
-        static const std::string play_event_str[11] = {
+        static const std::string play_event_str[12] = {
             "PC_Open", 
             "PC_Close", 
+            "PC_Kill",
             "PC_Callback", 
             "PC_Exit", 
             "PC_Session", 
@@ -1069,6 +1108,20 @@ namespace ppbox
                 ec = ppbox::mux::error::mux_not_open;
             }
             return ec;
+        }
+        void Dispatcher::parse_config(ppbox::mux::Muxer *muxer,std::string key,std::string values)
+        {
+            std::vector<std::string> parms;
+            slice<std::string>(key, std::inserter(parms, parms.end()), ".");
+            if(parms.size() != 3 || parms[0] != "mux") return;
+            muxer->config().set(parms[1],parms[2],values);
+        }
+        void Dispatcher::parse_params(ppbox::mux::Muxer *muxer,framework::string::Url params)
+        {
+            if (NULL == muxer) return;
+            framework::string::Url::param_iterator iter = params.param_begin();
+            for(; iter != params.param_end(); ++iter)
+                parse_config(muxer,(*iter).key(),(*iter).value());
         }
 
     } // namespace rtspd
