@@ -3,8 +3,11 @@
 #define _PPBOX_MUX_MUXERBASER_H_
 
 #include "ppbox/avformat/codec/Codec.h"
+
 #include <ppbox/demux/base/DemuxerBase.h>
-#include <ppbox/demux/base/SourceBase.h>
+#include <ppbox/common/SourceBase.h>
+
+#include <ppbox/common/SegmentBase.h>
 
 #include <boost/asio/buffer.hpp>
 
@@ -42,7 +45,7 @@ namespace ppbox
             {
             }
 
-            ppbox::cdn::DurationInfo duration_info;
+            ppbox::common::DurationInfo duration_info;
             boost::uint32_t stream_count;
             boost::uint32_t filesize;
             void * attachment;

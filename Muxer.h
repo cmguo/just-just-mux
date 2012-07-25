@@ -80,7 +80,7 @@ namespace ppbox
                 boost::system::error_code & ec);
 
             boost::system::error_code get_duration(
-                ppbox::cdn::DurationInfo & info, 
+                ppbox::common::DurationInfo & info, 
                 boost::system::error_code & ec);
 
             boost::system::error_code pause(

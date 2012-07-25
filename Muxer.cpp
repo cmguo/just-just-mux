@@ -6,7 +6,10 @@
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
+
 #include <ppbox/demux/base/BufferDemuxer.h>
+
+#include <ppbox/common/SegmentBase.h>
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
 #include <ppbox/avformat/codec/AvcCodec.h>
@@ -154,7 +157,7 @@ namespace ppbox
         }
 
         error_code Muxer::get_duration(
-            ppbox::cdn::DurationInfo & info, 
+            ppbox::common::DurationInfo & info, 
             error_code & ec)
         {
             if (!is_open()) {
