@@ -18,14 +18,16 @@ namespace ppbox
             : public framework::container::ListHook<Filter>::type
         {
         public:
-            Filter(
-                MediaFileInfo const & media_file_info)
-                : media_file_info_(media_file_info)
+            virtual ~Filter()
             {
             }
 
-            virtual ~Filter()
+        public:
+            virtual boost::system::error_code open(
+                MediaFileInfo const & media_file_info, 
+                boost::system::error_code & ec)
             {
+                return prev()->open(media_file_info, ec);
             }
 
             virtual boost::system::error_code get_sample(
@@ -40,30 +42,29 @@ namespace ppbox
             {
                 unlink();
             }
-
-            MediaFileInfo const & media_file_info(void)
-            {
-                return media_file_info_;
-            }
-
-        private:
-            MediaFileInfo const & media_file_info_;
         };
 
         class DemuxFilter
             : public Filter
         {
         public:
-            DemuxFilter(
-                MediaFileInfo const & media_file_info)
-                : Filter(media_file_info)
-                , demuxer_(NULL)
+            DemuxFilter()
+                : demuxer_(NULL)
             {
             }
 
             ~DemuxFilter()
             {
                 demuxer_ = NULL;
+            }
+
+            virtual boost::system::error_code open(
+                MediaFileInfo const & media_file_info, 
+                boost::system::error_code & ec)
+            {
+                assert(demuxer_);
+                ec.clear();
+                return ec;
             }
 
             virtual boost::system::error_code get_sample(
@@ -74,14 +75,14 @@ namespace ppbox
                 return demuxer_->get_sample(sample, ec);
             }
 
-            void set_demuxer(ppbox::demux::BufferDemuxer * demuxer)
+            void set_demuxer(
+                ppbox::demux::BufferDemuxer * demuxer)
             {
                 demuxer_ = demuxer;
             }
 
         private:
             ppbox::demux::BufferDemuxer * demuxer_;
-
         };
 
     }

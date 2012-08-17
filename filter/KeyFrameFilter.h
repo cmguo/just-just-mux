@@ -13,19 +13,16 @@ namespace ppbox
             : public Filter
         {
         public:
-            KeyFrameFilter(
-                MediaFileInfo const & media_file_info)
-                : Filter(media_file_info)
-            {
-            }
+            virtual boost::system::error_code open(
+                MediaFileInfo const & media_file_info, 
+                boost::system::error_code & ec);
 
-            virtual ~KeyFrameFilter()
-            {
-            }
-
-            boost::system::error_code get_sample(
+            virtual boost::system::error_code get_sample(
                 ppbox::demux::Sample & sample,
                 boost::system::error_code & ec);
+
+        private:
+            boost::uint32_t video_track_;
         };
     }
 }

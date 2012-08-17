@@ -13,32 +13,22 @@ namespace ppbox
             : public Filter
         {
         public:
-            SegmentFilter(
-                MediaFileInfo const & media_file_info)
-                : Filter(media_file_info)
-                , segent_end_time_(0)
-                , fisrt_idr_timestamp_us_(boost::uint64_t(-1))
-                , is_save_sample_(false)
-            {
-            }
+            SegmentFilter();
 
-            virtual ~SegmentFilter()
-            {
-            }
+            virtual ~SegmentFilter();
 
-            boost::system::error_code get_sample(
+            virtual boost::system::error_code open(
+                MediaFileInfo const & media_file_info, 
+                boost::system::error_code & ec);
+
+            virtual boost::system::error_code get_sample(
                 ppbox::demux::Sample & sample,
                 boost::system::error_code & ec);
 
-            boost::uint64_t & segment_end_time(void)
-            {
-                return segent_end_time_;
-            }
+            void set_end_time(
+                boost::uint64_t time);
 
-            void reset(void)
-            {
-                is_save_sample_ = false;
-            }
+            void reset();
 
             bool is_sequence()
             {
@@ -46,6 +36,7 @@ namespace ppbox
             }
 
         private:
+            boost::uint32_t video_track_;
             boost::uint64_t segent_end_time_;
             boost::uint64_t fisrt_idr_timestamp_us_;
             bool is_save_sample_;

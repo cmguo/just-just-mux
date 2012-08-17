@@ -13,8 +13,8 @@ namespace ppbox
 
         M3U8Mux::M3U8Mux()
             : begin_index_(1)
+            , old_index_(0)
             , m3u8_protocol_(*this)
-            , segment_filter_(Muxer::mediainfo())
         {
             add_filter(segment_filter_);
         }
@@ -55,14 +55,14 @@ namespace ppbox
                     Muxer::seek(seek_time, ec);
                     if (!ec || ec == boost::asio::error::would_block) {
                         segment_filter_.reset();
-                        segment_filter_.segment_end_time() 
-                            = (boost::uint64_t)segment_index * m3u8_protocol_.segment_duration() * 1000000;
+                        segment_filter_.set_end_time( 
+                            (boost::uint64_t)(segment_index-old_index_) * m3u8_protocol_.segment_duration() * 1000000);
                     } else {
                         return ec;
                     }
                 } else {
-                    segment_filter_.segment_end_time() 
-                        = (boost::uint64_t)segment_index * m3u8_protocol_.segment_duration() * 1000000;
+                    segment_filter_.set_end_time(
+                        (boost::uint64_t)(segment_index - old_index_) * m3u8_protocol_.segment_duration() * 1000000);
                 }
                 begin_index_ = segment_index;
             }

@@ -10,6 +10,35 @@ namespace ppbox
 {
     namespace mux
     {
+
+        SegmentFilter::SegmentFilter()
+            : video_track_(boost::uint32_t(-1))
+            , segent_end_time_(0)
+            , fisrt_idr_timestamp_us_(boost::uint64_t(-1))
+            , is_save_sample_(false)
+        {
+        }
+
+        SegmentFilter::~SegmentFilter()
+        {
+        }
+
+        error_code SegmentFilter::open(
+            MediaFileInfo const & media_file_info, 
+            boost::system::error_code & ec)
+        {
+            if (Filter::open(media_file_info, ec))
+                return ec;
+            video_track_ = boost::uint32_t(-1);
+            for (size_t i = 0; i < media_file_info.stream_infos.size(); ++i) {
+                if (media_file_info.stream_infos[i].type == ppbox::demux::MEDIA_TYPE_VIDE) {
+                    video_track_ = i;
+                    break;
+                }
+            }
+            return ec;
+        }
+
         error_code SegmentFilter::get_sample(
             ppbox::demux::Sample & sample,
             boost::system::error_code & ec)
@@ -19,30 +48,44 @@ namespace ppbox
                 is_save_sample_ = false;
                 ec.clear();
             } else {
-                Filter::get_sample(sample, ec);
+                if (Filter::get_sample(sample, ec))
+                    return ec;
             }
-
-            if (!ec) {
-                if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1)
-                    && media_file_info().stream_infos[sample.itrack].type == ppbox::demux::MEDIA_TYPE_VIDE
-                    && (sample.flags & demux::Sample::sync)) {
+            if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1)
+                && (video_track_ == boost::uint32_t(-1)
+                    || (sample.itrack == video_track_
+                    && (sample.flags & demux::Sample::sync)))) {
                         // fisrt_idr_timestamp_us_ = sample.ustime;
                         fisrt_idr_timestamp_us_ = 0;
-                } else {
-                    if (media_file_info().stream_infos[sample.itrack].type == ppbox::demux::MEDIA_TYPE_VIDE
-                        && (sample.flags & demux::Sample::sync)) {
-                            if ((sample.ustime - fisrt_idr_timestamp_us_) 
-                                >= segent_end_time_ ) {
-                                    std::cout << "m3u8 segment end time: " << segent_end_time_ 
-                                        << " last sample time: " << sample.ustime << std::endl;
-                                    ec = error::mux_segment_end;
-                                    is_save_sample_ = true;
-                                    sample_ = sample;
-                            }
-                    }
-                }
+                        segent_end_time_ += fisrt_idr_timestamp_us_;
+            }
+            //std::cout << "[SegmentFilter::get_sample] sample.ustime = " << sample.ustime << " segent_end_time_ = " << segent_end_time_ << std::endl;
+            if (sample.ustime >= segent_end_time_
+                && (video_track_ == boost::uint32_t(-1)
+                    || (sample.itrack == video_track_
+                    && (sample.flags & demux::Sample::sync)))) {
+                        ec = error::mux_segment_end;
+                        is_save_sample_ = true;
+                        sample_ = sample;
             }
             return ec;
         }
+
+        void SegmentFilter::set_end_time(
+            boost::uint64_t time)
+        {
+            if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1))
+                segent_end_time_ = time;
+            else
+                segent_end_time_ = time + fisrt_idr_timestamp_us_;
+        }
+
+        void SegmentFilter::reset()
+        {
+            fisrt_idr_timestamp_us_ = boost::uint64_t(-1);
+            is_save_sample_ = false;
+            segent_end_time_ = 0;
+        }
+
     }
 }

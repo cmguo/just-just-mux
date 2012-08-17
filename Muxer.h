@@ -27,25 +27,9 @@ namespace ppbox
         class Muxer
         {
         public:
-            Muxer()
-                : demuxer_(NULL)
-                , paused_(false)
-                , play_time_(0)
-                , read_step_(0)
-                , demux_filter_(media_info_)
-                , key_filter_(media_info_)
-            {
-                filters_.push_back(&demux_filter_);
-                filters_.push_back(&key_filter_);
-            }
+            Muxer();
 
-            virtual ~Muxer()
-            {
-                if (demuxer_ != NULL) {
-                    // demuxer具体的析构不在mux内里实现
-                    demuxer_ = NULL;
-                }
-            }
+            virtual ~Muxer();
 
         protected:
             virtual void add_stream(

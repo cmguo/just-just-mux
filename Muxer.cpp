@@ -30,6 +30,25 @@ namespace ppbox
 {
     namespace mux
     {
+
+        Muxer::Muxer()
+            : demuxer_(NULL)
+            , paused_(false)
+            , play_time_(0)
+            , read_step_(0)
+        {
+            filters_.push_back(&demux_filter_);
+            filters_.push_back(&key_filter_);
+        }
+
+        Muxer::~Muxer()
+        {
+            if (demuxer_ != NULL) {
+                // demuxer具体的析构不在mux内里实现
+                demuxer_ = NULL;
+            }
+        }
+
         error_code Muxer::open(
             demux::BufferDemuxer * demuxer,
             error_code & ec)
@@ -81,6 +100,9 @@ namespace ppbox
                         media_info_.stream_infos.push_back(media_info);
                     }
                 }
+            }
+            if (!ec) {
+                filters_.last()->open(media_info_, ec);
             }
             return ec;
         }
