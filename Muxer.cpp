@@ -7,6 +7,7 @@
 #include "ppbox/mux/rtp/RtpPacket.h"
 
 #include <ppbox/demux/base/BufferDemuxer.h>
+#include <ppbox/demux/base/SourceError.h>
 
 #include <ppbox/common/SegmentBase.h>
 
@@ -14,14 +15,15 @@
 #include <ppbox/avformat/codec/AvcCodec.h>
 using namespace ppbox::avformat;
 using namespace ppbox::demux;
-using namespace boost::system;
+
+#include <util/buffers/BufferCopy.h>
+#include <util/archive/ArchiveBuffer.h>
+
+#include <framework/memory/MemoryPage.h>
 
 #include <boost/thread/thread.hpp>
 using namespace boost::system;
 
-#include <framework/memory/MemoryPage.h>
-#include <util/buffers/BufferCopy.h>
-#include <util/archive/ArchiveBuffer.h>
 #include <iostream>
 
 namespace ppbox

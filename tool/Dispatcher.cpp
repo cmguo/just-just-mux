@@ -11,6 +11,7 @@
 #include <ppbox/demux/base/SourceError.h>
 
 #include <framework/timer/TickCounter.h>
+#include <framework/string/Slice.h>
 #include <framework/system/LogicError.h>
 #include <framework/thread/MessageQueue.h>
 #include <framework/logger/LoggerStreamRecord.h>
