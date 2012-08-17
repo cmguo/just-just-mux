@@ -7,6 +7,8 @@
 #include <ppbox/avformat/BitsIStream.h>
 #include <ppbox/avformat/BitsOStream.h>
 #include <ppbox/avformat/BitsBuffer.h>
+#include <ppbox/avformat/codec/AvcConfig.h>
+#include <ppbox/avformat/codec/AvcSliceType.h>
 
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/CycleBuffers.h>

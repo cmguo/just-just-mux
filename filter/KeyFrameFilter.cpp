@@ -4,6 +4,8 @@
 #include "ppbox/mux/Muxer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
+#include <boost/asio/error.hpp>
+
 using namespace boost::system;
 
 namespace ppbox
@@ -38,8 +40,9 @@ namespace ppbox
                 || (sample.itrack == video_track_
                 && (sample.flags & demux::Sample::sync))) {
                     detach_self();
+                    return ec;
             }
-            return ec; 
+            return boost::asio::error::would_block; 
         }
 
     }

@@ -29,7 +29,6 @@ namespace ppbox
         {
             stream_number_++;
 
-            Transfer * transfer = NULL;
             //if (mediainfoex.type == MEDIA_TYPE_VIDE) {
                 //if (mediainfoex.format_type == MediaInfo::video_avc_packet) {
                     //transfer = new PackageSplitTransfer();

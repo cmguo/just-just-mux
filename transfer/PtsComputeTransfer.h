@@ -5,8 +5,7 @@
 
 #include "ppbox/mux/transfer/Transfer.h"
 
-#include <ppbox/avformat/codec/AvcConfig.h>
-#include <ppbox/avformat/codec/AvcType.h>
+#include <ppbox/avformat/codec/AvcSpsPpsType.h>
 
 namespace ppbox
 {
