@@ -9,7 +9,7 @@
 #include <ppbox/demux/base/BufferDemuxer.h>
 #include <ppbox/demux/base/SourceError.h>
 
-#include <ppbox/common/SegmentBase.h>
+#include <ppbox/data/SegmentBase.h>
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
 #include <ppbox/avformat/codec/AvcCodec.h>
@@ -180,7 +180,7 @@ namespace ppbox
         }
 
         error_code Muxer::get_duration(
-            ppbox::common::DurationInfo & info, 
+            ppbox::data::DurationInfo & info, 
             error_code & ec)
         {
             if (!is_open()) {

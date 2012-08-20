@@ -38,7 +38,7 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
             boost::uint32_t begin_index,
-            ppbox::common::DurationInfo const & info)
+            ppbox::data::DurationInfo const & info)
         {
             boost::uint32_t lines = 0;
             boost::uint32_t Redundancy_size = 3;
@@ -65,7 +65,7 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
          boost::uint32_t begin_index,
-         ppbox::common::DurationInfo const & info,
+         ppbox::data::DurationInfo const & info,
          std::string full_path)
         {
             full_path_ = full_path;
