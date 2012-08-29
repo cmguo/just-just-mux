@@ -1,4 +1,5 @@
 //AsfMux.cpp
+
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/asf/AsfMux.h"
 #include "ppbox/mux/asf/AsfTransfer.h"
@@ -7,15 +8,16 @@
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 
 #include <ppbox/avformat/codec/AvcConfig.h>
-#include <base/util/archive/BigEndianBinaryOArchive.h>
-#include <boost/cstdint.hpp> // define uint8_t
-
 using namespace ppbox::demux;
 using namespace ppbox::avformat;
+
+#include <util/archive/BigEndianBinaryOArchive.h>
+
 namespace ppbox
 {
     namespace mux
     {
+
         AsfMux::AsfMux()
             : stream_number_(0)
              , transfer_(NULL)

@@ -14,7 +14,7 @@
 #include <framework/string/Slice.h>
 #include <framework/system/LogicError.h>
 #include <framework/thread/MessageQueue.h>
-#include <framework/logger/LoggerStreamRecord.h>
+#include <framework/logger/StreamRecord.h>
 #include <framework/logger/LoggerSection.h>
 using namespace framework::thread;
 using namespace framework::system::logic_error;
@@ -79,7 +79,7 @@ namespace ppbox
             static size_t g_session_id = rand();
             session_id = g_session_id++;
 
-            LOG_S(Logger::kLevelEvent, "[open] session_id:"<<session_id<<
+            LOG_INFO("[open] session_id:"<<session_id<<
                 " playlink:"<<play_link<<" format:"<<format);
 
             msgq_->push(new MessageQType(PC_Open,session_id,resp,play_link,params,format,need_session));
@@ -104,7 +104,7 @@ namespace ppbox
             Sink*  sink,
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[setup] session_id:"<<session_id<<" index:"<<index);
+            LOG_INFO("[setup] session_id:"<<session_id<<" index:"<<index);
             msgq_->push(new MessageQType(PC_Setup,session_id,index,sink,resp));
             return error_code();
         }
@@ -114,7 +114,7 @@ namespace ppbox
             Sink*  sink,
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[setup] session_id:"<<session_id);
+            LOG_INFO("[setup] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Setup,session_id,-1,sink,resp));
             return error_code();
         }
@@ -126,7 +126,7 @@ namespace ppbox
             ,const boost::uint32_t end
             ,session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[seek] session_id:"<<session_id<<" seek:"<<begin);
+            LOG_INFO("[seek] session_id:"<<session_id<<" seek:"<<begin);
             msgq_->push(new MessageQType(PC_Seek,session_id,resp,begin,end));
             return error_code();
         }
@@ -138,7 +138,7 @@ namespace ppbox
             ,boost::uint32_t end
             ,session_callback_respone const &resp)
         {
-            LOG_S(Logger::kLevelEvent, "[play_seek] session_id:"<<session_id);
+            LOG_INFO("[play_seek] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Play,session_id,resp,begin,end));
             return boost::system::error_code();
         }
@@ -148,7 +148,7 @@ namespace ppbox
             const boost::uint32_t session_id,
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[play] session_id:"<<session_id);
+            LOG_INFO("[play] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Play,session_id,resp));
             return error_code();
         }
@@ -157,7 +157,7 @@ namespace ppbox
             const boost::uint32_t session_id,
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[record] session_id:"<<session_id);
+            LOG_INFO("[record] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Record,session_id,resp));
             return error_code();
         }
@@ -166,7 +166,7 @@ namespace ppbox
             const boost::uint32_t session_id
             ,session_callback_respone const &resp)
         {
-            LOG_S(Logger::kLevelEvent, "[resume] session_id:"<<session_id);
+            LOG_INFO("[resume] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Resume,session_id,resp));
             return error_code();
         }
@@ -175,7 +175,7 @@ namespace ppbox
             const boost::uint32_t session_id, 
             session_callback_respone const & resp)
         {
-            LOG_S(Logger::kLevelEvent, "[pause] session_id:"<<session_id);
+            LOG_INFO("[pause] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Pause,session_id,resp));
 
             return error_code();
@@ -184,14 +184,14 @@ namespace ppbox
         error_code Dispatcher::close(
             const boost::uint32_t session_id)
         {
-            LOG_S(Logger::kLevelEvent, "[close] session_id:"<<session_id);
+            LOG_INFO("[close] session_id:"<<session_id);
             msgq_->push(new MessageQType(PC_Close,session_id)); 
             return error_code();
         }
 
         error_code Dispatcher::kill()
         {
-            LOG_S(Logger::kLevelEvent, "[kill]");
+            LOG_INFO("[kill]");
             msgq_->push(new MessageQType(PC_Kill,0)); 
             return error_code();
         }
@@ -206,7 +206,7 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::stop()
         {
-            LOG_S(Logger::kLevelEvent, "[stop]");
+            LOG_INFO("[stop]");
             msgq_->push(new MessageQType(PC_Exit,0));
             dispatch_thread_->join();
             delete dispatch_thread_;
@@ -467,12 +467,12 @@ namespace ppbox
                 }
                 else
                 {
-                    LOG_S(Logger::kLevelDebug,"[thread_seek] Not Send Head");
+                    LOG_DEBUG("[thread_seek] Not Send Head");
                 }
             }
             else
             {
-                LOG_S(Logger::kLevelError,"[thread_seek] Seek code : "<<ec.value()<<" msg"<<ec.message());
+                LOG_ERROR("[thread_seek] Seek code : "<<ec.value()<<" msg"<<ec.message());
             }
 
             return ec;
@@ -619,7 +619,7 @@ namespace ppbox
                 if (iter != append_mov_->sessions.end())
                 {//openning wait
 
-                    LOG_S(Logger::kLevelError, "[thread_close] find_if "<<session_id);
+                    LOG_ERROR("[thread_close] find_if "<<session_id);
                     MessageQType *pMsg = (*iter);
                     append_mov_->sessions.erase(iter);
                     delete pMsg;
@@ -689,7 +689,7 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::thread_setup(MessageQType* &param)
         {
-            //LOG_S(Logger::kLevelEvent, "[thread_setup]");
+            //LOG_INFO("[thread_setup]");
 
             boost::system::error_code ec;
 
@@ -744,7 +744,7 @@ namespace ppbox
             {
                 boost::system::error_code ec1 = ppbox::mux::error::mux_not_open;
 
-                LOG_S(Logger::kLevelError, "[thread_command] session_id:"<<session_id);
+                LOG_ERROR("[thread_command] session_id:"<<session_id);
 
                 if (!pMsgType->resq_.empty()) {
                     pMsgType->resq_(ec1);
@@ -839,7 +839,7 @@ namespace ppbox
                 break;
             default:
                 //Òì³£Çé¿ö
-                LOG_S(Logger::kLevelError,"[thread_dispatch][Unknow Msg Type]");
+                LOG_ERROR("[thread_dispatch][Unknow Msg Type]");
                 assert(false);
                 break;
             }
@@ -965,22 +965,22 @@ namespace ppbox
 
                     boost::uint32_t session_id = pMsgType->session_id_;
                     PlayControl msg = pMsgType->msg_;
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin, session:" << session_id 
+                    LOG_DEBUG("[thread_dispatch] begin, session:" << session_id 
                         << ", msg:" << play_event_str[msg]
                     << ", status:" << status_string());
 
                     thread_command(pMsgType);
 
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended, session:" << session_id 
+                    LOG_DEBUG("[thread_dispatch] ended, session:" << session_id 
                         << ", msg:" << play_event_str[msg]
                     << ", status:" << status_string());
                 }
                 else
                 {
                     LOG_SECTION();
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] begin, session:0, msg:PC_Timeout, status:" << status_string());
+                    LOG_DEBUG("[thread_dispatch] begin, session:0, msg:PC_Timeout, status:" << status_string());
                     thread_timeout();
-                    LOG_S(Logger::kLevelDebug,"[thread_dispatch] ended, session:0, msg:PC_Timeout, status:" << status_string());
+                    LOG_DEBUG("[thread_dispatch] ended, session:0, msg:PC_Timeout, status:" << status_string());
                 }
             }
 
@@ -1002,7 +1002,7 @@ namespace ppbox
 
             if(!play_resq_.empty())
             {
-                LOG_S(Logger::kLevelEvent, "[detach play_resq] ");
+                LOG_INFO("[detach play_resq] ");
                 play_resq_(ec);
                 play_resq_.clear();
             }
@@ -1034,7 +1034,7 @@ namespace ppbox
 
         boost::system::error_code Dispatcher::play()
         {
-            LOG_S(Logger::kLevelEvent, "[internal_play] session:" << cur_mov_->session_id);
+            LOG_INFO("[internal_play] session:" << cur_mov_->session_id);
 
             bool start_time_valid = false;
             //playing_ = true;
@@ -1046,7 +1046,7 @@ namespace ppbox
             while (true) 
             {
                 if (!msgq_->empty()) {
-                    LOG_S(Logger::kLevelEvent, "[internal_play] new message arrived");
+                    LOG_INFO("[internal_play] new message arrived");
                     break;
                 }
 
@@ -1065,7 +1065,7 @@ namespace ppbox
                     {
                         //if(!cur_mov_->play_resq.empty())
                         {
-                            LOG_S(Logger::kLevelEvent, "[internal_play] play time end");
+                            LOG_INFO("[internal_play] play time end");
                             play_resq_(ec);
                             play_resq_.clear();
                         }
@@ -1175,7 +1175,7 @@ namespace ppbox
                 {
                     if(ec != boost::asio::error::would_block )
                     {
-                        LOG_S(Logger::kLevelError, "[internal_play] on_error, ec: "<<ec.message());
+                        LOG_ERROR("[internal_play] on_error, ec: "<<ec.message());
 
                         playing_ = false;
                         play_resq_(ec);
@@ -1189,7 +1189,7 @@ namespace ppbox
                 }
             }
 
-            LOG_S(Logger::kLevelEvent, "[internal_play] exiting...");
+            LOG_INFO("[internal_play] exiting...");
             //playing_ = false;
             return ec;
         }
