@@ -55,24 +55,24 @@ namespace ppbox
                     Muxer::seek(seek_time, ec);
                     if (!ec || ec == boost::asio::error::would_block) {
                         segment_filter_.reset();
-                        if (m3u8_protocol_.is_last_segment(segment_index)) {
+                        /*if (m3u8_protocol_.is_last_segment(segment_index)) {
                             segment_filter_.set_end_time((boost::uint64_t)((segment_index-old_index_-1) * m3u8_protocol_.segment_duration() 
                                 + m3u8_protocol_.last_segment_time()) * 1000000);
-                        } else {
+                        } else {*/
                             segment_filter_.set_end_time(
                                 (boost::uint64_t)(segment_index-old_index_) * m3u8_protocol_.segment_duration() * 1000000);
-                        }
+                        /*}*/
                     } else {
                         return ec;
                     }
                 } else {
-                    if (m3u8_protocol_.is_last_segment(segment_index)) {
+                    /*if (m3u8_protocol_.is_last_segment(segment_index)) {
                         segment_filter_.set_end_time((boost::uint64_t)((segment_index-old_index_-1) * m3u8_protocol_.segment_duration() 
                             + m3u8_protocol_.last_segment_time()) * 1000000);
-                    } else {
+                    } else {*/
                         segment_filter_.set_end_time(
                             (boost::uint64_t)(segment_index-old_index_) * m3u8_protocol_.segment_duration() * 1000000);
-                    }
+                    /*}*/
                 }
                 begin_index_ = segment_index;
             }
