@@ -9,7 +9,7 @@
 #include <ppbox/demux/base/BufferDemuxer.h>
 #include <ppbox/demux/base/SourceError.h>
 
-#include <ppbox/data/SegmentBase.h>
+#include <ppbox/data/MediaBase.h>
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
 #include <ppbox/avformat/codec/AvcCodec.h>
@@ -75,13 +75,13 @@ namespace ppbox
         error_code Muxer::open_impl(error_code & ec)
         {
             assert(demuxer_ != NULL);
-            demuxer_->get_duration(media_info_.duration_info, ec);
-            media_info_.stream_count = demuxer_->get_media_count(ec);
+            demuxer_->get_media_info(media_info_.duration_info, ec);
+            media_info_.stream_count = demuxer_->get_stream_count(ec);
             if (!ec) {
                 media_info_.filesize = 0;
                 for (size_t i = 0; i < media_info_.stream_count; ++i) {
                     MediaInfoEx media_info;
-                    demuxer_->get_media_info(i, media_info, ec);
+                    demuxer_->get_stream_info(i, media_info, ec);
                     if (ec) {
                         break;
                     } else {
@@ -175,18 +175,18 @@ namespace ppbox
             boost::uint32_t & offset,
             boost::system::error_code & ec)
         {
-            boost::uint32_t seek_time = (offset * media_info_.duration_info.total) / media_info_.filesize;
+            boost::uint32_t seek_time = (offset * media_info_.duration_info.duration) / media_info_.filesize;
             return seek(seek_time, ec);
         }
 
         error_code Muxer::get_duration(
-            ppbox::data::DurationInfo & info, 
+            ppbox::data::MediaInfo & info, 
             error_code & ec)
         {
             if (!is_open()) {
                 ec = error::mux_not_open;
             } else {
-                demuxer_->get_duration(info, ec);
+                demuxer_->get_media_info(info, ec);
             }
             return ec;
         }

@@ -2,6 +2,7 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerModule.h"
+#include "ppbox/mux/Version.h"
 #include "ppbox/mux/flv/FlvMux.h"
 #include "ppbox/mux/asf/AsfMux.h"
 #include "ppbox/mux/ts/TsMux.h"

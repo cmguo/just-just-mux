@@ -38,13 +38,13 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
             boost::uint32_t begin_index,
-            ppbox::data::DurationInfo const & info)
+            ppbox::data::MediaInfo const & info)
         {
             boost::uint32_t lines = 0;
             boost::uint32_t Redundancy_size = 3;
-            if (info.total > 0) {
+            if (info.duration > 0) {
                 begin_index = 1;
-                lines = boost::uint32_t(info.total / (seg_duration_ * 1000));
+                lines = boost::uint32_t(info.duration / (seg_duration_ * 1000));
                 create(begin_index, lines, true);
             } else {
                 boost::uint32_t buffer_time = info.end - info.begin;
@@ -65,7 +65,7 @@ namespace ppbox
 
         std::string M3U8Protocol::create(
          boost::uint32_t begin_index,
-         ppbox::data::DurationInfo const & info,
+         ppbox::data::MediaInfo const & info,
          std::string full_path)
         {
             full_path_ = full_path;

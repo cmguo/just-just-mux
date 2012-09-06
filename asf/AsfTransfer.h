@@ -25,7 +25,7 @@ namespace ppbox
 
         public:
             virtual void transfer(
-                ppbox::demux::MediaInfo & mediainfo);
+                ppbox::demux::StreamInfo & mediainfo);
 
             virtual void transfer(
                 ppbox::demux::Sample & sample);

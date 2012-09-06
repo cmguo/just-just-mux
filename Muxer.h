@@ -64,7 +64,7 @@ namespace ppbox
                 boost::system::error_code & ec);
 
             boost::system::error_code get_duration(
-                ppbox::data::DurationInfo & info, 
+                ppbox::data::MediaInfo & info, 
                 boost::system::error_code & ec);
 
             boost::system::error_code pause(

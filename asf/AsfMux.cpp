@@ -33,7 +33,7 @@ namespace ppbox
         {
              Transfer * transfer = NULL;
              if (mediainfoex.type == MEDIA_TYPE_VIDE) {
-                 if (mediainfoex.format_type == MediaInfo::video_avc_packet) {
+                 if (mediainfoex.format_type == StreamInfo::video_avc_packet) {
                      transfer = new PackageSplitTransfer();
                      mediainfoex.transfers.push_back(transfer);
                      transfer = new StreamJoinTransfer();
@@ -155,7 +155,7 @@ namespace ppbox
             file_object.ObjLength = 104;
             file_object.FileId.generate();
             file_object.FileSize = 104;
-            file_object.PlayDuration = media_info_.duration_info.total;
+            file_object.PlayDuration = media_info_.duration_info.duration;
             file_object.Flag.BroadcastFlag = 1;
             //file_object.Flag.SeekableFlag = 0;
             file_object.Flag.Reserved = 1;

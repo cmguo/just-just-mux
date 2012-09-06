@@ -3,7 +3,7 @@
 #ifndef   _PPBOX_MUX_TS_M3U8_PROTOCOL_H_
 #define   _PPBOX_MUX_TS_M3U8_PROTOCOL_H_
 
-#include <ppbox/data/SegmentBase.h>
+#include <ppbox/data/MediaBase.h>
 
 #include <framework/timer/TickCounter.h>
 namespace ppbox
@@ -29,11 +29,11 @@ namespace ppbox
 
             std::string create(
                 boost::uint32_t begin_index,
-                ppbox::data::DurationInfo const & info);
+                ppbox::data::MediaInfo const & info);
 
             std::string create(
              boost::uint32_t begin_index,
-             ppbox::data::DurationInfo const & info,
+             ppbox::data::MediaInfo const & info,
              std::string full_path);
 
             std::string create(

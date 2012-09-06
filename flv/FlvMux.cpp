@@ -31,9 +31,9 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
-                if (mediainfo.format_type == MediaInfo::video_avc_packet) {
+                if (mediainfo.format_type == StreamInfo::video_avc_packet) {
                     // empty
-                } else if (mediainfo.format_type == MediaInfo::video_avc_byte_stream) {
+                } else if (mediainfo.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
                     mediainfo.transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();

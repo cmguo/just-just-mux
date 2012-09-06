@@ -7,7 +7,7 @@
 #include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/data/SourceBase.h>
 
-#include <ppbox/data/SegmentBase.h>
+#include <ppbox/data/MediaBase.h>
 
 #include <boost/asio/buffer.hpp>
 
@@ -20,10 +20,10 @@ namespace ppbox
         class Transfer;
 
         struct MediaInfoEx
-            : ppbox::demux::MediaInfo
+            : ppbox::demux::StreamInfo
         {
             MediaInfoEx()
-                : MediaInfo()
+                : StreamInfo()
                 , decode(NULL)
                 , config(NULL)
                 , attachment(NULL)
@@ -45,7 +45,7 @@ namespace ppbox
             {
             }
 
-            ppbox::data::DurationInfo duration_info;
+            ppbox::data::MediaInfo duration_info;
             boost::uint32_t stream_count;
             boost::uint32_t filesize;
             void * attachment;

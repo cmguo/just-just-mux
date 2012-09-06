@@ -261,7 +261,7 @@ namespace ppbox
         }
 
         void AsfTransfer::transfer(
-            MediaInfo & mediainfo) 
+            StreamInfo & mediainfo) 
         {
             media_number_.push_back(0);
         }
