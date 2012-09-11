@@ -38,6 +38,7 @@ namespace ppbox
 
         private:
             boost::uint32_t begin_index_;
+            boost::uint32_t old_index_;
             std::string full_path_;
             std::string m3u8_cache_;
             M3U8Protocol m3u8_protocol_;

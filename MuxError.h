@@ -23,6 +23,7 @@ namespace ppbox
                 mux_set_videotag_error,
                 mux_segment_end,
                 mux_invalid_sample,
+                mux_not_support,
                 mux_other_error = 3000, 
             };
 
@@ -63,6 +64,8 @@ namespace ppbox
                                 return "mux set video information error";
                             case mux_segment_end:
                                 return "mux segment end";
+                            case mux_not_support:
+                                return "mux not support";
                             case mux_invalid_sample:
                                 return "mux invalid sample";
                             default:
