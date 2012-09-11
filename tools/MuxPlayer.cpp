@@ -126,8 +126,6 @@ namespace ppbox
                         {
                             size_t isend = 0;
                             isend = session_->sinks_[tag.itrack]->write_some(tag.data,ec);
-
-                            //session_->sinks_[tag.itrack]->write(tag,ec);
                             if(ec == boost::asio::error::would_block)
                             {
                                 if(isend > 0)
@@ -156,9 +154,14 @@ namespace ppbox
                                         iter = tag.data.begin();
                                     }
                                 }
+                                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                            }
+                            else
+                            {
+                                break;
                             }
                             //·¢Êý¾Ý  would_block
-                            //boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                            //
                         }while (!exit_);
 
                     }
