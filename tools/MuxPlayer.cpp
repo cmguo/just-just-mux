@@ -82,7 +82,7 @@ namespace ppbox
             return ec;
         }
 
-        boost::system::error_code seek(boost::uint32_t beg)
+        boost::system::error_code MuxPlayer::seek(boost::uint32_t beg)
         {
             boost::system::error_code ec;
 
