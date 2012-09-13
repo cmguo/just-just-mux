@@ -67,16 +67,6 @@ namespace ppbox
                 boost::bind(&MuxDispatcher::open_call_back_mux,this,resp, _1, _2));
         }
 
-        void MuxDispatcher::setup(boost::uint32_t session_id,
-            size_t control,
-            util::stream::Sink* sink,
-            std::string& info,
-            boost::system::error_code& ec)
-        {
-           //((ppbox::mux::RtpMux *)cur_mov_->muxer)->setup(control, info, ec);
-            Dispatcher::setup(session_id,control,sink,info,ec);
-        }
-
         void MuxDispatcher::open_call_back_mux(
             ppbox::common::session_callback_respone const &resp,
             boost::system::error_code const & ec,

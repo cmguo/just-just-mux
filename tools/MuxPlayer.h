@@ -28,6 +28,7 @@ namespace ppbox
 
             virtual ~MuxPlayer();
             virtual boost::system::error_code doing();
+            virtual boost::system::error_code seek(boost::uint32_t beg);
 
         private:
             boost::system::error_code buffering();

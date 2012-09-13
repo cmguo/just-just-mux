@@ -42,13 +42,6 @@ namespace ppbox
                 return player_;
             }
 
-            void setup(boost::uint32_t session_id,
-                size_t control,
-                util::stream::Sink* sink,
-                std::string& info,
-                boost::system::error_code& ec);
-
-
 //播放控制函数
             virtual void async_open_playlink(std::string const &playlink,ppbox::common::session_callback_respone const &resp) ;
             virtual void cancel_open_playlink(boost::system::error_code& ec) ;
@@ -86,6 +79,11 @@ namespace ppbox
                 boost::system::error_code const & ec,
                 ppbox::demux::BufferDemuxer * muxer);
             
+        protected:
+            ppbox::mux::Muxer *muxer_;           
+            ppbox::demux::BufferDemuxer* demuxer_;
+            MuxPlayer* player_;
+
         private:
             boost::asio::deadline_timer timer_;
             ppbox::demux::DemuxerModule& demuxer_module_;
@@ -93,10 +91,7 @@ namespace ppbox
 
             size_t  demux_close_token_;      
             size_t  mux_close_token_;
-            ppbox::mux::Muxer *muxer_;           
-            ppbox::demux::BufferDemuxer* demuxer_;
 
-            MuxPlayer* player_;
 
             boost::uint32_t video_type_;          //视频索引值
             boost::uint32_t audio_type_;          //音频索引值

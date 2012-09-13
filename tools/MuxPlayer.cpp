@@ -82,32 +82,36 @@ namespace ppbox
             return ec;
         }
 
-        boost::system::error_code MuxPlayer::playing()
+        boost::system::error_code seek(boost::uint32_t beg)
         {
             boost::system::error_code ec;
 
+            if (beg != boost::uint32_t(-1))
             {
-                boost::uint32_t seek = session_->playlist_[0].beg_;
-                if (seek != boost::uint32_t(-1))
+                muxer_->seek(beg,ec);
+
+                size_t n = 0;
+                while (ec == boost::asio::error::would_block) 
                 {
-                    muxer_->seek(seek,ec);
-
-                    size_t n = 0;
-                    while (ec == boost::asio::error::would_block) 
-                    {
-                        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-                        ++n;
-                        if (n == 5) {
-                            muxer_->seek(seek,ec);
-                            n = 0;
-                        }
+                    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                    ++n;
+                    if (n == 5) {
+                        muxer_->seek(beg,ec);
+                        n = 0;
                     }
-
                 }
-                if(ec)
-                    return ec;
-            }
 
+            }
+            return ec;
+        }
+
+        boost::system::error_code MuxPlayer::playing()
+        {
+            boost::system::error_code ec;
+            boost::uint32_t beg = session_->playlist_[0].beg_;
+            ec = seek(beg);
+            if(ec)
+                return ec;
 
             while(!exit_)
             {
