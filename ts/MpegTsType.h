@@ -452,7 +452,7 @@ namespace ppbox
             }
         };
 
-        struct StreamInfo
+        struct TsStreamInfo
         {
             boost::uint8_t stream_type;
             union {

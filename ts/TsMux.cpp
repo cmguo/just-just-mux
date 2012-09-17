@@ -245,7 +245,7 @@ namespace ppbox
             ts_archive << pmt_section;
 
             if (has_video_) {
-                StreamInfo stream_info;
+                TsStreamInfo stream_info;
                 stream_info.stream_type = video_stream_type_;
                 stream_info.reserved = 7;
                 stream_info.elementary_PID = video_pid_;
@@ -254,7 +254,7 @@ namespace ppbox
                 ts_archive << stream_info;
             }
             if (has_audio_) {
-                StreamInfo stream_info;
+                TsStreamInfo stream_info;
                 stream_info.stream_type = audio_stream_type_;
                 stream_info.reserved = 7;
                 stream_info.elementary_PID = audio_pid_;
