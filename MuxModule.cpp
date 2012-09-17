@@ -1,15 +1,9 @@
-// MuxerModule.cpp
+// MuxModule.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/MuxerModule.h"
+#include "ppbox/mux/MuxModule.h"
 #include "ppbox/mux/Version.h"
-#include "ppbox/mux/flv/FlvMux.h"
-#include "ppbox/mux/asf/AsfMux.h"
-#include "ppbox/mux/ts/TsMux.h"
-#include "ppbox/mux/ts/M3U8Mux.h"
-#include "ppbox/mux/rtp/RtpEsMux.h"
-#include "ppbox/mux/rtp/RtpTsMux.h"
-#include "ppbox/mux/rtp/RtpAsfMux.h"
+#include "ppbox/mux/MuxerType.h"
 
 #include <ppbox/demux/DemuxModule.h>
 using namespace ppbox::demux;
@@ -26,7 +20,7 @@ namespace ppbox
 
         struct MuxerInfo
         {
-            MuxerInfo(Muxer * imuxer)
+            MuxerInfo(MuxerBase * imuxer)
                 : muxer(imuxer)
                 , demuxer_id(size_t(-1))
             {
@@ -35,10 +29,10 @@ namespace ppbox
             }
 
             size_t id;
-            Muxer * muxer;
+            MuxerBase * muxer;
             size_t demuxer_id;
             BufferDemuxer * demuxer;
-            MuxerModule::open_respone_type resp;
+            MuxModule::open_respone_type resp;
 
             struct Finder
             {
@@ -59,35 +53,28 @@ namespace ppbox
             };
         };
 
-        MuxerModule::MuxerModule(
+        MuxModule::MuxModule(
             util::daemon::Daemon & daemon)
-            : ppbox::common::CommonModuleBase<MuxerModule>(daemon, "muxer")
+            : ppbox::common::CommonModuleBase<MuxModule>(daemon, "muxer")
             , demux_mod_(util::daemon::use_module<ppbox::demux::DemuxModule>(daemon))
         {
-            type_map_["asf"] = MuxerType::ASF;
-            type_map_["ts"] = MuxerType::TS;
-            type_map_["flv"] = MuxerType::FLV;
-            type_map_["rtp-es"] = MuxerType::RTPES;
-            type_map_["rtp-ts"] = MuxerType::RTPTS;
-            type_map_["rtp-asf"] = MuxerType::RTPASF;
-            type_map_["m3u8"] = MuxerType::m3u8;
         }
 
-        MuxerModule::~MuxerModule()
+        MuxModule::~MuxModule()
         {
         }
 
-        error_code MuxerModule::startup()
+        error_code MuxModule::startup()
         {
             error_code ec;
             return ec;
         }
 
-        void MuxerModule::shutdown()
+        void MuxModule::shutdown()
         {
         }
 
-        void MuxerModule::async_open(
+        void MuxModule::async_open(
             std::string playlink,
             std::string format,
             size_t & token,
@@ -100,10 +87,10 @@ namespace ppbox
             demux_mod_.async_open(
                 playlink,
                 mux_info->demuxer_id,
-                boost::bind(&MuxerModule::open_callback, this, mux_info, _1, _2));
+                boost::bind(&MuxModule::open_callback, this, mux_info, _1, _2));
         }
 
-        void MuxerModule::open_callback(
+        void MuxModule::open_callback(
             MuxerInfo * info,
             error_code const & ec,
             ppbox::demux::BufferDemuxer * demuxer)
@@ -116,7 +103,7 @@ namespace ppbox
             info->resp(lec, info->muxer);
         }
 
-        Muxer * MuxerModule::open(
+        MuxerBase * MuxModule::open(
             std::string playlink,
             std::string format,
             size_t & token,
@@ -134,7 +121,7 @@ namespace ppbox
             return NULL;
         }
 
-        Muxer * MuxerModule::open(
+        MuxerBase * MuxModule::open(
             ppbox::demux::BufferDemuxer * demuxer,
             std::string format,
             size_t & token)
@@ -150,7 +137,7 @@ namespace ppbox
             return NULL;
         }
 
-        error_code MuxerModule::close(
+        error_code MuxModule::close(
             size_t close_token,
             error_code & ec)
         {
@@ -171,55 +158,23 @@ namespace ppbox
             return ec;
         }
 
-        MuxerInfo * MuxerModule::create(
+        MuxerInfo * MuxModule::create(
             std::string format,
             error_code & ec)
         {
-            MuxerType::Enum muxer_type = MuxerType::NONE;
-            std::map<std::string, MuxerType::Enum>::const_iterator iter = 
-                type_map_.find(format);
-            if (iter != type_map_.end()) {
-                muxer_type = iter->second;
-            }
-            Muxer * muxer = NULL;
-            switch(muxer_type) {
-                case MuxerType::ASF:
-                    muxer = new AsfMux;
-                    break;
-                case MuxerType::FLV:
-                    muxer = new FlvMux;
-                    break;
-                case MuxerType::TS:
-                    muxer = new TsMux;
-                    break;
-                case MuxerType::RTPES:
-                    muxer = new RtpEsMux;
-                    break;
-                case MuxerType::RTPTS:
-                    muxer = new RtpTsMux;
-                    break;
-                case MuxerType::RTPASF:
-                    muxer = new RtpAsfMux;
-                    break;
-                case MuxerType::m3u8:
-                    muxer = new M3U8Mux;
-                    break;
-                default:
-                    muxer = new FlvMux;
-                    break;
-            }
+            MuxerBase * muxer = MuxerBase::create(format);
             boost::mutex::scoped_lock lock(mutex_);
             MuxerInfo * muxer_info = new MuxerInfo(muxer);
             muxers_.push_back(muxer_info);
             return muxer_info;
         }
 
-        void MuxerModule::destory(
+        void MuxModule::destory(
             MuxerInfo * info)
         {
             if (info->muxer) {
                 info->muxer->close();
-                delete info->muxer;
+                MuxerBase::destory(info->muxer);
                 info->muxer = NULL;
             }
             info->demuxer = NULL;
@@ -229,5 +184,6 @@ namespace ppbox
             delete info;
             info = NULL;
         }
-    }
-}
+
+    } // namespace mux
+} // namespace ppbox

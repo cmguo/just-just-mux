@@ -1,7 +1,7 @@
-//AsfMux.cpp
+// AsfMuxer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/asf/AsfMux.h"
+#include "ppbox/mux/asf/AsfMuxer.h"
 #include "ppbox/mux/asf/AsfTransfer.h"
 #include "ppbox/mux/transfer/MergeTransfer.h"
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
@@ -18,17 +18,17 @@ namespace ppbox
     namespace mux
     {
 
-        AsfMux::AsfMux()
+        AsfMuxer::AsfMuxer()
             : stream_number_(0)
              , transfer_(NULL)
         {
         }
 
-        AsfMux::~AsfMux()
+        AsfMuxer::~AsfMuxer()
         {
         }
 
-        void AsfMux::add_stream(
+        void AsfMuxer::add_stream(
             MediaInfoEx & mediainfoex)
         {
              Transfer * transfer = NULL;
@@ -125,14 +125,14 @@ namespace ppbox
             }
         }
 
-        void AsfMux::stream_header(
+        void AsfMuxer::stream_header(
             boost::uint32_t index, 
             ppbox::demux::Sample & tag)
         {
             tag.data.clear();
         }
 
-        void AsfMux::file_header(
+        void AsfMuxer::file_header(
             Sample & tag)
         {
             if(0 != file_buf_.size()) {
@@ -187,16 +187,16 @@ namespace ppbox
             tag.data.push_back( data_buf_.data() );
         }
 
-        boost::system::error_code AsfMux::seek(
+        boost::system::error_code AsfMuxer::seek(
             boost::uint32_t & time,
             boost::system::error_code & ec)
         {
-            Muxer::seek(time, ec);
+            MuxerBase::seek(time, ec);
             if (!ec || ec == boost::asio::error::would_block) {
                 transfer_->on_seek(time);
             }
             return ec;
         }
 
-    }//mux
-}//ppbox
+    } // namespace mux
+} // namespace ppbox

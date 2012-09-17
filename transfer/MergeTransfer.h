@@ -4,7 +4,7 @@
 #define   _PPBOX_MUX_TRANSFER_MERGE_TRANSFER_H_
 
 #include "ppbox/mux/transfer/Transfer.h"
-#include <ppbox/mux/MuxerBase.h>
+#include <ppbox/mux/MuxBase.h>
 
 namespace ppbox
 {

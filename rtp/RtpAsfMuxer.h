@@ -1,10 +1,10 @@
 // RtpAsfMux.h
 
-#ifndef _PPBOX_MUX_RTP_ASF_MUX_H_
-#define _PPBOX_MUX_RTP_ASF_MUX_H_
+#ifndef _PPBOX_MUX_RTP_ASF_MUXER_H_
+#define _PPBOX_MUX_RTP_ASF_MUXER_H_
 
-#include "ppbox/mux/asf/AsfMux.h"
-#include "ppbox/mux/rtp/RtpMux.h"
+#include "ppbox/mux/asf/AsfMuxer.h"
+#include "ppbox/mux/rtp/RtpMuxer.h"
 
 namespace ppbox
 {
@@ -13,13 +13,13 @@ namespace ppbox
 
         class RtpAsfTransfer;
 
-        class RtpAsfMux
-            : public RtpMux
+        class RtpAsfMuxer
+            : public RtpMuxer
         {
         public:
-            RtpAsfMux();
+            RtpAsfMuxer();
 
-            ~RtpAsfMux();
+            ~RtpAsfMuxer();
 
         public:
             void add_stream(
@@ -30,10 +30,13 @@ namespace ppbox
                 boost::system::error_code & ec);
 
         private:
-            AsfMux asf_mux_;
+            AsfMuxer asf_mux_;
             RtpAsfTransfer * rtp_asf_transfer_;
         };
-    }
-}
 
-#endif // _PPBOX_MUX_RTP_ASF_MUX_H_
+        PPBOX_REGISTER_MUXER(rtp_asf, RtpAsfMuxer);
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_RTP_ASF_MUXER_H_

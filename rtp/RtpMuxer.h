@@ -3,7 +3,7 @@
 #ifndef   _PPBOX_MUX_RTP_MUX_H_
 #define   _PPBOX_MUX_RTP_MUX_H_
 
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
 
 #include <ppbox/demux/base/DemuxerBase.h>
@@ -15,16 +15,16 @@ namespace ppbox
 
         class RtpTransfer;
 
-        class RtpMux
-            : public Muxer
+        class RtpMuxer
+            : public MuxerBase
         {
         public:
-            RtpMux();
+            RtpMuxer();
 
-            RtpMux(
-                Muxer * base);
+            RtpMuxer(
+                MuxerBase * base);
 
-            ~RtpMux();
+            ~RtpMuxer();
 
         public:
             virtual boost::system::error_code get_sdp(
@@ -57,7 +57,7 @@ namespace ppbox
                RtpTransfer * rtp_transfer);
 
         private:
-            Muxer * base_;
+            MuxerBase * base_;
             std::vector<RtpTransfer *> rtp_transfers_;
         };
     }

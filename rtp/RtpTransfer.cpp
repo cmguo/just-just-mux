@@ -1,7 +1,7 @@
 // RtpTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpTransfer.h"
 
 namespace ppbox
@@ -10,7 +10,7 @@ namespace ppbox
     {
 
         RtpTransfer::RtpTransfer(
-            Muxer & muxer, 
+            MuxerBase & muxer, 
             std::string const & name, 
             boost::uint8_t type)
         {

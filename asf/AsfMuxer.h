@@ -1,8 +1,9 @@
-//AsfMux.h
-#ifndef  _PPBOX_MUX_ASF_MUX_H_
-#define  _PPBOX_MUX_ASF_MUX_H_
+// AsfMuxer.h
 
-#include  "ppbox/mux/Muxer.h"
+#ifndef _PPBOX_MUX_ASF_MUXER_H_
+#define _PPBOX_MUX_ASF_MUXER_H_
+
+#include  "ppbox/mux/MuxerBase.h"
 
 #include  <boost/asio/streambuf.hpp>
 #include  <ppbox/avformat/asf/AsfGuid.h>
@@ -15,13 +16,13 @@ namespace ppbox
 
         class AsfTransfer;
 
-        class AsfMux
-            : public Muxer
+        class AsfMuxer
+            : public MuxerBase
         {
         public:
-            AsfMux();
+            AsfMuxer();
 
-            ~AsfMux();
+            ~AsfMuxer();
 
         public:
             void add_stream(
@@ -46,10 +47,11 @@ namespace ppbox
             boost::asio::streambuf data_buf_;
             boost::uint8_t stream_number_;
             AsfTransfer * transfer_;
+        };
 
-        };//class AsfMux
-    }//mux
-}//ppbox
+        PPBOX_REGISTER_MUXER(asf, AsfMuxer);
 
+    } // namespace mux
+} // namespace ppbox
 
-#endif
+#endif // _PPBOX_MUX_ASF_MUXER_H_

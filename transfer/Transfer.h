@@ -3,14 +3,14 @@
 #ifndef _PPBOX_MUX_TRANSFER_TRANSFER_H_
 #define _PPBOX_MUX_TRANSFER_TRANSFER_H_
 
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/MuxBase.h"
 
 namespace ppbox
 {
     namespace mux
     {
 
-        class Muxer;
+        class MuxerBase;
 
         class Transfer
         {

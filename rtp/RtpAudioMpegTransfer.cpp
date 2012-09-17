@@ -1,7 +1,7 @@
 // RtpAudioMpegTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpAudioMpegTransfer.h"
 
 namespace ppbox
@@ -10,7 +10,7 @@ namespace ppbox
     {
 
         RtpAudioMpegTransfer::RtpAudioMpegTransfer(
-            Muxer & muxer)
+            MuxerBase & muxer)
             : RtpTransfer(muxer, "RtpAudioMpegTransfer", 97)
         {
             header_[0] = 0;

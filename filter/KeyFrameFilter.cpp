@@ -1,7 +1,7 @@
 // KeyFrameFilter.h
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
 #include <boost/asio/error.hpp>

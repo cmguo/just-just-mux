@@ -1,22 +1,22 @@
-// TsMux.h
+// TsMuxer.h
 
-#ifndef _PPBOX_MUX_TS_TS_MUX_H_
-#define _PPBOX_MUX_TS_TS_MUX_H_
+#ifndef _PPBOX_MUX_TS_MUXER_H_
+#define _PPBOX_MUX_TS_MUXER_H_
 
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/ts/Mpeg2Ts.h"
 
 namespace ppbox
 {
     namespace mux
     {
-        class TsMux
-            : public Muxer
+        class TsMuxer
+            : public MuxerBase
         {
         public:
-            TsMux();
+            TsMuxer();
 
-            virtual ~TsMux();
+            virtual ~TsMuxer();
 
         public:
             void add_stream(
@@ -47,7 +47,10 @@ namespace ppbox
             // buffer
             boost::uint8_t header_[512];
         };
-    }
-}
 
-#endif // _PPBOX_MUX_TS_TS_MUX_H_
+        PPBOX_REGISTER_MUXER(ts, TsMuxer);
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_TS_MUXER_H_

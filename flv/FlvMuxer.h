@@ -1,9 +1,9 @@
-// FlvMux.h
-#ifndef   _PPBOX_MUX_FLV_FLVMUX_H_
-#define   _PPBOX_MUX_FLV_FLVMUX_H_
+// FlvMuxer.h
 
-#include "ppbox/mux/Muxer.h"
-#include "ppbox/mux/filter/KeyFrameFilter.h"
+#ifndef _PPBOX_MUX_FLV_MUXER_H_
+#define _PPBOX_MUX_FLV_MUXER_H_
+
+#include "ppbox/mux/MuxerBase.h"
 
 #include <ppbox/avformat/flv/FlvTagType.h>
 
@@ -12,13 +12,13 @@ namespace ppbox
     namespace mux
     {
 
-        class FlvMux
-            : public Muxer
+        class FlvMuxer
+            : public MuxerBase
         {
         public:
-            FlvMux();
+            FlvMuxer();
 
-            ~FlvMux();
+            ~FlvMuxer();
 
         public:
             void add_stream(
@@ -42,7 +42,10 @@ namespace ppbox
             boost::uint32_t audio_header_size_;
             boost::uint32_t video_header_size_;
         };
-    }
-}
 
-#endif // End _PPBOX_MUX_FLV_FLVMUX_H_
+        PPBOX_REGISTER_MUXER(flv, FlvMuxer);
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_FLV_MUXER_H_

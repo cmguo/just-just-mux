@@ -1,27 +1,14 @@
 // MuxerType.h
 
-#ifndef   _PPBOX_MUX_MUXER_TYPE_H_
-#define   _PPBOX_MUX_MUXER_TYPE_H_
+#ifndef   _PPBOX_MUX_MUX_TYPE_H_
+#define   _PPBOX_MUX_MUX_TYPE_H_
 
-namespace ppbox
-{
-    namespace mux
-    {
-        struct MuxerType
-        {
-            enum Enum
-            {
-                NONE,
-                ASF,
-                FLV,
-                TS,
-                RTPES,
-                RTPTS,
-                RTPASF,
-                m3u8,
-            };
-        };
-    }
-}
+#include "ppbox/mux/flv/FlvMuxer.h"
+#include "ppbox/mux/asf/AsfMuxer.h"
+#include "ppbox/mux/ts/TsMuxer.h"
+//#include "ppbox/mux/ts/M3U8Muxer.h"
+#include "ppbox/mux/rtp/RtpEsMuxer.h"
+#include "ppbox/mux/rtp/RtpTsMuxer.h"
+#include "ppbox/mux/rtp/RtpAsfMuxer.h"
 
-#endif // _PPBOX_MUX_MUXER_TYPE_H_
+#endif // _PPBOX_MUX_MUX_TYPE_H_

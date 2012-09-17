@@ -15,7 +15,7 @@ namespace ppbox
         {
         public:
             RtpEsAudioTransfer(
-                Muxer & muxer);
+                MuxerBase & muxer);
 
             ~RtpEsAudioTransfer();
 

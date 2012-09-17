@@ -19,7 +19,7 @@ namespace ppbox
         {
         public:
             AsfTransfer(
-                Muxer & muxer);
+                MuxerBase & muxer);
 
             ~AsfTransfer();
 

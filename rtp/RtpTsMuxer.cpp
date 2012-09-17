@@ -1,7 +1,7 @@
 // RtpTsMux.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/rtp/RtpTsMux.h"
+#include "ppbox/mux/rtp/RtpTsMuxer.h"
 #include "ppbox/mux/rtp/RtpTsTransfer.h"
 #include "ppbox/mux/transfer/MergeTransfer.h"
 
@@ -13,13 +13,13 @@ namespace ppbox
     namespace mux
     {
 
-        RtpTsMux::RtpTsMux()
-            : RtpMux(&ts_mux_)
+        RtpTsMuxer::RtpTsMuxer()
+            : RtpMuxer(&ts_mux_)
             , rtp_ts_transfer_(NULL)
         {
         }
 
-        RtpTsMux::~RtpTsMux()
+        RtpTsMuxer::~RtpTsMuxer()
         {
             if (rtp_ts_transfer_) {
                 delete rtp_ts_transfer_;
@@ -27,10 +27,10 @@ namespace ppbox
             }
         }
 
-        void RtpTsMux::add_stream(
+        void RtpTsMuxer::add_stream(
             MediaInfoEx & mediainfo)
         {
-            RtpMux::add_stream(mediainfo);
+            RtpMuxer::add_stream(mediainfo);
             if (rtp_ts_transfer_ == NULL) {
                 rtp_ts_transfer_ = new RtpTsTransfer(*this);
                 add_transfer(rtp_ts_transfer_);
@@ -39,10 +39,10 @@ namespace ppbox
             mediainfo.transfers.push_back(transfer);
         }
 
-        void RtpTsMux::file_header(
+        void RtpTsMuxer::file_header(
             ppbox::demux::Sample & tag)
         {
-            RtpMux::file_header(tag);
+            RtpMuxer::file_header(tag);
             rtp_ts_transfer_->header_rtp_packet(tag);
         }
 

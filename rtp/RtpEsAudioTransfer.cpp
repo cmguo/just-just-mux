@@ -1,7 +1,7 @@
 // RtpEsAudioTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpEsAudioTransfer.h"
 
 #include <framework/string/Base16.h>
@@ -12,7 +12,7 @@ namespace ppbox
     {
 
         RtpEsAudioTransfer::RtpEsAudioTransfer(
-            Muxer & muxer)
+            MuxerBase & muxer)
             : RtpTransfer(muxer, "RtpESAudio", 97)
             , index_(0)
             , time_adjust_(0)

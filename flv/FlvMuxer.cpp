@@ -1,6 +1,7 @@
-// FlvMux.cpp
+// FlvMuxer.cpp
+
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/flv/FlvMux.h"
+#include "ppbox/mux/flv/FlvMuxer.h"
 #include "ppbox/mux/transfer/PackageJoinTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
@@ -18,15 +19,15 @@ namespace ppbox
 {
     namespace mux
     {
-        FlvMux::FlvMux()
+        FlvMuxer::FlvMuxer()
         {
         }
 
-        FlvMux::~FlvMux()
+        FlvMuxer::~FlvMuxer()
         {
         }
 
-        void FlvMux::add_stream(
+        void FlvMuxer::add_stream(
             MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;
@@ -49,7 +50,7 @@ namespace ppbox
             }
         }
 
-        void FlvMux::file_header(
+        void FlvMuxer::file_header(
             ppbox::demux::Sample & tag)
         {
             tag.data.clear();
@@ -65,7 +66,7 @@ namespace ppbox
             tag.size = 13;
         }
 
-        void FlvMux::stream_header(
+        void FlvMuxer::stream_header(
             boost::uint32_t index, 
             ppbox::demux::Sample & tag)
         {

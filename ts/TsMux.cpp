@@ -1,7 +1,7 @@
 // TsMux.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/ts/TsMux.h"
+#include "ppbox/mux/ts/TsMuxer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
@@ -78,7 +78,7 @@ namespace ppbox
             return crc;
         }
 
-        TsMux::TsMux()
+        TsMuxer::TsMuxer()
             : pat_(new Stream(0))
             , pmt_(new Stream(AP4_MPEG2_TS_DEFAULT_PID_PMT))
             , has_audio_(false)
@@ -92,7 +92,7 @@ namespace ppbox
         {
         }
 
-        TsMux::~TsMux()
+        TsMuxer::~TsMuxer()
         {
             if (pat_) {
                 delete pat_;
@@ -105,7 +105,7 @@ namespace ppbox
             }
         }
 
-        void TsMux::add_stream(
+        void TsMuxer::add_stream(
             MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;
@@ -137,7 +137,7 @@ namespace ppbox
             }
         }
 
-        void TsMux::file_header(
+        void TsMuxer::file_header(
             ppbox::demux::Sample & tag)
         {
             WritePAT(header_);
@@ -150,14 +150,14 @@ namespace ppbox
             tag.data.push_back(boost::asio::buffer(header_, 376));
         }
 
-        void TsMux::stream_header(
+        void TsMuxer::stream_header(
             boost::uint32_t index, 
             ppbox::demux::Sample & tag)
         {
             tag.data.clear();
         }
 
-        void TsMux::WritePAT(boost::uint8_t * ptr)
+        void TsMuxer::WritePAT(boost::uint8_t * ptr)
         {
             boost::uint32_t payload_size = AP4_MPEG2TS_PACKET_PAYLOAD_SIZE;
             std::vector<boost::uint8_t> ts_header;
@@ -195,7 +195,7 @@ namespace ppbox
             util::serialization::serialize_collection(ts_archive, suffer, AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-17);
         }
 
-        void TsMux::WritePMT(boost::uint8_t * ptr)
+        void TsMuxer::WritePMT(boost::uint8_t * ptr)
         {
             // check that we have at least one media stream
             if (!has_audio_ && !has_video_) {

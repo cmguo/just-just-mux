@@ -1,7 +1,7 @@
 // Muxer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/transfer/Transfer.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
@@ -31,7 +31,38 @@ namespace ppbox
     namespace mux
     {
 
-        Muxer::Muxer()
+        std::map< std::string, MuxerBase::register_type > & MuxerBase::muxer_map()
+        {
+            static std::map< std::string, MuxerBase::register_type > get_map;
+            return get_map;
+        }
+
+        void MuxerBase::register_muxer(
+            std::string const & name, 
+            register_type func)
+        {
+            muxer_map().insert(std::make_pair(name, func));
+            return;
+        }
+
+        MuxerBase * MuxerBase::create(
+            std::string const & proto)
+        {
+            std::map< std::string, register_type >::iterator iter = muxer_map().find(proto);
+            if (muxer_map().end() == iter) {
+                return NULL;
+            }
+            return iter->second();
+        }
+
+        void MuxerBase::destory(
+            MuxerBase* & source)
+        {
+            delete source;
+            source = NULL;
+        }
+
+        MuxerBase::MuxerBase()
             : demuxer_(NULL)
             , paused_(false)
             , play_time_(0)
@@ -41,7 +72,7 @@ namespace ppbox
             filters_.push_back(&key_filter_);
         }
 
-        Muxer::~Muxer()
+        MuxerBase::~MuxerBase()
         {
             if (demuxer_ != NULL) {
                 // demuxer具体的析构不在mux内里实现
@@ -49,7 +80,7 @@ namespace ppbox
             }
         }
 
-        error_code Muxer::open(
+        error_code MuxerBase::open(
             demux::BufferDemuxer * demuxer,
             error_code & ec)
         {
@@ -63,7 +94,7 @@ namespace ppbox
             return ec;
         }
 
-        bool Muxer::is_open()
+        bool MuxerBase::is_open()
         {
             if (demuxer_) {
                 return true;
@@ -72,7 +103,7 @@ namespace ppbox
             }
         }
 
-        error_code Muxer::open_impl(error_code & ec)
+        error_code MuxerBase::open_impl(error_code & ec)
         {
             assert(demuxer_ != NULL);
             demuxer_->get_media_info(media_info_.duration_info, ec);
@@ -107,7 +138,7 @@ namespace ppbox
             return ec;
         }
 
-        error_code Muxer::read(
+        error_code MuxerBase::read(
             ppbox::demux::Sample & tag,
             error_code & ec)
         {
@@ -139,16 +170,16 @@ namespace ppbox
                 }
                 read_step_ = boost::uint32_t(-1);
             }
-            Muxer::get_sample_with_transfer(tag, ec);
+            MuxerBase::get_sample_with_transfer(tag, ec);
             return ec;
         }
 
-        void Muxer::reset(void)
+        void MuxerBase::reset(void)
         {
             read_step_ = 0;
         }
 
-        error_code Muxer::seek(
+        error_code MuxerBase::seek(
             boost::uint32_t & time,
             error_code & ec)
         {
@@ -171,7 +202,7 @@ namespace ppbox
             return ec;
         }
 
-        error_code Muxer::byte_seek(
+        error_code MuxerBase::byte_seek(
             boost::uint32_t & offset,
             boost::system::error_code & ec)
         {
@@ -179,7 +210,7 @@ namespace ppbox
             return seek(seek_time, ec);
         }
 
-        error_code Muxer::get_duration(
+        error_code MuxerBase::get_duration(
             ppbox::data::MediaInfo & info, 
             error_code & ec)
         {
@@ -191,7 +222,7 @@ namespace ppbox
             return ec;
         }
 
-        error_code Muxer::pause(
+        error_code MuxerBase::pause(
             error_code & ec)
         {
             if (!is_open()) {
@@ -205,7 +236,7 @@ namespace ppbox
             return ec;
         }
 
-        error_code Muxer::resume(
+        error_code MuxerBase::resume(
             boost::system::error_code & ec)
         {
             if (!is_open()) {
@@ -219,28 +250,28 @@ namespace ppbox
             return ec;
         }
 
-        void Muxer::close(void)
+        void MuxerBase::close(void)
         {
             demuxer_ = NULL;
             release_mediainfo();
         }
 
-        boost::uint32_t & Muxer::current_time(void)
+        boost::uint32_t & MuxerBase::current_time(void)
         {
             return play_time_;
         }
 
-        MediaFileInfo & Muxer::mediainfo(void)
+        MediaFileInfo & MuxerBase::mediainfo(void)
         {
             return media_info_;
         }
 
-        framework::configure::Config & Muxer::config()
+        framework::configure::Config & MuxerBase::config()
         {
             return config_;
         }
 
-        error_code Muxer::get_buffer_time(
+        error_code MuxerBase::get_buffer_time(
             boost::uint32_t & buffer_time,
             error_code & ec)
         {
@@ -258,7 +289,7 @@ namespace ppbox
             return ec;
         }
 
-        error_code Muxer::get_sample(
+        error_code MuxerBase::get_sample(
             Sample & sample,
             error_code & ec)
         {
@@ -275,7 +306,7 @@ namespace ppbox
             return ec;
         }
 
-        error_code Muxer::get_sample_with_transfer(
+        error_code MuxerBase::get_sample_with_transfer(
             Sample & sample,
             error_code & ec)
         {
@@ -293,7 +324,7 @@ namespace ppbox
             return ec;
         }
 
-        void Muxer::release_mediainfo(void)
+        void MuxerBase::release_mediainfo(void)
         {
             for (boost::uint32_t i = 0; i < media_info_.stream_infos.size(); ++i) {
                 if (media_info_.stream_infos[i].decode) {
@@ -308,5 +339,5 @@ namespace ppbox
             media_info_.stream_infos.clear();
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

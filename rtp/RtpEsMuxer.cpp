@@ -1,10 +1,9 @@
-// RtpEsMux.cpp
+// RtpEsMuxer.cpp
+
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/rtp/RtpEsMux.h"
+#include "ppbox/mux/rtp/RtpEsMuxer.h"
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
-#include "ppbox/mux/transfer/PackageJoinTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
-#include "ppbox/mux/transfer/StreamJoinTransfer.h"
 #include "ppbox/mux/rtp/RtpEsAudioTransfer.h"
 #include "ppbox/mux/rtp/RtpAudioMpegTransfer.h"
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
@@ -18,15 +17,15 @@ namespace ppbox
     namespace mux
     {
 
-        RtpEsMux::RtpEsMux()
+        RtpEsMuxer::RtpEsMuxer()
         {
         }
 
-        RtpEsMux::~RtpEsMux()
+        RtpEsMuxer::~RtpEsMuxer()
         {
         }
 
-        void RtpEsMux::add_stream(
+        void RtpEsMuxer::add_stream(
             MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;

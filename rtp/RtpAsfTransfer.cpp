@@ -1,7 +1,7 @@
 // RtpAsfTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/asf/AsfTransfer.h"
 #include "ppbox/mux/rtp/RtpAsfTransfer.h"
 
@@ -16,7 +16,7 @@ namespace ppbox
     {
 
         RtpAsfTransfer::RtpAsfTransfer(
-            Muxer & muxer)
+            MuxerBase & muxer)
             : RtpTransfer(muxer, "RtpAsf", 96)
         {
             header_[0][0] = 0x40; // S = 0, L = 1, R = 0, D = 0. I = 0

@@ -15,7 +15,7 @@ namespace ppbox
         {
         public:
             RtpEsVideoTransfer(
-                Muxer & muxer);
+                MuxerBase & muxer);
 
             ~RtpEsVideoTransfer();
 

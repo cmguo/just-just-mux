@@ -1,7 +1,7 @@
 // RtpEsVideoTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h" // for Nalu
 
@@ -19,7 +19,7 @@ namespace ppbox
     {
 
         RtpEsVideoTransfer::RtpEsVideoTransfer(
-            Muxer & muxer)
+            MuxerBase & muxer)
             : RtpTransfer(muxer, "RtpESVideo", 96)
             , mtu_size_(1436)
             , sample_description_index_(boost::uint32_t(-1))

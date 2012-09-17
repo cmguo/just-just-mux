@@ -1,7 +1,6 @@
 // SegmentFilter.h
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
 #include "ppbox/mux/filter/SegmentFilter.h"
 
 using namespace boost::system;

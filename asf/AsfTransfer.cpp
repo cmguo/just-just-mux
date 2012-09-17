@@ -2,7 +2,7 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/asf/AsfTransfer.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
 
@@ -23,7 +23,7 @@ namespace ppbox
     namespace mux
     {
         AsfTransfer::AsfTransfer(
-            Muxer & muxer)
+            MuxerBase & muxer)
             : packet_length_(4096)
             , single_payload_(false)
             , p_index_(0)

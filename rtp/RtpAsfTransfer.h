@@ -15,7 +15,7 @@ namespace ppbox
         {
         public:
             RtpAsfTransfer(
-                Muxer & muxer);
+                MuxerBase & muxer);
 
             ~RtpAsfTransfer();
 

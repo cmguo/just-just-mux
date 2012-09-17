@@ -45,6 +45,5 @@ namespace ppbox
             videotagheader_.AVCPacketType = 1;
         }
 
-    }
-}
-
+    } // namespace mux
+} // namespace ppbox

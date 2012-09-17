@@ -1,7 +1,7 @@
 // RtpMux.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/rtp/RtpMux.h"
+#include "ppbox/mux/rtp/RtpMuxer.h"
 #include "ppbox/mux/rtp/RtpTransfer.h"
 
 #include <framework/string/Base16.h>
@@ -12,53 +12,53 @@ namespace ppbox
     namespace mux
     {
 
-        RtpMux::RtpMux()
+        RtpMuxer::RtpMuxer()
             : base_(NULL)
         {
         }
 
-        RtpMux::RtpMux(
-            Muxer * base)
+        RtpMuxer::RtpMuxer(
+            MuxerBase * base)
             : base_(base)
         {
         }
 
-        RtpMux::~RtpMux()
+        RtpMuxer::~RtpMuxer()
         {
         }
 
-        void RtpMux::add_stream(
+        void RtpMuxer::add_stream(
             MediaInfoEx & mediainfo)
         {
             if (base_) {
-                ((RtpMux *)base_)->add_stream(mediainfo);
+                ((RtpMuxer *)base_)->add_stream(mediainfo);
             }
         }
 
-        void RtpMux::file_header(
+        void RtpMuxer::file_header(
             ppbox::demux::Sample & tag)
         {
             if (base_) {
-                ((RtpMux *)base_)->file_header(tag);
+                ((RtpMuxer *)base_)->file_header(tag);
             }
         }
 
-        void RtpMux::stream_header(
+        void RtpMuxer::stream_header(
             boost::uint32_t index, 
             ppbox::demux::Sample & tag)
         {
             if (base_) {
-                ((RtpMux *)base_)->stream_header(index, tag);
+                ((RtpMuxer *)base_)->stream_header(index, tag);
             }
         }
 
-        void RtpMux::add_transfer(
+        void RtpMuxer::add_transfer(
             RtpTransfer * rtp_transfer)
         {
             rtp_transfers_.push_back(rtp_transfer);
         }
 
-        boost::system::error_code RtpMux::get_sdp(
+        boost::system::error_code RtpMuxer::get_sdp(
             std::string & sdp_out, 
             boost::system::error_code & ec)
         {
@@ -69,7 +69,7 @@ namespace ppbox
             return ec;
         }
 
-        boost::system::error_code RtpMux::setup(
+        boost::system::error_code RtpMuxer::setup(
             boost::uint32_t index, 
             std::string & setup_out, 
             boost::system::error_code & ec)
@@ -86,7 +86,7 @@ namespace ppbox
             return ec;
         }
 
-        boost::system::error_code RtpMux::get_rtp_info(
+        boost::system::error_code RtpMuxer::get_rtp_info(
             std::string & rtp_info_out, 
             boost::uint32_t & seek_time, 
             boost::system::error_code & ec)

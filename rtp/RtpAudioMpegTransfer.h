@@ -15,7 +15,7 @@ namespace ppbox
         {
         public:
             RtpAudioMpegTransfer(
-                Muxer & muxer);
+                MuxerBase & muxer);
 
             ~RtpAudioMpegTransfer();
 

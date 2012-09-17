@@ -1,7 +1,7 @@
 // RtpTsTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
+#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/ts/TsTransfer.h"
 #include "ppbox/mux/rtp/RtpTsTransfer.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
@@ -14,7 +14,7 @@ namespace ppbox
     {
 
         RtpTsTransfer::RtpTsTransfer(
-            Muxer & muxer)
+            MuxerBase & muxer)
             : RtpTransfer(muxer, "RtpTs", 33)
         {
         }

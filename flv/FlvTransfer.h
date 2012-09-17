@@ -1,7 +1,7 @@
 #ifndef   _PPBOX_MUX_FLV_TRANSFER_
 #define   _PPBOX_MUX_FLV_TRANSFER_
 
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/MuxBase.h"
 #include "ppbox/mux/transfer/Transfer.h"
 
 #include <ppbox/avformat/flv/FlvFormat.h>

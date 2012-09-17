@@ -21,7 +21,7 @@ namespace ppbox
         {
         public:
             RtpTransfer(
-                Muxer & muxer, 
+                MuxerBase & muxer, 
                 std::string const & name, 
                 boost::uint8_t type);
 

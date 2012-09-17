@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_TS_M3U8_MUX_H_
 #define _PPBOX_MUX_TS_M3U8_MUX_H_
 
-#include "ppbox/mux/ts/TsMux.h"
+#include "ppbox/mux/ts/TsMuxer.h"
 #include "ppbox/mux/filter/SegmentFilter.h"
 #include "ppbox/mux/ts/M3U8Protocol.h"
 
@@ -12,7 +12,7 @@ namespace ppbox
     namespace mux
     {
         class M3U8Mux
-            : public TsMux
+            : public TsMuxer
         {
         public:
             M3U8Mux();

@@ -3,7 +3,7 @@
 #ifndef   _PPBOX_MUX_FILTER_H_
 #define   _PPBOX_MUX_FILTER_H_
 
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/MuxBase.h"
 
 #include <ppbox/demux/base/BufferDemuxer.h>
 

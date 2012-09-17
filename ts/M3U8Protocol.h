@@ -18,12 +18,12 @@ namespace ppbox
 {
     namespace mux
     {
-        class Muxer;
+        class MuxerBase;
 
         class M3U8Protocol
         {
         public:
-            M3U8Protocol(Muxer & muxer);
+            M3U8Protocol(MuxerBase & muxer);
 
             ~M3U8Protocol();
 
