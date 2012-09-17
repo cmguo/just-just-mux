@@ -13,7 +13,7 @@ namespace ppbox
 {
     namespace demux
     {
-        class DemuxerModule;
+        class DemuxModule;
     }
 
     namespace mux
@@ -77,7 +77,7 @@ namespace ppbox
                 ppbox::demux::BufferDemuxer * demuxer);
 
         private:
-            ppbox::demux::DemuxerModule & demux_mod_;
+            ppbox::demux::DemuxModule & demux_mod_;
             std::vector<MuxerInfo *> muxers_;
             std::string format_;
             std::map<std::string, MuxerType::Enum> type_map_;

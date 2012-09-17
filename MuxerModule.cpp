@@ -11,7 +11,7 @@
 #include "ppbox/mux/rtp/RtpTsMux.h"
 #include "ppbox/mux/rtp/RtpAsfMux.h"
 
-#include <ppbox/demux/DemuxerModule.h>
+#include <ppbox/demux/DemuxModule.h>
 using namespace ppbox::demux;
 
 #include <boost/bind.hpp>
@@ -62,7 +62,7 @@ namespace ppbox
         MuxerModule::MuxerModule(
             util::daemon::Daemon & daemon)
             : ppbox::common::CommonModuleBase<MuxerModule>(daemon, "muxer")
-            , demux_mod_(util::daemon::use_module<ppbox::demux::DemuxerModule>(daemon))
+            , demux_mod_(util::daemon::use_module<ppbox::demux::DemuxModule>(daemon))
         {
             type_map_["asf"] = MuxerType::ASF;
             type_map_["ts"] = MuxerType::TS;
