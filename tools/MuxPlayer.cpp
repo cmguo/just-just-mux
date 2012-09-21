@@ -30,10 +30,10 @@ namespace ppbox
 
         }
 
-        void MuxPlayer::set(ppbox::mux::Muxer *muxer,
+        void MuxPlayer::set(ppbox::demux::BufferDemuxer* demuxer,
             ppbox::common::session_callback_respone const &resp,
-            ppbox::common::Session* session,
-            ppbox::demux::BufferDemuxer* demuxer )
+            ppbox::common::Session* session ,
+            ppbox::mux::Muxer *muxer)
         {
             muxer_ = muxer;
             resp_ = resp;
@@ -41,7 +41,7 @@ namespace ppbox
             demuxer_ = demuxer;
         }
 
-        boost::system::error_code MuxPlayer::doing()
+        void MuxPlayer::operator ()()
         {
             boost::system::error_code ec;
 
@@ -50,12 +50,11 @@ namespace ppbox
             exit_ = false;
             playing_ = true;
 
-            ec = (NULL == session_)?buffering():playing();
+            ec = (NULL == muxer_)?buffering():playing();
 
             exit_ = true;
 
             resp_(ec);
-            return ec;
         }
 
         boost::system::error_code MuxPlayer::buffering()

@@ -21,14 +21,17 @@ namespace ppbox
 
             MuxPlayer();
 
-            void set(ppbox::mux::Muxer *muxer,
+            void set(
+                ppbox::demux::BufferDemuxer* demuxer,
                 ppbox::common::session_callback_respone const &resp,
                 ppbox::common::Session* session = NULL,
-                ppbox::demux::BufferDemuxer* demuxer = NULL);
+                ppbox::mux::Muxer *muxer = NULL);
 
             virtual ~MuxPlayer();
-            virtual boost::system::error_code doing();
-            virtual boost::system::error_code seek(boost::uint32_t beg);
+            
+            void operator ()();
+
+            boost::system::error_code seek(boost::uint32_t beg);
 
         private:
             boost::system::error_code buffering();

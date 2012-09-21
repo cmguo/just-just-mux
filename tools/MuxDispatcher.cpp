@@ -27,11 +27,10 @@ namespace ppbox
     namespace mux
     {
         MuxDispatcher::MuxDispatcher(
-            util::daemon::Daemon & daemon)
-            : ppbox::common::Dispatcher(daemon)
-            , timer_(daemon.io_svc())
-            , demuxer_module_(util::daemon::use_module<ppbox::demux::DemuxerModule>(daemon))
-            , muxer_module_(util::daemon::use_module<MuxerModule>(daemon))
+            boost::asio::io_service& ios)
+            : ppbox::common::Dispatcher(ios)
+            , demuxer_module_(util::daemon::use_module<ppbox::demux::DemuxerModule>(ios))
+            , muxer_module_(util::daemon::use_module<MuxerModule>(ios))
             , demux_close_token_(0)
             , mux_close_token_(0)
             , muxer_(NULL)
@@ -85,24 +84,10 @@ namespace ppbox
 
         void MuxDispatcher::close_playlink(boost::system::error_code& ec)
         {
+            close_format(ec);
             demuxer_module_.close(demux_close_token_,ec);
             demux_close_token_ = 0;
             demuxer_ = NULL;
-        }
-
-        void MuxDispatcher::open_format(std::string const &format,boost::system::error_code& ec)
-        {
-            muxer_ = muxer_module_.open(
-                demuxer_,
-                format,
-                mux_close_token_);
-        }
-
-        void MuxDispatcher::close_format(boost::system::error_code& ec)
-        {
-            muxer_module_.close(mux_close_token_,ec);
-            mux_close_token_ = 0;
-            muxer_ = NULL;
         }
 
         void MuxDispatcher::pause_moive(boost::system::error_code& ec)
@@ -117,9 +102,10 @@ namespace ppbox
 
         void MuxDispatcher::async_play_playlink(ppbox::common::Session* session,ppbox::common::session_callback_respone const &resp)
         {
-            player_->set(muxer_,resp,session,demuxer_);
-
-            post(player_);
+            boost::system::error_code ec;
+            open_format(session->format_,ec);
+            player_->set(demuxer_,resp,session,muxer_);
+            post(*player_);
         }
 
         void MuxDispatcher::cancel_play_playlink(boost::system::error_code& ec)
@@ -129,28 +115,13 @@ namespace ppbox
 
         void MuxDispatcher::async_buffering(ppbox::common::Session* session,ppbox::common::session_callback_respone const &resp)
         {
-            player_->set(muxer_,resp);
-            post(player_);
+            player_->set(demuxer_,resp);
+            post(*player_);
         }
 
         void MuxDispatcher::cancel_buffering(boost::system::error_code& ec)
         {
             player_->stop();
-        }
-
-
-        void MuxDispatcher::async_wait(
-            boost::uint32_t wait_timer
-            , ppbox::common::session_callback_respone const &resp) 
-        {
-            //time
-            timer_.expires_from_now(boost::posix_time::seconds(wait_timer));
-            timer_.async_wait(resp);
-        }
-
-        void MuxDispatcher::cancel_wait(boost::system::error_code& ec)
-        {
-            timer_.cancel();
         }
 
         boost::system::error_code MuxDispatcher::get_media_info(
@@ -166,6 +137,31 @@ namespace ppbox
             ppbox::common::PlayInfo & info)
         {
             return boost::system::error_code();
+        }
+
+        void MuxDispatcher::open_format(std::string const &format,boost::system::error_code& ec)
+        {
+            if (format_ != format)
+            {
+                close_format(ec);
+                format_ = format;
+
+                muxer_ = muxer_module_.open(
+                    demuxer_,
+                    format,
+                    mux_close_token_);
+            }
+        }
+
+        void MuxDispatcher::close_format(boost::system::error_code& ec)
+        {
+            if (mux_close_token_)
+            {
+                muxer_module_.close(mux_close_token_,ec);
+                mux_close_token_ = 0;
+                muxer_ = NULL;
+                format_.clear();
+            }
         }
 
     } // namespace mux

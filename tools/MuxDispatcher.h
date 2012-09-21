@@ -7,7 +7,6 @@
 
 #include <ppbox/common/Dispatcher.h>
 
-#include <boost/asio/deadline_timer.hpp>
 
 
 namespace ppbox
@@ -29,7 +28,7 @@ namespace ppbox
         public:
 
             MuxDispatcher(
-                util::daemon::Daemon & daemon);
+                boost::asio::io_service& ios);
 
             virtual ~MuxDispatcher();
 
@@ -47,9 +46,6 @@ namespace ppbox
             virtual void cancel_open_playlink(boost::system::error_code& ec) ;
             virtual void close_playlink(boost::system::error_code& ec) ;
 
-            virtual void open_format(std::string const &format,boost::system::error_code& ec) ;
-            virtual void close_format(boost::system::error_code& ec) ;
-
             virtual void pause_moive(boost::system::error_code& ec);
             virtual void resume_moive(boost::system::error_code& ec);
 
@@ -58,13 +54,6 @@ namespace ppbox
 
             virtual void async_buffering(ppbox::common::Session* session,ppbox::common::session_callback_respone const &resp);
             virtual void cancel_buffering(boost::system::error_code& ec);
-
-
-            virtual void async_wait(
-                boost::uint32_t wait_timer
-                , ppbox::common::session_callback_respone const &resp) ;
-
-            virtual void cancel_wait(boost::system::error_code& ec) ;
 
             virtual boost::system::error_code get_media_info(
                 ppbox::common::MediaInfo & info) ;
@@ -78,6 +67,9 @@ namespace ppbox
                 ppbox::common::session_callback_respone const &resp,
                 boost::system::error_code const & ec,
                 ppbox::demux::BufferDemuxer * muxer);
+
+            void open_format(std::string const &format,boost::system::error_code& ec) ;
+            void close_format(boost::system::error_code& ec) ;
             
         protected:
             ppbox::mux::Muxer *muxer_;           
@@ -85,12 +77,14 @@ namespace ppbox
             MuxPlayer* player_;
 
         private:
-            boost::asio::deadline_timer timer_;
+            
             ppbox::demux::DemuxerModule& demuxer_module_;
             ppbox::mux::MuxerModule& muxer_module_;
 
             size_t  demux_close_token_;      
             size_t  mux_close_token_;
+
+            std::string format_;
 
 
             boost::uint32_t video_type_;          //ÊÓÆµË÷ÒýÖµ
