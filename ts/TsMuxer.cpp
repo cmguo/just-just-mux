@@ -1,4 +1,4 @@
-// TsMux.cpp
+// TsMuxer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/ts/TsMuxer.h"
