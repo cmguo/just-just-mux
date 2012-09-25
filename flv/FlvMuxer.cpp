@@ -95,11 +95,11 @@ namespace ppbox
 
                 if (stream_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
                     flv_video_tag_header_.FrameType = 1;
-                    flv_video_tag_header_.CodecID = VideoCodec::FLV_CODECID_H264;
+                    flv_video_tag_header_.CodecID = FlvVideoCodec::H264;
                     flv_video_tag_header_.AVCPacketType = 0;
                 } else {
                     flv_video_tag_header_.FrameType = 1;
-                    flv_video_tag_header_.CodecID = VideoCodec::FLV_CODECID_H264;
+                    flv_video_tag_header_.CodecID = FlvVideoCodec::H264;
                     flv_video_tag_header_.AVCPacketType = 0;
                 }
                 flv_video_tag_header_.CompositionTime = framework::system::UInt24(0);

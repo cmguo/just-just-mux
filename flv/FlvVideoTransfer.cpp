@@ -41,7 +41,7 @@ namespace ppbox
 
         void FlvVideoTransfer::transfer(MediaInfoEx & mediainfo)
         {
-            videotagheader_.CodecID = VideoCodec::FLV_CODECID_H264;
+            videotagheader_.CodecID = FlvVideoCodec::H264;
             videotagheader_.AVCPacketType = 1;
         }
 
