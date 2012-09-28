@@ -8,7 +8,6 @@
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
-using namespace ppbox::demux;
 using namespace ppbox::avformat;
 
 #include <framework/system/BytesOrder.h>
@@ -31,7 +30,7 @@ namespace ppbox
             MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;
-            if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
+            if (mediainfo.type == MEDIA_TYPE_VIDE) {
                 if (mediainfo.format_type == StreamInfo::video_avc_packet) {
                     // empty
                 } else if (mediainfo.format_type == StreamInfo::video_avc_byte_stream) {
@@ -44,14 +43,14 @@ namespace ppbox
                 }
                 transfer = new FlvVideoTransfer(9);
                 mediainfo.transfers.push_back(transfer);
-            } else if (mediainfo.type == ppbox::demux::MEDIA_TYPE_AUDI) {
+            } else if (mediainfo.type == MEDIA_TYPE_AUDI) {
                 transfer = new FlvAudioTransfer(8);
                 mediainfo.transfers.push_back(transfer);
             }
         }
 
         void FlvMuxer::file_header(
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             tag.data.clear();
             tag.time = 0;
@@ -68,7 +67,7 @@ namespace ppbox
 
         void FlvMuxer::stream_header(
             boost::uint32_t index, 
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             assert(index < mediainfo().stream_infos.size());
             boost::uint32_t spec_data_size = 0;
@@ -80,7 +79,7 @@ namespace ppbox
             tag.cts_delta = 0;
 
             MediaInfoEx const & stream_info = mediainfo().stream_infos[index];
-            if (stream_info.type == ppbox::demux::MEDIA_TYPE_VIDE) {
+            if (stream_info.type == MEDIA_TYPE_VIDE) {
                 spec_data_size = stream_info.format_data.size();
                 flv_tag_header_.Type = 0x09;
                 flv_tag_header_.Filter = 0;
@@ -93,7 +92,7 @@ namespace ppbox
                 ppbox::avformat::FLVOArchive flv_archive(buf);
                 flv_archive << flv_tag_header_;
 
-                if (stream_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
+                if (stream_info.sub_type == VIDEO_TYPE_AVC1) {
                     flv_video_tag_header_.FrameType = 1;
                     flv_video_tag_header_.CodecID = FlvVideoCodec::H264;
                     flv_video_tag_header_.AVCPacketType = 0;
@@ -113,7 +112,7 @@ namespace ppbox
                 tag.data.push_back(boost::asio::buffer(
                     (boost::uint8_t *)&video_header_size_, 4));
 
-            } else if (stream_info.type == ppbox::demux::MEDIA_TYPE_AUDI) {
+            } else if (stream_info.type == MEDIA_TYPE_AUDI) {
                 spec_data_size = stream_info.format_data.size();
                 flv_tag_header_.Type = 0x08;
                 flv_tag_header_.Filter = 0;
@@ -128,13 +127,13 @@ namespace ppbox
 
                 switch(stream_info.sub_type)
                 {
-                case ppbox::demux::AUDIO_TYPE_MP4A:
+                case AUDIO_TYPE_MP4A:
                     flv_audio_tag_header_.SoundFormat = 10;
                     break;
-                case ppbox::demux::AUDIO_TYPE_MP1A:
+                case AUDIO_TYPE_MP1A:
                     flv_audio_tag_header_.SoundFormat = 2;
                     break;
-                case ppbox::demux::AUDIO_TYPE_WMA2:
+                case AUDIO_TYPE_WMA2:
                     flv_audio_tag_header_.SoundFormat = 11;
                     break;
                 default:

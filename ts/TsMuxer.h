@@ -40,8 +40,8 @@ namespace ppbox
             bool has_video_;
             boost::uint16_t audio_pid_;
             boost::uint16_t video_pid_;
-            boost::uint16_t audio_stream_id_;
-            boost::uint16_t video_stream_id_;
+            boost::uint8_t audio_stream_id_;
+            boost::uint8_t video_stream_id_;
             boost::uint8_t audio_stream_type_;
             boost::uint8_t video_stream_type_;
             // buffer

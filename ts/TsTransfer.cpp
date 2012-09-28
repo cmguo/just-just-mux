@@ -1,8 +1,10 @@
-// TsStreamTransfer.cpp
+// TsTransfer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/ts/TsTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
+
+using namespace ppbox::avformat;
 
 #include <util/archive/ArchiveBuffer.h>
 
@@ -15,7 +17,7 @@ namespace ppbox
 
         TsTransfer::TsTransfer(
             boost::uint16_t pid,
-            boost::uint16_t stream_id)
+            boost::uint8_t stream_id)
             : Stream(pid)
             , stream_id_(stream_id)
             , time_adjust_(0)
@@ -31,7 +33,7 @@ namespace ppbox
         void TsTransfer::transfer(
             ppbox::mux::MediaInfoEx & media)
         {
-            if (media.type == ppbox::demux::MEDIA_TYPE_VIDE) {
+            if (media.type == MEDIA_TYPE_VIDE) {
                 scale_.reset(media.time_scale, PES_TIME_SCALE);
                 with_pcr_ = true;
                 with_dts_ = true;
@@ -55,7 +57,7 @@ namespace ppbox
             if (time_adjust_ == 0) {
                 sample.dts = scale_.transfer(sample.dts);
                 cts = scale_.inc(sample.cts_delta);
-                sample.cts_delta = cts - sample.dts;
+                sample.cts_delta = (boost::uint32_t)(cts - sample.dts);
             } else if (time_adjust_ == 1) {
                 sample.dts = cts = scale_.static_transfer(media.time_scale, PES_TIME_SCALE, sample.dts);
                 scale_.set(sample.dts);
@@ -69,12 +71,12 @@ namespace ppbox
             ts_headers_.clear();
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             MyBuffersPosition position(limit);
-            size_t pes_header_size = 14 + (with_dts_ ? 5 : 0);
+            boost::uint8_t pes_header_size = 14 + (with_dts_ ? 5 : 0);
             PESPacket pes_packet;
             pes_packet.stream_id = stream_id_;
             //assert (frame_size + pes_header_size - 6 < 65536);
-            pes_packet.PES_packet_length = (media.type == ppbox::demux::MEDIA_TYPE_VIDE)
-                ? 0 : (frame_size + pes_header_size - 6);
+            pes_packet.PES_packet_length = (media.type == MEDIA_TYPE_VIDE)
+                ? 0 : (boost::uint16_t)(frame_size + pes_header_size - 6);
             pes_packet.PES_scrambling_control = 0;
             pes_packet.PES_priority = 0;
             pes_packet.data_alignment_indicator = 1;
@@ -158,5 +160,5 @@ namespace ppbox
                 time_adjust_ = 1;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

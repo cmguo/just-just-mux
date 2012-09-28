@@ -94,7 +94,7 @@ namespace ppbox
             MediaInfoEx const & media = *(MediaInfoEx const *)sample.media_info;
             NaluList & nalus = *(NaluList *)sample.context;
 
-            boost::uint32_t cts_time = 0;
+            boost::uint64_t cts_time = 0;
             if (use_dts_) {
                 cts_time = scale_.transfer(sample.dts);
                 assert(cts_time == sample.dts * 90000 / media.time_scale);

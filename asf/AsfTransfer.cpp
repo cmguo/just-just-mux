@@ -108,7 +108,7 @@ namespace ppbox
             //packet_head_.PayLoadParseInfo.PacketLenth = packet_length_;
             //packet_head_.PayLoadParseInfo.Sequence = 0;
             packet_head_.PayLoadParseInfo.PaddingLength = 0;
-            packet_head_.PayLoadParseInfo.SendTime = sample.time + 2000;
+            packet_head_.PayLoadParseInfo.SendTime = (boost::uint32_t)sample.time + 2000;
             //packet_head_.PayLoadParseInfo.Duration = sample.duration;
             //packet_head_.PayloadNum = 0;
             packet_head_.PayloadLengthType = 2;
@@ -194,7 +194,7 @@ namespace ppbox
             payload_header.OffsetIntoMediaObj = pos1.skipped_bytes();
             payload_header.ReplicatedDataLen = 8;
             payload_header.MediaObjectSize = sample.size;
-            payload_header.PresTime = sample.time + 2000;
+            payload_header.PresTime = (boost::uint32_t)sample.time + 2000;
             payload_header.PayloadLength = payload_size;
 
             util::archive::ArchiveBuffer<boost::uint8_t> buf(head_end_->buf, PAYLOAD_HEAD_LENGTH);
@@ -326,7 +326,7 @@ namespace ppbox
         }//AsfTransfer::transfer
 
         void AsfTransfer::on_seek(
-            boost::uint32_t time)
+            boost::uint64_t time)
         {
             packet_count_ = 0;
             data_.clear();

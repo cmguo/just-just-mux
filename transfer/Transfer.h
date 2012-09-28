@@ -32,7 +32,7 @@ namespace ppbox
                 ppbox::demux::Sample & sample) = 0;
 
             virtual void on_seek(
-                boost::uint32_t time)
+                boost::uint64_t time)
             {
             }
         };

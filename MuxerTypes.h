@@ -1,7 +1,7 @@
-// MuxerType.h
+// MuxerTypes.h
 
-#ifndef   _PPBOX_MUX_MUX_TYPE_H_
-#define   _PPBOX_MUX_MUX_TYPE_H_
+#ifndef   _PPBOX_MUX_MUXER_TYPES_H_
+#define   _PPBOX_MUX_MUXER_TYPES_H_
 
 #include "ppbox/mux/flv/FlvMuxer.h"
 #include "ppbox/mux/asf/AsfMuxer.h"
@@ -11,4 +11,4 @@
 #include "ppbox/mux/rtp/RtpTsMuxer.h"
 #include "ppbox/mux/rtp/RtpAsfMuxer.h"
 
-#endif // _PPBOX_MUX_MUX_TYPE_H_
+#endif // _PPBOX_MUX_MUXER_TYPES_H_

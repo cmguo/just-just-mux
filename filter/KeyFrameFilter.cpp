@@ -4,6 +4,8 @@
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
+using namespace ppbox::avformat;
+
 #include <boost/asio/error.hpp>
 
 using namespace boost::system;
@@ -21,7 +23,7 @@ namespace ppbox
                 return ec;
             video_track_ = boost::uint32_t(-1);
             for (size_t i = 0; i < media_file_info.stream_infos.size(); ++i) {
-                if (media_file_info.stream_infos[i].type == ppbox::demux::MEDIA_TYPE_VIDE) {
+                if (media_file_info.stream_infos[i].type == MEDIA_TYPE_VIDE) {
                     video_track_ = i;
                     break;
                 }

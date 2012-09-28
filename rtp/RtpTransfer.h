@@ -35,7 +35,7 @@ namespace ppbox
 
         public:
             virtual void on_seek(
-                boost::uint32_t time);
+                boost::uint64_t time);
 
             virtual void setup();
 

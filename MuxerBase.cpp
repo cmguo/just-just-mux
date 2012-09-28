@@ -6,15 +6,15 @@
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
 
-#include <ppbox/demux/base/BufferDemuxer.h>
+#include <ppbox/demux/base/SegmentDemuxer.h>
 #include <ppbox/demux/base/SourceError.h>
+using namespace ppbox::demux;
 
 #include <ppbox/data/MediaBase.h>
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
 #include <ppbox/avformat/codec/AvcCodec.h>
 using namespace ppbox::avformat;
-using namespace ppbox::demux;
 
 #include <util/buffers/BufferCopy.h>
 #include <util/archive/ArchiveBuffer.h>
@@ -81,7 +81,7 @@ namespace ppbox
         }
 
         error_code MuxerBase::open(
-            demux::BufferDemuxer * demuxer,
+            demux::SegmentDemuxer * demuxer,
             error_code & ec)
         {
             assert(demuxer != NULL);
@@ -118,8 +118,8 @@ namespace ppbox
                     } else {
                         media_info.attachment = NULL;
                         // add attachment
-                        if (media_info.type == ppbox::demux::MEDIA_TYPE_VIDE 
-                            && media_info.sub_type == ppbox::demux::VIDEO_TYPE_AVC1) {
+                        if (media_info.type == MEDIA_TYPE_VIDE 
+                            && media_info.sub_type == VIDEO_TYPE_AVC1) {
                                 media_info.decode = new AvcCodec();
                                 media_info.decode->config(
                                     media_info.format_data, media_info.config);
@@ -139,7 +139,7 @@ namespace ppbox
         }
 
         error_code MuxerBase::read(
-            ppbox::demux::Sample & tag,
+            Sample & tag,
             error_code & ec)
         {
             ec.clear();
@@ -180,7 +180,7 @@ namespace ppbox
         }
 
         error_code MuxerBase::seek(
-            boost::uint32_t & time,
+            boost::uint64_t & time,
             error_code & ec)
         {
             if (!is_open()) {
@@ -203,10 +203,10 @@ namespace ppbox
         }
 
         error_code MuxerBase::byte_seek(
-            boost::uint32_t & offset,
+            boost::uint64_t & offset,
             boost::system::error_code & ec)
         {
-            boost::uint32_t seek_time = (offset * media_info_.duration_info.duration) / media_info_.filesize;
+            boost::uint64_t seek_time = (offset * media_info_.duration_info.duration) / media_info_.filesize;
             return seek(seek_time, ec);
         }
 
@@ -256,11 +256,6 @@ namespace ppbox
             release_mediainfo();
         }
 
-        boost::uint32_t & MuxerBase::current_time(void)
-        {
-            return play_time_;
-        }
-
         MediaFileInfo & MuxerBase::mediainfo(void)
         {
             return media_info_;
@@ -269,24 +264,6 @@ namespace ppbox
         framework::configure::Config & MuxerBase::config()
         {
             return config_;
-        }
-
-        error_code MuxerBase::get_buffer_time(
-            boost::uint32_t & buffer_time,
-            error_code & ec)
-        {
-            boost::uint32_t cur = demuxer_->get_cur_time(ec);
-            if (!ec) {
-                error_code ec_buf;
-                boost::uint32_t end = demuxer_->get_end_time(ec, ec_buf);
-                if (!ec) {
-                    buffer_time = end > cur ? (end-cur) : 0;
-                    if (ec_buf == source_error::no_more_segment) {
-                        ec = ec_buf;
-                    }
-                }
-            }
-            return ec;
         }
 
         error_code MuxerBase::get_sample(

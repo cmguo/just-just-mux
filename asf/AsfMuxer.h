@@ -36,7 +36,7 @@ namespace ppbox
                 ppbox::demux::Sample & tag);
 
             boost::system::error_code seek(
-                boost::uint32_t & time,
+                boost::uint64_t & time,
                 boost::system::error_code & ec);
 
         private:

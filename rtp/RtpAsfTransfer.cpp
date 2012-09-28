@@ -5,6 +5,8 @@
 #include "ppbox/mux/asf/AsfTransfer.h"
 #include "ppbox/mux/rtp/RtpAsfTransfer.h"
 
+using namespace ppbox::avformat;
+
 #include <framework/string/Format.h>
 #include <framework/string/Base64.h>
 
@@ -35,7 +37,7 @@ namespace ppbox
             MediaInfoEx & info)
         {
             std::string sdp;
-            if (info.type == ppbox::demux::MEDIA_TYPE_VIDE) {
+            if (info.type == MEDIA_TYPE_VIDE) {
                 sdp = "m=video 0 RTP/AVP 96\r\n";
             } else {
                 sdp = "m=audio 0 RTP/AVP 96\r\n";

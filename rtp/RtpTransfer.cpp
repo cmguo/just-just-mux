@@ -47,19 +47,19 @@ namespace ppbox
         }
 
         void RtpTransfer::on_seek(
-            boost::uint32_t time)
+            boost::uint64_t time)
         {
             if (packets_.empty())
                 return;
             boost::uint32_t last_timestamp = 
                 framework::system::BytesOrder::host_to_big_endian(packets_[0].timestamp);
             // std::cout << "last_timestamp = " << last_timestamp << std::endl;
-            rtp_info_.timestamp = last_timestamp + scale_.scale_out() * 8; // add 8 seconds to keep distance from timestamp before
+            rtp_info_.timestamp = last_timestamp + (boost::uint32_t)scale_.scale_out() * 8; // add 8 seconds to keep distance from timestamp before
             // std::cout << "rtp_info_.timestamp = " << rtp_info_.timestamp << std::endl;
-            rtp_head_.timestamp = rtp_info_.timestamp - scale_.static_transfer(1000, scale_.scale_out(), time);
+            rtp_head_.timestamp = rtp_info_.timestamp - (boost::uint32_t)scale_.static_transfer(1000, scale_.scale_out(), time);
             // std::cout << "rtp_head_.timestamp = " << rtp_head_.timestamp << std::endl;
             rtp_info_.sequence = rtp_head_.sequence;
-            rtp_info_.seek_time = time;
+            rtp_info_.seek_time = (boost::uint32_t)time;
         }
 
     } // namespace mux

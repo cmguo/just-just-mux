@@ -8,7 +8,6 @@
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 
 #include <ppbox/avformat/codec/AvcConfig.h>
-using namespace ppbox::demux;
 using namespace ppbox::avformat;
 
 #include <util/archive/BigEndianBinaryOArchive.h>
@@ -84,7 +83,7 @@ namespace ppbox
                 streams_object.Video_Media_Type.FormatData.FormatDataSize = 
                     streams_object.Video_Media_Type.FormatData.CodecSpecificData.size() + 40;
                 streams_object.Video_Media_Type.FormatDataSize = 
-                    streams_object.Video_Media_Type.FormatData.FormatDataSize;
+                    (boost::uint16_t)streams_object.Video_Media_Type.FormatData.FormatDataSize;
                 streams_object.ObjLength = 89 + streams_object.Video_Media_Type.FormatDataSize;
                 streams_object.TypeSpecificDataLength =
                     11 + streams_object.Video_Media_Type.FormatDataSize;
@@ -106,7 +105,7 @@ namespace ppbox
                 {
                     streams_object.Audio_Media_Type.CodecId = 0;
                 }
-                streams_object.Audio_Media_Type.NumberOfChannels = mediainfoex.audio_format.channel_count;
+                streams_object.Audio_Media_Type.NumberOfChannels = (boost::uint16_t)mediainfoex.audio_format.channel_count;
                 streams_object.Audio_Media_Type.SamplesPerSecond = mediainfoex.audio_format.sample_rate;
                 //streams_object.Audio_Media_Type.AverageNumberOfBytesPerSecond = 4000;
                 //streams_object.Audio_Media_Type.BlockAlignment = 
@@ -188,7 +187,7 @@ namespace ppbox
         }
 
         boost::system::error_code AsfMuxer::seek(
-            boost::uint32_t & time,
+            boost::uint64_t & time,
             boost::system::error_code & ec)
         {
             MuxerBase::seek(time, ec);

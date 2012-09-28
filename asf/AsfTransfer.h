@@ -32,7 +32,7 @@ namespace ppbox
 
         public:
             void on_seek(
-                boost::uint32_t time);
+                boost::uint64_t time);
 
             boost::uint32_t packet_length() const
             {
@@ -141,7 +141,7 @@ namespace ppbox
             std::deque<boost::asio::const_buffer> data_;//保存buffer的地址和长度记录
             size_t p_index_;                            //保存当前的packet在data_中下标值
             std::vector<AsfPacket> packets_;
-            boost::uint16_t packet_left_;               //当前packet内存剩余空间
+            boost::uint32_t packet_left_;               //当前packet内存剩余空间
             HeadBlockPointer head_beg_;
             HeadBlockPointer head_end_;
             HeadBlockPointer head_pkt_;

@@ -51,7 +51,7 @@ namespace ppbox
             NaluList const & nalus = 
                 *(NaluList const * )sample.context;
             util::buffers::BuffersLimit<ConstBuffers::const_iterator> limit(sample.data.begin(), sample.data.end());
-            for (boost::uint32_t i = 0; i < nalus.size(); ++i) {
+            for (size_t i = 0; i < nalus.size(); ++i) {
                 avformat::NaluHeader nalu_header(nalus[i].begin.dereference_byte());
                 if (avformat::NaluHeader::SPS == nalu_header.nal_unit_type) {
                     ppbox::avformat::SeqParameterSetRbsp sps;
@@ -65,7 +65,7 @@ namespace ppbox
                     || avformat::NaluHeader::IDR == nalu_header.nal_unit_type) {
                     ppbox::avformat::SliceLayerWithoutPartitioningRbsp slice(ppss_);
                     parse(slice, sample, nalus[i]);
-                    sample.cts_delta = idr_dts_ + frame_scale_ * slice.slice_header.pic_order_cnt_lsb / 2 - sample.dts;
+                    sample.cts_delta = (boost::uint32_t)(idr_dts_ + frame_scale_ * slice.slice_header.pic_order_cnt_lsb / 2 - sample.dts);
                     // iphoneÂ¼ÖÆÊ¹ÓÃ
                     if (slice.slice_header.slice_type % 5 == 2) {
                         sample.flags |= ppbox::demux::Sample::sync;

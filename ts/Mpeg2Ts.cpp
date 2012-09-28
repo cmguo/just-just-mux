@@ -37,7 +37,7 @@ namespace ppbox
             }
             transport_packet_.transport_priority = (pid_ == 0) ? 1 : 0;
             transport_packet_.Pid = pid_;
-            boost::uint32_t adaptation_field_size = 0;
+            boost::uint8_t adaptation_field_size = 0;
             if (with_pcr) adaptation_field_size += 2+AP4_MPEG2TS_PCR_ADAPTATION_SIZE;
             // clamp the payload size
             if (payload_size+adaptation_field_size > AP4_MPEG2TS_PACKET_PAYLOAD_SIZE) {
@@ -45,7 +45,7 @@ namespace ppbox
             }
             // adjust the adaptation field to include stuffing if necessary
             if (adaptation_field_size+payload_size < AP4_MPEG2TS_PACKET_PAYLOAD_SIZE) {
-                adaptation_field_size = AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-payload_size;
+                adaptation_field_size = (boost::uint8_t)(AP4_MPEG2TS_PACKET_PAYLOAD_SIZE-payload_size);
             }
             transport_packet_.transport_scrambling_control = 0;
             if (adaptation_field_size == 0) {
@@ -78,8 +78,8 @@ namespace ppbox
                         pcr_size = AP4_MPEG2TS_PCR_ADAPTATION_SIZE;
                         boost::uint64_t pcr_base = pcr;
                         boost::uint32_t pcr_ext  = 0;
-                        adapation_field_.program_clock_reference_base = pcr_base >> 1;
-                        adapation_field_.program_clock_reference_base_last1bit = pcr_base & 0x01;
+                        adapation_field_.program_clock_reference_base = (boost::uint32_t)pcr_base >> 1;
+                        adapation_field_.program_clock_reference_base_last1bit = (boost::uint32_t)pcr_base & 0x01;
                         adapation_field_.pcr_reserved = 0x3F;
                         adapation_field_.program_clock_reference_extension = pcr_ext;
                     }

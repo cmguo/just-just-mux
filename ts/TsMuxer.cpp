@@ -12,7 +12,7 @@
 #include "ppbox/mux/ts/TsTransfer.h"
 #include "ppbox/mux/ts/MpegTsType.h"
 
-using namespace ppbox::demux;
+using namespace ppbox::avformat;
 
 #include <util/archive/ArchiveBuffer.h>
 
@@ -109,7 +109,7 @@ namespace ppbox
             MediaInfoEx & mediainfo)
         {
             Transfer * transfer = NULL;
-            if (mediainfo.type == ppbox::demux::MEDIA_TYPE_VIDE) {
+            if (mediainfo.type == MEDIA_TYPE_VIDE) {
                 if (mediainfo.format_type == StreamInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
                     mediainfo.transfers.push_back(transfer);
@@ -124,12 +124,12 @@ namespace ppbox
                 transfer = new TsTransfer(video_pid_, video_stream_id_);
                 mediainfo.transfers.push_back(transfer);
                 has_video_ = true;
-            } else if (mediainfo.type == ppbox::demux::MEDIA_TYPE_AUDI) {
+            } else if (mediainfo.type == MEDIA_TYPE_AUDI) {
                 has_audio_ = true;
-                if (mediainfo.sub_type == ppbox::demux::AUDIO_TYPE_MP4A) {
+                if (mediainfo.sub_type == AUDIO_TYPE_MP4A) {
                     transfer = new AdtsAudioTransfer();
                     mediainfo.transfers.push_back(transfer);
-                } else if (mediainfo.sub_type == ppbox::demux::AUDIO_TYPE_MP1A) {
+                } else if (mediainfo.sub_type == AUDIO_TYPE_MP1A) {
                     audio_stream_type_ = AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_3;
                 }
                 transfer = new TsTransfer(audio_pid_, audio_stream_id_);
@@ -138,7 +138,7 @@ namespace ppbox
         }
 
         void TsMuxer::file_header(
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             WritePAT(header_);
             WritePMT(header_ + 188);
@@ -152,7 +152,7 @@ namespace ppbox
 
         void TsMuxer::stream_header(
             boost::uint32_t index, 
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             tag.data.clear();
         }

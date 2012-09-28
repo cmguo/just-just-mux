@@ -3,6 +3,8 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 
+using namespace ppbox::avformat;
+
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;
 
@@ -11,10 +13,10 @@ namespace ppbox
     namespace mux
     {
 
-        void FlvAudioTransfer::transfer(ppbox::demux::Sample & sample)
+        void FlvAudioTransfer::transfer(Sample & sample)
         {
             boost::uint32_t data_length = sample.size;
-            setTagSizeAndTimestamp(data_length+2, sample.time);
+            setTagSizeAndTimestamp(data_length+2, (boost::uint32_t)sample.time);
             sample.data.push_front(boost::asio::buffer((boost::uint8_t*)&audiotagheader_, 2));
             sample.data.push_front(tag_buffer());
             previous_tag_size_ = data_length + 13;
@@ -27,13 +29,13 @@ namespace ppbox
         {
             switch(mediainfo.sub_type)
             {
-            case ppbox::demux::AUDIO_TYPE_MP4A:
+            case AUDIO_TYPE_MP4A:
                 audiotagheader_.SoundFormat = 10;
                 break;
-            case ppbox::demux::AUDIO_TYPE_MP1A:
+            case AUDIO_TYPE_MP1A:
                 audiotagheader_.SoundFormat = 2;
                 break;
-            case ppbox::demux::AUDIO_TYPE_WMA2:
+            case AUDIO_TYPE_WMA2:
                 audiotagheader_.SoundFormat = 11;
                 break;
             default:

@@ -5,7 +5,7 @@
 
 #include <ppbox/data/MediaBase.h>
 
-#include <framework/timer/TickCounter.h>
+#include <framework/timer/TimeCounter.h>
 namespace ppbox
 {
     namespace cdn
@@ -51,7 +51,7 @@ namespace ppbox
             boost::uint32_t seg_duration_;
             std::string full_path_;
             std::string context_;
-            framework::timer::TickCounter tc_;
+            framework::timer::TimeCounter tc_;
             boost::uint32_t back_seek_time_;
             boost::uint32_t last_segment_time_;
             boost::uint32_t lines_;

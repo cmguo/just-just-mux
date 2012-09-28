@@ -20,7 +20,7 @@ namespace ppbox
 {
     namespace demux
     {
-        class BufferDemuxer;
+        class SegmentDemuxer;
     }
 
     namespace cdn
@@ -67,7 +67,7 @@ namespace ppbox
 
         public:
             virtual boost::system::error_code open(
-                demux::BufferDemuxer * demuxer,
+                demux::SegmentDemuxer * demuxer,
                 boost::system::error_code & ec);
 
             boost::system::error_code read(
@@ -79,11 +79,11 @@ namespace ppbox
             bool is_open();
 
             virtual boost::system::error_code seek(
-                boost::uint32_t & time,
+                boost::uint64_t & time,
                 boost::system::error_code & ec);
 
             boost::system::error_code byte_seek(
-                boost::uint32_t & offset,
+                boost::uint64_t & offset,
                 boost::system::error_code & ec);
 
             boost::system::error_code get_duration(
@@ -99,12 +99,6 @@ namespace ppbox
             void close(void);
 
             virtual MediaFileInfo & mediainfo(void);
-
-            boost::system::error_code get_buffer_time(
-                boost::uint32_t & buffer_time,
-                boost::system::error_code & ec);
-
-            boost::uint32_t & current_time(void);
 
             framework::configure::Config & config();
 
@@ -135,10 +129,10 @@ namespace ppbox
             MediaFileInfo media_info_;
 
         private:
-            demux::BufferDemuxer * demuxer_;
+            demux::SegmentDemuxer * demuxer_;
             framework::container::List<Filter> filters_;
             bool paused_;
-            boost::uint32_t play_time_; // ms
+            boost::uint64_t play_time_; // ms
             // For reset 
             boost::uint32_t read_step_;
             DemuxFilter demux_filter_;

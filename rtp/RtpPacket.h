@@ -28,11 +28,11 @@ namespace ppbox
         {
         public:
             RtpPacket(
-                boost::uint32_t time,
+                boost::uint64_t time,
                 bool mark)
                 : size(0)
             {
-                timestamp = time;
+                timestamp = (boost::uint32_t)time;
                 mpt = mark ? 0x80 : 0;
                 push_buffers(boost::asio::buffer(this, sizeof(RtpHead)));
             }

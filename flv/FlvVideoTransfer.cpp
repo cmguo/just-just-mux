@@ -28,7 +28,7 @@ namespace ppbox
             ppbox::avformat::FLVOArchive flv_archive(buf);
             flv_archive << videotagheader_;
             boost::uint32_t data_length = sample.size;
-            setTagSizeAndTimestamp(data_length+5, sample.time);
+            setTagSizeAndTimestamp(data_length+5, (boost::uint32_t)sample.time);
 
             sample.data.push_front(boost::asio::buffer(video_tag_header_, 5));
             sample.data.push_front(tag_buffer());

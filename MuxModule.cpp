@@ -3,7 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxModule.h"
 #include "ppbox/mux/Version.h"
-#include "ppbox/mux/MuxerType.h"
+#include "ppbox/mux/MuxerTypes.h"
 
 #include <ppbox/demux/DemuxModule.h>
 using namespace ppbox::demux;
@@ -31,7 +31,7 @@ namespace ppbox
             size_t id;
             MuxerBase * muxer;
             size_t demuxer_id;
-            BufferDemuxer * demuxer;
+            SegmentDemuxer * demuxer;
             MuxModule::open_respone_type resp;
 
             struct Finder
@@ -93,7 +93,7 @@ namespace ppbox
         void MuxModule::open_callback(
             MuxerInfo * info,
             error_code const & ec,
-            ppbox::demux::BufferDemuxer * demuxer)
+            ppbox::demux::SegmentDemuxer * demuxer)
         {
             error_code lec = ec;
             if (!lec) {
@@ -122,7 +122,7 @@ namespace ppbox
         }
 
         MuxerBase * MuxModule::open(
-            ppbox::demux::BufferDemuxer * demuxer,
+            ppbox::demux::SegmentDemuxer * demuxer,
             std::string format,
             size_t & token)
         {

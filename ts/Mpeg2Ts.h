@@ -34,7 +34,8 @@ namespace ppbox
             : public Transfer
         {
         public:
-            Stream(AP4_UI16 pid) 
+            Stream(
+                boost::uint16_t pid) 
                 : pid_(pid)
                 , continuity_counter_(0)
                 , ts_header_(new AP4_MemoryByteStream(AP4_MPEG2TS_PACKET_SIZE))
@@ -52,7 +53,7 @@ namespace ppbox
             {
             }
 
-            boost::uint32_t GetPID()
+            boost::uint16_t GetPID()
             {
                 return pid_;
             }
@@ -66,7 +67,7 @@ namespace ppbox
                 boost::uint8_t * ptr);
 
         private:
-            boost::uint32_t pid_;
+            boost::uint16_t pid_;
             boost::uint32_t continuity_counter_;
             AP4_MemoryByteStream * ts_header_;
 
@@ -77,7 +78,7 @@ namespace ppbox
             boost::uint32_t   ts_packet_header_size_;
         };
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox
 
 #endif // End of _PPBOX_MUX_TS_MPEG2TS_H_

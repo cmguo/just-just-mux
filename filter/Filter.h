@@ -5,7 +5,7 @@
 
 #include "ppbox/mux/MuxBase.h"
 
-#include <ppbox/demux/base/BufferDemuxer.h>
+#include <ppbox/demux/base/SegmentDemuxer.h>
 
 #include <framework/container/List.h>
 
@@ -76,13 +76,13 @@ namespace ppbox
             }
 
             void set_demuxer(
-                ppbox::demux::BufferDemuxer * demuxer)
+                ppbox::demux::SegmentDemuxer * demuxer)
             {
                 demuxer_ = demuxer;
             }
 
         private:
-            ppbox::demux::BufferDemuxer * demuxer_;
+            ppbox::demux::SegmentDemuxer * demuxer_;
         };
 
     }
