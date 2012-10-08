@@ -11,7 +11,6 @@
 #include <ppbox/common/Create.h>
 
 #include <framework/configure/Config.h>
-#include <framework/string/Url.h>
 
 #define PPBOX_REGISTER_MUXER(n, c) \
     static ppbox::common::Call reg ## n(ppbox::mux::MuxerBase::register_muxer, BOOST_PP_STRINGIZE(n), ppbox::common::Creator<c>())

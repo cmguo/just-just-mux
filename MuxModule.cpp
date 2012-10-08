@@ -75,8 +75,8 @@ namespace ppbox
         }
 
         void MuxModule::async_open(
-            std::string playlink,
-            std::string format,
+            framework::string::Url const & playlink,
+            std::string const & format,
             size_t & token,
             open_respone_type const & resp)
         {
@@ -104,8 +104,8 @@ namespace ppbox
         }
 
         MuxerBase * MuxModule::open(
-            std::string playlink,
-            std::string format,
+            framework::string::Url const & playlink,
+            std::string const & format,
             size_t & token,
             error_code & ec)
         {

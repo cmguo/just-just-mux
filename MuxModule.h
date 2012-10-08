@@ -1,9 +1,11 @@
 // MuxModule.h
 
 #ifndef _PPBOX_MUX_MODULE_H_
-#define _PPBOX_MUXER_MODULE_H_
+#define _PPBOX_MUX_MODULE_H_
 
 #include "ppbox/mux/MuxerBase.h"
+
+#include <framework/string/Url.h>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/function.hpp>
@@ -41,14 +43,14 @@ namespace ppbox
 
         public:
             void async_open(
-                std::string playlink,
-                std::string format,
+                framework::string::Url const & playlink,
+                std::string const & format,
                 size_t & token,
                 open_respone_type const & resp);
 
             MuxerBase * open(
-                std::string playlink,
-                std::string format,
+                framework::string::Url const & playlink,
+                std::string const & format,
                 size_t & token,
                 boost::system::error_code & ec);
 
