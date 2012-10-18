@@ -15,6 +15,11 @@ namespace ppbox
     namespace mux
     {
 
+        KeyFrameFilter::KeyFrameFilter()
+            : video_track_(boost::uint32_t(-1))
+        {
+        }
+
         error_code KeyFrameFilter::open(
             MediaStreamInfo const & media_info, 
             boost::system::error_code & ec)
@@ -40,7 +45,7 @@ namespace ppbox
                 return ec;
             if (video_track_ == boost::uint32_t(-1) 
                 || (sample.itrack == video_track_
-                && (sample.flags & demux::Sample::sync))) {
+                && (sample.flags & Sample::sync))) {
                     detach_self();
                     return ec;
             }
