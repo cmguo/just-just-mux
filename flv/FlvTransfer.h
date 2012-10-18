@@ -1,8 +1,10 @@
-#ifndef   _PPBOX_MUX_FLV_TRANSFER_
-#define   _PPBOX_MUX_FLV_TRANSFER_
+// FlvTransfer.h
+
+#ifndef _PPBOX_MUX_FLV_FLV_TRANSFER_H_
+#define _PPBOX_MUX_FLV_FLV_TRANSFER_H_
 
 #include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 
 #include <ppbox/avformat/flv/FlvFormat.h>
 #include <ppbox/avformat/flv/FlvTagType.h>
@@ -15,11 +17,13 @@ namespace ppbox
 {
     namespace mux
     {
+
         class FlvTransfer
             : public Transfer
         {
         public:
-            FlvTransfer(boost::uint8_t type)
+            FlvTransfer(
+                boost::uint8_t type)
                 : previous_tag_size_(0)
             {
                 flvtag_.Type = type;
@@ -29,6 +33,7 @@ namespace ppbox
             {
             }
 
+        public:
             void setTagSizeAndTimestamp(
                 boost::uint32_t size, 
                 boost::uint32_t timestamp)
@@ -53,9 +58,9 @@ namespace ppbox
         private:
             ppbox::avformat::FlvTagHeader   flvtag_;
             char tag_header_[16];
-
         };
-    }
-}
 
-#endif // End _PPBOX_MUX_FLV_TRANSFER_
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_FLV_FLV_TRANSFER_H_

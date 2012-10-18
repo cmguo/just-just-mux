@@ -1,4 +1,4 @@
-// RtpTsMux.cpp
+// RtpTsMuxer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/rtp/RtpTsMuxer.h"
@@ -28,19 +28,19 @@ namespace ppbox
         }
 
         void RtpTsMuxer::add_stream(
-            MediaInfoEx & mediainfo)
+            StreamInfo & info)
         {
-            RtpMuxer::add_stream(mediainfo);
+            RtpMuxer::add_stream(info);
             if (rtp_ts_transfer_ == NULL) {
                 rtp_ts_transfer_ = new RtpTsTransfer(*this);
                 add_transfer(rtp_ts_transfer_);
             }
             Transfer * transfer = new MergeTransfer(rtp_ts_transfer_);
-            mediainfo.transfers.push_back(transfer);
+            info.transfers.push_back(transfer);
         }
 
         void RtpTsMuxer::file_header(
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             RtpMuxer::file_header(tag);
             rtp_ts_transfer_->header_rtp_packet(tag);

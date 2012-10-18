@@ -1,10 +1,9 @@
 // RtpEsMux.h
 
-#ifndef _PPBOX_MUX_RTP_ES_MUX_H_
-#define _PPBOX_MUX_RTP_ES_MUX_H_
+#ifndef _PPBOX_MUX_RTP_RTP_ES_MUXER_H_
+#define _PPBOX_MUX_RTP_RTP_ES_MUXER_H_
 
 #include "ppbox/mux/rtp/RtpMuxer.h"
-#include <ppbox/demux/base/DemuxerBase.h>
 
 namespace ppbox
 {
@@ -21,7 +20,7 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo);
+                StreamInfo & info);
         };
 
         PPBOX_REGISTER_MUXER(rtp_es, RtpEsMuxer);
@@ -29,4 +28,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_ES_MUX_H_
+#endif // _PPBOX_MUX_RTP_RTP_ES_MUXER_H_

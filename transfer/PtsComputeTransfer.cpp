@@ -21,7 +21,7 @@ namespace ppbox
         template <typename T>
         static bool parse(
             T & t, 
-            ppbox::demux::Sample & s, 
+            Sample & s, 
             Nalu const & n)
         {
             util::buffers::BuffersLimit<ConstBuffers::const_iterator> limit(s.data.begin(), s.data.end());
@@ -35,13 +35,20 @@ namespace ppbox
             return !!bits_reader;
         }
 
+        PtsComputeTransfer::PtsComputeTransfer()
+            : idr_dts_(0)
+            , frame_scale_(0)
+            , is_last_a_idr_(false)
+        {
+        }
+
         void PtsComputeTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             if (sample.cts_delta != boost::uint32_t(-1)) {
                 return;
             }
-            if (sample.flags & demux::Sample::sync) {
+            if (sample.flags & Sample::sync) {
                 idr_dts_ = sample.dts;
                 is_last_a_idr_ = true;
             } else if (is_last_a_idr_) {
@@ -68,7 +75,7 @@ namespace ppbox
                     sample.cts_delta = (boost::uint32_t)(idr_dts_ + frame_scale_ * slice.slice_header.pic_order_cnt_lsb / 2 - sample.dts);
                     // iphoneÂ¼ÖÆÊ¹ÓÃ
                     if (slice.slice_header.slice_type % 5 == 2) {
-                        sample.flags |= ppbox::demux::Sample::sync;
+                        sample.flags |= Sample::sync;
                     }
                 } else {
                     // skip
@@ -76,5 +83,5 @@ namespace ppbox
             } // End for
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

@@ -26,7 +26,7 @@ namespace ppbox
         }
 
         void RtpEsAudioTransfer::transfer(
-            MediaInfoEx & media)
+            StreamInfo & media)
         {
             using namespace framework::string;
 
@@ -61,7 +61,7 @@ namespace ppbox
         }
 
         void RtpEsAudioTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             au_header_section_[2] =  (boost::uint8_t)(sample.size >> 5);
             au_header_section_[3] = (boost::uint8_t)((sample.size << 3) /*| (index_++ & 0x07)*/);
@@ -73,8 +73,8 @@ namespace ppbox
             if (time_adjust_ == 0) {
                 sample.dts = scale_.transfer(sample.dts);
             } else if (time_adjust_ == 1) {
-                MediaInfoEx const & media = 
-                    *(MediaInfoEx const *)sample.media_info;
+                StreamInfo const & media = 
+                    *(StreamInfo const *)sample.media_info;
                 sample.dts = scale_.static_transfer(media.time_scale, media.audio_format.sample_rate, sample.dts);
                 scale_.set(sample.dts);
                 time_adjust_ = 2;
@@ -103,5 +103,5 @@ namespace ppbox
                 time_adjust_ = 1;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

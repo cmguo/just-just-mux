@@ -7,6 +7,8 @@
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 
+#include <ppbox/avformat/asf/AsfGuid.h>
+#include <ppbox/avformat/asf/AsfObjectType.h>
 #include <ppbox/avformat/codec/AvcConfig.h>
 using namespace ppbox::avformat;
 
@@ -28,46 +30,46 @@ namespace ppbox
         }
 
         void AsfMuxer::add_stream(
-            MediaInfoEx & mediainfoex)
+            StreamInfo & infoex)
         {
              Transfer * transfer = NULL;
-             if (mediainfoex.type == MEDIA_TYPE_VIDE) {
-                 if (mediainfoex.format_type == StreamInfo::video_avc_packet) {
+             if (infoex.type == MEDIA_TYPE_VIDE) {
+                 if (infoex.format_type == StreamInfo::video_avc_packet) {
                      transfer = new PackageSplitTransfer();
-                     mediainfoex.transfers.push_back(transfer);
+                     infoex.transfers.push_back(transfer);
                      transfer = new StreamJoinTransfer();
-                     mediainfoex.transfers.push_back(transfer);
+                     infoex.transfers.push_back(transfer);
                  }
              }
              if (transfer_ == NULL)
                  transfer_ = new AsfTransfer(*this);
-             mediainfoex.transfers.push_back(new MergeTransfer(transfer_));
+             infoex.transfers.push_back(new MergeTransfer(transfer_));
 
             //structure ASF_Stream_Properties_Object
             stream_number_++;
             ASF_Stream_Properties_Object streams_object;
             streams_object.StreamType = 
-                mediainfoex.type == MEDIA_TYPE_VIDE ? ASF_Video_Media : ASF_Audio_Media;
+                infoex.type == MEDIA_TYPE_VIDE ? ASF_Video_Media : ASF_Audio_Media;
 
 //             streams_object.ErrorCorrectionType =
-//                 mediainfo.type == MEDIA_TYPE_VIDE ? ASF_No_Error_Correction : ASF_Audio_Spread;
+//                 info.type == MEDIA_TYPE_VIDE ? ASF_No_Error_Correction : ASF_Audio_Spread;
             streams_object.ErrorCorrectionType = ASF_No_Error_Correction;
             streams_object.Flag.StreamNumber = stream_number_;
 
             if (ASF_Video_Media == streams_object.StreamType) {
-                streams_object.Video_Media_Type.EncodeImageWidth  = mediainfoex.video_format.width;
-                streams_object.Video_Media_Type.EncodeImageHeight = mediainfoex.video_format.height;
+                streams_object.Video_Media_Type.EncodeImageWidth  = infoex.video_format.width;
+                streams_object.Video_Media_Type.EncodeImageHeight = infoex.video_format.height;
 
-                streams_object.Video_Media_Type.FormatData.ImageWidth  = mediainfoex.video_format.width;
-                streams_object.Video_Media_Type.FormatData.ImageHeight = mediainfoex.video_format.height;
+                streams_object.Video_Media_Type.FormatData.ImageWidth  = infoex.video_format.width;
+                streams_object.Video_Media_Type.FormatData.ImageHeight = infoex.video_format.height;
                 streams_object.Video_Media_Type.FormatData.BitsPerPixelCount = 24;
-                if (mediainfoex.sub_type == VIDEO_TYPE_AVC1) {
+                if (infoex.sub_type == VIDEO_TYPE_AVC1) {
                     streams_object.Video_Media_Type.FormatData.CompressionID = 
                         MAKE_FOURC_TYPE('H', '2', '6', '4');
                 }
                 else
                     streams_object.Video_Media_Type.FormatData.CompressionID = 0;
-                AvcConfig avc_config(&mediainfoex.format_data.at(0), mediainfoex.format_data.size());
+                AvcConfig avc_config(&infoex.format_data.at(0), infoex.format_data.size());
                 avc_config.creat();
                 std::vector<boost::uint8_t> vec_0001;
                 vec_0001.push_back(0);
@@ -93,11 +95,11 @@ namespace ppbox
             }
             else
             {
-                if (mediainfoex.sub_type == AUDIO_TYPE_MP4A)
+                if (infoex.sub_type == AUDIO_TYPE_MP4A)
                 {
                     streams_object.Audio_Media_Type.CodecId = 255;
                 }
-                else if (mediainfoex.sub_type == AUDIO_TYPE_WMA2)
+                else if (infoex.sub_type == AUDIO_TYPE_WMA2)
                 {
                     streams_object.Audio_Media_Type.CodecId = 353;
                 }
@@ -105,15 +107,15 @@ namespace ppbox
                 {
                     streams_object.Audio_Media_Type.CodecId = 0;
                 }
-                streams_object.Audio_Media_Type.NumberOfChannels = (boost::uint16_t)mediainfoex.audio_format.channel_count;
-                streams_object.Audio_Media_Type.SamplesPerSecond = mediainfoex.audio_format.sample_rate;
+                streams_object.Audio_Media_Type.NumberOfChannels = (boost::uint16_t)infoex.audio_format.channel_count;
+                streams_object.Audio_Media_Type.SamplesPerSecond = infoex.audio_format.sample_rate;
                 //streams_object.Audio_Media_Type.AverageNumberOfBytesPerSecond = 4000;
                 //streams_object.Audio_Media_Type.BlockAlignment = 
-                //    mediainfo.audio_format.channel_count * mediainfo.audio_format.sample_size / 8;
-                //streams_object.Audio_Media_Type.BitsPerSample = mediainfo.audio_format.sample_size;
+                //    info.audio_format.channel_count * info.audio_format.sample_size / 8;
+                //streams_object.Audio_Media_Type.BitsPerSample = info.audio_format.sample_size;
                 streams_object.Audio_Media_Type.CodecSpecificDataSize = 
-                    mediainfoex.format_data.size();
-                streams_object.Audio_Media_Type.CodecSpecificData = mediainfoex.format_data;
+                    infoex.format_data.size();
+                streams_object.Audio_Media_Type.CodecSpecificData = infoex.format_data;
 
                 streams_object.ObjLength = 96 + streams_object.Audio_Media_Type.CodecSpecificDataSize;
 
@@ -126,7 +128,7 @@ namespace ppbox
 
         void AsfMuxer::stream_header(
             boost::uint32_t index, 
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             tag.data.clear();
         }
@@ -154,7 +156,7 @@ namespace ppbox
             file_object.ObjLength = 104;
             file_object.FileId.generate();
             file_object.FileSize = 104;
-            file_object.PlayDuration = media_info_.duration_info.duration;
+            file_object.PlayDuration = media_info_.duration;
             file_object.Flag.BroadcastFlag = 1;
             //file_object.Flag.SeekableFlag = 0;
             file_object.Flag.Reserved = 1;
@@ -186,11 +188,11 @@ namespace ppbox
             tag.data.push_back( data_buf_.data() );
         }
 
-        boost::system::error_code AsfMuxer::seek(
+        boost::system::error_code AsfMuxer::time_seek(
             boost::uint64_t & time,
             boost::system::error_code & ec)
         {
-            MuxerBase::seek(time, ec);
+            MuxerBase::time_seek(time, ec);
             if (!ec || ec == boost::asio::error::would_block) {
                 transfer_->on_seek(time);
             }

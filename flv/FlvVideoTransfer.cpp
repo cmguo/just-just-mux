@@ -4,7 +4,6 @@
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
 #include <ppbox/avformat/flv/FlvFormat.h>
-using namespace ppbox::demux;
 using namespace ppbox::avformat;
 
 using namespace framework::system;
@@ -14,9 +13,23 @@ namespace ppbox
     namespace mux
     {
 
-        void FlvVideoTransfer::transfer(ppbox::demux::Sample & sample)
+        FlvVideoTransfer::FlvVideoTransfer(
+            boost::uint8_t type)
+            : FlvTransfer(type)
         {
-            if(sample.flags & demux::Sample::sync) {
+        }
+
+        void FlvVideoTransfer::transfer(
+            StreamInfo & info)
+        {
+            videotagheader_.CodecID = FlvVideoCodec::H264;
+            videotagheader_.AVCPacketType = 1;
+        }
+
+        void FlvVideoTransfer::transfer(
+            Sample & sample)
+        {
+            if(sample.flags & Sample::sync) {
                 videotagheader_.FrameType = 1;
             } else {
                 videotagheader_.FrameType = 2;
@@ -37,12 +50,6 @@ namespace ppbox
             previous_tag_size_ = BytesOrder::host_to_big_endian_long(previous_tag_size_);
             sample.data.push_back(boost::asio::buffer((boost::uint8_t*)&previous_tag_size_, 4));
             sample.size += 20;
-        }
-
-        void FlvVideoTransfer::transfer(MediaInfoEx & mediainfo)
-        {
-            videotagheader_.CodecID = FlvVideoCodec::H264;
-            videotagheader_.AVCPacketType = 1;
         }
 
     } // namespace mux

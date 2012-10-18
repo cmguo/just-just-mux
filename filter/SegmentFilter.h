@@ -1,14 +1,15 @@
 // SegmentFilter.h
 
-#ifndef   _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
-#define   _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
+#ifndef _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
+#define _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
 
-#include "ppbox/mux/filter/Filter.h"
+#include "ppbox/mux/Filter.h"
 
 namespace ppbox
 {
     namespace mux
     {
+
         class SegmentFilter
             : public Filter
         {
@@ -17,14 +18,16 @@ namespace ppbox
 
             virtual ~SegmentFilter();
 
+        public:
             virtual boost::system::error_code open(
-                MediaFileInfo const & media_file_info, 
+                MediaStreamInfo const & media_info, 
                 boost::system::error_code & ec);
 
             virtual boost::system::error_code get_sample(
-                ppbox::demux::Sample & sample,
+                Sample & sample,
                 boost::system::error_code & ec);
 
+        public:
             void set_end_time(
                 boost::uint64_t time);
 
@@ -40,9 +43,10 @@ namespace ppbox
             boost::uint64_t segent_end_time_;
             boost::uint64_t fisrt_idr_timestamp_us_;
             bool is_save_sample_;
-            ppbox::demux::Sample sample_;
+            Sample sample_;
         };
-    }
-}
 
-#endif // End of _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_

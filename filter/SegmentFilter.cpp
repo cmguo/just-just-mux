@@ -25,14 +25,14 @@ namespace ppbox
         }
 
         error_code SegmentFilter::open(
-            MediaFileInfo const & media_file_info, 
+            MediaStreamInfo const & media_info, 
             boost::system::error_code & ec)
         {
-            if (Filter::open(media_file_info, ec))
+            if (Filter::open(media_info, ec))
                 return ec;
             video_track_ = boost::uint32_t(-1);
-            for (size_t i = 0; i < media_file_info.stream_infos.size(); ++i) {
-                if (media_file_info.stream_infos[i].type == MEDIA_TYPE_VIDE) {
+            for (size_t i = 0; i < media_info.streams.size(); ++i) {
+                if (media_info.streams[i].type == MEDIA_TYPE_VIDE) {
                     video_track_ = i;
                     break;
                 }
@@ -41,7 +41,7 @@ namespace ppbox
         }
 
         error_code SegmentFilter::get_sample(
-            ppbox::demux::Sample & sample,
+            Sample & sample,
             boost::system::error_code & ec)
         {
             if (is_save_sample_) {
@@ -55,7 +55,7 @@ namespace ppbox
             if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1)
                 && (video_track_ == boost::uint32_t(-1)
                     || (sample.itrack == video_track_
-                    && (sample.flags & demux::Sample::sync)))) {
+                    && (sample.flags & Sample::sync)))) {
                         // fisrt_idr_timestamp_us_ = sample.ustime;
                         fisrt_idr_timestamp_us_ = 0;
                         segent_end_time_ += fisrt_idr_timestamp_us_;
@@ -64,7 +64,7 @@ namespace ppbox
             if (sample.ustime >= segent_end_time_
                 && (video_track_ == boost::uint32_t(-1)
                     || (sample.itrack == video_track_
-                    && (sample.flags & demux::Sample::sync)))) {
+                    && (sample.flags & Sample::sync)))) {
                         ec = error::mux_segment_end;
                         is_save_sample_ = true;
                         sample_ = sample;
@@ -88,5 +88,5 @@ namespace ppbox
             segent_end_time_ = 0;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

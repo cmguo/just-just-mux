@@ -27,25 +27,25 @@ namespace ppbox
         }
 
         void FlvMuxer::add_stream(
-            MediaInfoEx & mediainfo)
+            StreamInfo & info)
         {
             Transfer * transfer = NULL;
-            if (mediainfo.type == MEDIA_TYPE_VIDE) {
-                if (mediainfo.format_type == StreamInfo::video_avc_packet) {
+            if (info.type == MEDIA_TYPE_VIDE) {
+                if (info.format_type == StreamInfo::video_avc_packet) {
                     // empty
-                } else if (mediainfo.format_type == StreamInfo::video_avc_byte_stream) {
+                } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    mediainfo.transfers.push_back(transfer);
+                    info.transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    mediainfo.transfers.push_back(transfer);
+                    info.transfers.push_back(transfer);
                     transfer = new PackageJoinTransfer();
-                    mediainfo.transfers.push_back(transfer);
+                    info.transfers.push_back(transfer);
                 }
                 transfer = new FlvVideoTransfer(9);
-                mediainfo.transfers.push_back(transfer);
-            } else if (mediainfo.type == MEDIA_TYPE_AUDI) {
+                info.transfers.push_back(transfer);
+            } else if (info.type == MEDIA_TYPE_AUDI) {
                 transfer = new FlvAudioTransfer(8);
-                mediainfo.transfers.push_back(transfer);
+                info.transfers.push_back(transfer);
             }
         }
 
@@ -69,7 +69,6 @@ namespace ppbox
             boost::uint32_t index, 
             Sample & tag)
         {
-            assert(index < mediainfo().stream_infos.size());
             boost::uint32_t spec_data_size = 0;
 
             tag.data.clear();
@@ -78,7 +77,7 @@ namespace ppbox
             tag.dts = 0;
             tag.cts_delta = 0;
 
-            MediaInfoEx const & stream_info = mediainfo().stream_infos[index];
+            StreamInfo const & stream_info = media_info_.streams[index];
             if (stream_info.type == MEDIA_TYPE_VIDE) {
                 spec_data_size = stream_info.format_data.size();
                 flv_tag_header_.Type = 0x09;

@@ -1,8 +1,8 @@
 
-#ifndef _PPBOX_MUX_ASF_TRANSFER_H_
-#define _PPBOX_MUX_ASF_TRANSFER_H_
+#ifndef _PPBOX_MUX_ASF_ASF_TRANSFER_H_
+#define _PPBOX_MUX_ASF_ASF_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 #include <ppbox/mux/detail/BitsReader.h>
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
@@ -13,6 +13,8 @@ namespace ppbox
 {
     namespace mux
     {
+
+        class MuxerBase;
 
         class AsfTransfer
             : public Transfer
@@ -25,10 +27,10 @@ namespace ppbox
 
         public:
             virtual void transfer(
-                ppbox::demux::StreamInfo & mediainfo);
+                StreamInfo & info);
 
             virtual void transfer(
-                ppbox::demux::Sample & sample);
+                Sample & sample);
 
         public:
             void on_seek(
@@ -49,11 +51,11 @@ namespace ppbox
 
         private:
             void add_packet(
-                ppbox::demux::Sample & sample, 
+                Sample & sample, 
                 bool need_data_buf);
 
             void add_payload(
-                ppbox::demux::Sample & sample,
+                Sample & sample,
                 MyBuffersLimit & limit,
                 MyBuffersPosition & pos1,
                 MyBuffersPosition & pos2,
@@ -155,7 +157,8 @@ namespace ppbox
             ppbox::avformat::ASF_Packet packet_head_;
             std::vector<HeadBlock*> head_buf_ptr_;
         };
-    } 
-}
 
-#endif
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_ASF_ASF_TRANSFER_H_

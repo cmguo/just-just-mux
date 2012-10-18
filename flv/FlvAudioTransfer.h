@@ -1,7 +1,7 @@
 // FlvAudioTransfer.h
 
-#ifndef   _PPBOX_MUX_FLV_AUDIO_TRANSFER_H_
-#define   _PPBOX_MUX_FLV_AUDIO_TRANSFER_H_
+#ifndef _PPBOX_MUX_FLV_FLV_AUDIO_TRANSFER_H_
+#define _PPBOX_MUX_FLV_FLV_AUDIO_TRANSFER_H_
 
 #include "ppbox/mux/flv/FlvTransfer.h"
 
@@ -14,23 +14,22 @@ namespace ppbox
             : public FlvTransfer
         {
         public:
-            FlvAudioTransfer(boost::uint8_t type)
-                : FlvTransfer(type)
-            {
-            }
+            FlvAudioTransfer(
+                boost::uint8_t type);
 
-            ~FlvAudioTransfer()
-            {
-            }
+        public:
+            virtual void transfer(
+                StreamInfo & info);
 
-            virtual void transfer(ppbox::demux::Sample & sample);
-
-            virtual void transfer(MediaInfoEx & mediainfo);
+            virtual void transfer(
+                Sample & sample);
 
         private:
             ppbox::avformat::FlvAudioTagHeader audiotagheader_;
 
         };
-    }
-}
-#endif // _PPBOX_MUX_FLV_AUDIO_TRANSFER_H_
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_FLV_FLV_AUDIO_TRANSFER_H_

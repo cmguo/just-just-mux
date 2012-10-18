@@ -37,10 +37,10 @@ namespace ppbox
         }
 
         void AdtsAudioTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             //std::cout << "Audio sample: dts = " << sample.dts << std::endl;
-            MediaInfoEx const * audio_stream_info = (MediaInfoEx const *)sample.media_info;
+            StreamInfo const * audio_stream_info = (StreamInfo const *)sample.media_info;
             unsigned int sampling_frequency_index = 0;
             unsigned int channel_configuration = 0;
             boost::uint32_t frame_size = sample.size;
@@ -156,5 +156,5 @@ namespace ppbox
             */
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

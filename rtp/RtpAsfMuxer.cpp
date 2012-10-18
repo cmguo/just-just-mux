@@ -27,22 +27,22 @@ namespace ppbox
         }
 
         void RtpAsfMuxer::add_stream(
-            MediaInfoEx & mediainfo)
+            StreamInfo & info)
         {
-            RtpMuxer::add_stream(mediainfo);
+            RtpMuxer::add_stream(info);
             if (rtp_asf_transfer_ == NULL) {
                 rtp_asf_transfer_ = new RtpAsfTransfer(*this);
                 add_transfer(rtp_asf_transfer_);
             }
             Transfer * transfer = new MergeTransfer(rtp_asf_transfer_);
-            mediainfo.transfers.push_back(transfer);
+            info.transfers.push_back(transfer);
         }
 
         error_code RtpAsfMuxer::get_sdp(
             std::string & sdp_out, 
             error_code & ec)
         {
-            ppbox::demux::Sample tag;
+            Sample tag;
             RtpMuxer::read(tag, ec);
             if (!ec) {
                 rtp_asf_transfer_->get_sdp(tag, sdp_out);

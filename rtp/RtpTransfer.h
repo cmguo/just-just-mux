@@ -1,15 +1,13 @@
 // RtpTransfer.h
 
-#ifndef   _PPBOX_MUX_RTP_RTP_TRANSFER_H_
-#define   _PPBOX_MUX_RTP_RTP_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_TRANSFER_H_
+#define _PPBOX_MUX_RTP_RTP_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpPacket.h"
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 
 #include <framework/system/BytesOrder.h>
 #include <framework/system/ScaleTransform.h>
-
-using namespace boost::system;
 
 namespace ppbox
 {
@@ -65,7 +63,8 @@ namespace ppbox
             RtpSplitContent packets_;
             framework::system::ScaleTransform scale_; 
         };
-    }
-}
 
-#endif // _PPBOX_MUX_RTP_ES_TRANSFER_H_
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_RTP_RTP_TRANSFER_H_

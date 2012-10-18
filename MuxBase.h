@@ -3,14 +3,10 @@
 #ifndef _PPBOX_MUX_MUX_BASE_H_
 #define _PPBOX_MUX_MUX_BASE_H_
 
+#include "ppbox/avformat/Format.h"
 #include "ppbox/avformat/codec/Codec.h"
 
-#include <ppbox/demux/base/DemuxerBase.h>
-#include <ppbox/data/SourceBase.h>
-
 #include <ppbox/data/MediaBase.h>
-
-#include <boost/asio/buffer.hpp>
 
 namespace ppbox
 {
@@ -18,39 +14,31 @@ namespace ppbox
     namespace mux
     {
 
+        using ppbox::avformat::Sample;
+
         class Transfer;
 
-        struct MediaInfoEx
-            : ppbox::demux::StreamInfo
+        struct MediaInfo
+            : ppbox::data::MediaInfo
         {
-            MediaInfoEx()
-                : StreamInfo()
-                , decode(NULL)
-                , config(NULL)
-                , attachment(NULL)
+            MediaInfo()
+                : attachment(NULL)
             {
             }
 
-            ppbox::avformat::Codec * decode;
-            void * config;
             void * attachment;
+        };
+
+        struct StreamInfo
+            : ppbox::avformat::StreamInfo
+        {
             std::vector<Transfer *> transfers;
         };
 
-        struct MediaFileInfo
+        struct MediaStreamInfo
+            : MediaInfo
         {
-            MediaFileInfo()
-                : stream_count(0)
-                , filesize(0)
-                , attachment(NULL)
-            {
-            }
-
-            ppbox::data::MediaInfo duration_info;
-            boost::uint32_t stream_count;
-            boost::uint32_t filesize;
-            void * attachment;
-            std::vector<MediaInfoEx> stream_infos;
+            std::vector<StreamInfo> streams;
         };
 
     }

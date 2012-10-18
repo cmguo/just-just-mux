@@ -22,6 +22,7 @@ namespace ppbox
 {
     namespace mux
     {
+
         AsfTransfer::AsfTransfer(
             MuxerBase & muxer)
             : packet_length_(4096)
@@ -261,7 +262,7 @@ namespace ppbox
         }
 
         void AsfTransfer::transfer(
-            StreamInfo & mediainfo) 
+            StreamInfo & info) 
         {
             media_number_.push_back(0);
         }
@@ -323,7 +324,7 @@ namespace ppbox
             if (sample.data.empty()) {
                 sample.data.push_back(boost::asio::buffer(pad_buf_.data(), 0));
             }
-        }//AsfTransfer::transfer
+        }
 
         void AsfTransfer::on_seek(
             boost::uint64_t time)
@@ -336,8 +337,7 @@ namespace ppbox
             Sample sample;
             sample.time = time;
             add_packet(sample, false);
-        }//on_seek
+        }
 
-    }//mux
-}//ppbox
-
+    } // namespace mux
+} // namespace ppbox

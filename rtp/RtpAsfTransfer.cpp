@@ -34,7 +34,7 @@ namespace ppbox
         }
 
         void RtpAsfTransfer::transfer(
-            MediaInfoEx & info)
+            StreamInfo & info)
         {
             std::string sdp;
             if (info.type == MEDIA_TYPE_VIDE) {
@@ -55,7 +55,7 @@ namespace ppbox
         }
 
         void RtpAsfTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / sample.media_info->time_scale);
             std::vector<AsfTransfer::AsfPacket> const & packets = 
@@ -75,7 +75,7 @@ namespace ppbox
         }
 
         void RtpAsfTransfer::get_sdp(
-            ppbox::demux::Sample const & tag, 
+            Sample const & tag, 
             std::string & sdp)
         {
             std::string asf_head;
@@ -88,5 +88,5 @@ namespace ppbox
             sdp += rtp_info_.sdp;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

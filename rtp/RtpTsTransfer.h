@@ -9,6 +9,7 @@ namespace ppbox
 {
     namespace mux
     {
+
         class RtpTsTransfer
             : public RtpTransfer
         {
@@ -18,16 +19,18 @@ namespace ppbox
 
             ~RtpTsTransfer();
 
+        public:
             virtual void transfer(
-                MediaInfoEx & info);
+                StreamInfo & info);
 
             virtual void transfer(
-                ppbox::demux::Sample & sample);
+                Sample & sample);
 
             void header_rtp_packet(
-                ppbox::demux::Sample & tag);
+                Sample & tag);
         };
-    }
-}
+
+    } // namespace mux
+} // namespace ppbox
 
 #endif // _PPBOX_MUX_RTP_TS_TRANSFER_H_

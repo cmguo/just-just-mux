@@ -1,7 +1,7 @@
-// RtpAsfMux.h
+// RtpAsfMuxer.h
 
-#ifndef _PPBOX_MUX_RTP_ASF_MUXER_H_
-#define _PPBOX_MUX_RTP_ASF_MUXER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_ASF_MUXER_H_
+#define _PPBOX_MUX_RTP_RTP_ASF_MUXER_H_
 
 #include "ppbox/mux/asf/AsfMuxer.h"
 #include "ppbox/mux/rtp/RtpMuxer.h"
@@ -23,7 +23,7 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo);
+                StreamInfo & info);
 
             boost::system::error_code get_sdp(
                 std::string & sdp_out,
@@ -39,4 +39,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_ASF_MUXER_H_
+#endif // _PPBOX_MUX_RTP_RTP_ASF_MUXER_H_

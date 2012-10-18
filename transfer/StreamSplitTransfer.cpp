@@ -10,7 +10,8 @@ namespace ppbox
     namespace mux
     {
 
-        void StreamSplitTransfer::transfer(ppbox::demux::Sample & sample)
+        void StreamSplitTransfer::transfer(
+            Sample & sample)
         {
             nalus_.clear();
             MyFindIterator2 finder(sample.data, boost::asio::buffer("\0\0\0\1", 4));
@@ -33,5 +34,5 @@ namespace ppbox
             sample.context = (void*)&nalus_;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

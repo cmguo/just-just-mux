@@ -1,10 +1,9 @@
 // MergeTransfer.h
 
-#ifndef   _PPBOX_MUX_TRANSFER_MERGE_TRANSFER_H_
-#define   _PPBOX_MUX_TRANSFER_MERGE_TRANSFER_H_
+#ifndef _PPBOX_MUX_TRANSFER_MERGE_TRANSFER_H_
+#define _PPBOX_MUX_TRANSFER_MERGE_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
-#include <ppbox/mux/MuxBase.h>
+#include "ppbox/mux/Transfer.h"
 
 namespace ppbox
 {
@@ -20,14 +19,15 @@ namespace ppbox
             {
             }
 
+        public:
             virtual void transfer(
-                MediaInfoEx & mediainfoex)
+                StreamInfo & infoex)
             {
-                transfer_->transfer(mediainfoex);
+                transfer_->transfer(infoex);
             };
 
             void transfer(
-                ppbox::demux::Sample & sample)
+                Sample & sample)
             {
                 transfer_->transfer(sample);
             }
@@ -36,6 +36,7 @@ namespace ppbox
             Transfer * transfer_;
         };
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox
+
 #endif // End _PPBOX_MUX_TRANSFER_MERGE_TRANSFER_H_

@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_TRANSFER_PTS_COMPUTE_TRANSFER_H_
 #define _PPBOX_MUX_TRANSFER_PTS_COMPUTE_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 
 #include <ppbox/avformat/codec/AvcSpsPpsType.h>
 
@@ -11,23 +11,16 @@ namespace ppbox
 {
     namespace mux
     {
+
         class PtsComputeTransfer
             : public Transfer
         {
         public:
-            PtsComputeTransfer()
-                : idr_dts_(0)
-                , frame_scale_(0)
-                , is_last_a_idr_(false)
-            {
-            }
+            PtsComputeTransfer();
 
-            ~PtsComputeTransfer()
-            {
-            }
-
+        public:
             virtual void transfer(
-                ppbox::demux::Sample & sample);
+                Sample & sample);
 
         private:
             std::map<boost::uint32_t, ppbox::avformat::SeqParameterSetRbsp> spss_;
@@ -36,7 +29,8 @@ namespace ppbox
             boost::uint32_t frame_scale_;
             bool is_last_a_idr_;
         };
-    }
-}
+
+    } // namespace mux
+} // namespace ppbox
 
 #endif // _PPBOX_MUX_TRANSFER_PTS_COMPUTE_TRANSFER_H_

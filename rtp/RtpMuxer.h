@@ -1,12 +1,10 @@
-// RtpMux.h
+// RtpMuxer.h
 
-#ifndef   _PPBOX_MUX_RTP_MUX_H_
-#define   _PPBOX_MUX_RTP_MUX_H_
+#ifndef _PPBOX_MUX_RTP_RTP_MUXER_H_
+#define _PPBOX_MUX_RTP_RTP_MUXER_H_
 
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
-
-#include <ppbox/demux/base/DemuxerBase.h>
 
 namespace ppbox
 {
@@ -43,14 +41,14 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo);
+                StreamInfo & info);
 
             void file_header(
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
             void stream_header(
                 boost::uint32_t index, 
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
         protected:
            void add_transfer(
@@ -60,7 +58,8 @@ namespace ppbox
             MuxerBase * base_;
             std::vector<RtpTransfer *> rtp_transfers_;
         };
-    }
-}
 
-#endif // End _PPBOX_MUX_RTP_MUX_H_
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_RTP_RTP_MUXER_H_

@@ -1,10 +1,10 @@
 // MuxerBase.h
 
-#ifndef _PPBOX_MUX_MUXER_H_
-#define _PPBOX_MUX_MUXER_H_
+#ifndef _PPBOX_MUX_MUXER_BASE_H_
+#define _PPBOX_MUX_MUXER_BASE_H_
 
 #include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/filter/DemuxerFilter.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
 #include <ppbox/common/Call.h>
@@ -53,88 +53,89 @@ namespace ppbox
 
             virtual ~MuxerBase();
 
-        protected:
-            virtual void add_stream(
-                MediaInfoEx & mediainfo) = 0;
-
-            virtual void file_header(
-                ppbox::demux::Sample & tag) = 0;
-
-            virtual void stream_header(
-                boost::uint32_t index, 
-                ppbox::demux::Sample & tag) = 0;
-
         public:
-            virtual boost::system::error_code open(
+            boost::system::error_code open(
                 demux::SegmentDemuxer * demuxer,
                 boost::system::error_code & ec);
 
             boost::system::error_code read(
-                ppbox::demux::Sample & tag,
+                Sample & tag,
                 boost::system::error_code & ec);
 
             void reset(void);
 
             bool is_open();
 
-            virtual boost::system::error_code seek(
+            virtual boost::system::error_code time_seek(
                 boost::uint64_t & time,
                 boost::system::error_code & ec);
 
-            boost::system::error_code byte_seek(
+            virtual boost::system::error_code byte_seek(
                 boost::uint64_t & offset,
-                boost::system::error_code & ec);
-
-            boost::system::error_code get_duration(
-                ppbox::data::MediaInfo & info, 
-                boost::system::error_code & ec);
-
-            boost::system::error_code pause(
-                boost::system::error_code & ec);
-
-            boost::system::error_code resume(
                 boost::system::error_code & ec);
 
             void close(void);
 
-            virtual MediaFileInfo & mediainfo(void);
+        public:
+            framework::configure::Config & config()
+            {
+                return config_;
+            }
 
-            framework::configure::Config & config();
+            virtual void media_info(
+                MediaInfo & info) const;
 
         protected:
-            void add_filter(Filter & filter)
+            virtual void add_stream(
+                StreamInfo & info) = 0;
+
+            virtual void file_header(
+                Sample & tag) = 0;
+
+            virtual void stream_header(
+                boost::uint32_t index, 
+                Sample & tag) = 0;
+
+        protected:
+            ppbox::demux::SegmentDemuxer const & demuxer() const
+            {
+                return *demuxer_;
+            };
+
+            void add_filter(
+                Filter & filter)
             {
                 filters_.push_back(&filter);
             }
 
         private:
             boost::system::error_code get_sample(
-                ppbox::demux::Sample & sample,
+                Sample & sample,
                 boost::system::error_code & ec);
 
             boost::system::error_code get_sample_with_transfer(
-                ppbox::demux::Sample & sample,
+                Sample & sample,
                 boost::system::error_code & ec);
 
             boost::system::error_code open_impl(
                 boost::system::error_code & ec);
 
-            void release_mediainfo(void);
+            void release_info(void);
 
         private:
             static std::map<std::string, MuxerBase::register_type> & muxer_map();
 
         protected:
-            MediaFileInfo media_info_;
+            MediaStreamInfo media_info_;
 
         private:
-            demux::SegmentDemuxer * demuxer_;
+            ppbox::demux::SegmentDemuxer * demuxer_;
             framework::container::List<Filter> filters_;
             bool paused_;
             boost::uint64_t play_time_; // ms
             // For reset 
             boost::uint32_t read_step_;
-            DemuxFilter demux_filter_;
+            DemuxerFilter demux_filter_;
             KeyFrameFilter key_filter_;
 
             framework::configure::Config config_;
@@ -143,4 +144,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_MUXER_H_
+#endif // _PPBOX_MUX_MUXER_BASE_H_

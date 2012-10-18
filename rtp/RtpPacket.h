@@ -1,10 +1,9 @@
 // RtpPacket.h
 
-#ifndef _PPBOX_MUX_RTP_PACKET_H_
-#define _PPBOX_MUX_RTP_PACKET_H_
+#ifndef _PPBOX_MUX_RTP_RTP_PACKET_H_
+#define _PPBOX_MUX_RTP_RTP_PACKET_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
-//#include "ppbox/mux/transfer/RtpTransfer.h"
+#include "ppbox/mux/Transfer.h"
 
 namespace ppbox
 {
@@ -85,4 +84,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_PACKET_H_
+#endif // _PPBOX_MUX_RTP_RTP_PACKET_H_

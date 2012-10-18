@@ -24,7 +24,7 @@ namespace ppbox
         }
 
         void RtpTsTransfer::transfer(
-            MediaInfoEx & info)
+            StreamInfo & info)
         {
             rtp_info_.sdp = "m=video 0 RTP/AVP 33\r\n";
             rtp_info_.sdp += "a=rtpmap:33 MP2T/90000\r\n";
@@ -34,7 +34,7 @@ namespace ppbox
         }
 
         void RtpTsTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / sample.media_info->time_scale);
             std::vector<size_t> const & off_segs = 
@@ -62,7 +62,7 @@ namespace ppbox
         }
 
         void RtpTsTransfer::header_rtp_packet(
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             RtpTransfer::clear(0);
             RtpPacket p(rtp_info_.timestamp, true);
@@ -71,5 +71,5 @@ namespace ppbox
             tag.context = (void*)&packets_;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

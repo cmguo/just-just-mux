@@ -1,7 +1,7 @@
 // Error.h
 
-#ifndef _PPBOX_MUX_ERROR_H_
-#define _PPBOX_MUX_ERROR_H_
+#ifndef _PPBOX_MUX_MUX_ERROR_H_
+#define _PPBOX_MUX_MUX_ERROR_H_
 
 namespace ppbox
 {
@@ -112,4 +112,4 @@ namespace boost
     }
 }
 
-#endif // _PPBOX_MUX_ERROR_H_
+#endif // _PPBOX_MUX_MUX_ERROR_H_

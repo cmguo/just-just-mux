@@ -4,7 +4,7 @@
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
 
-#include <ppbox/avformat/codec/AvcConfig.h>
+#include <ppbox/avformat/codec/AvcCodec.h>
 #include <ppbox/avformat/codec/AvcNalu.h>
 
 namespace ppbox
@@ -27,10 +27,10 @@ namespace ppbox
         }
 
         void StreamJoinTransfer::transfer(
-            ppbox::mux::MediaInfoEx & media)
+            ppbox::mux::StreamInfo & media)
         {
             ppbox::avformat::AvcConfig const & avc_config = 
-                *(ppbox::avformat::AvcConfig const *)media.config;;
+                ((ppbox::avformat::AvcCodec const *)media.codec)->config();
             // access unit delimiter
             access_unit_delimiter_ = nalu_start_code_;
             access_unit_delimiter_.push_back(9);
@@ -51,7 +51,7 @@ namespace ppbox
         }
 
         void StreamJoinTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             //packet -> es
             if (sample.idesc != sample_description_index_) {
@@ -119,5 +119,5 @@ namespace ppbox
             sample.data.swap(datas);
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

@@ -1,9 +1,9 @@
 // TsTransfer.h
 
-#ifndef   _PPBOX_MUX_TS_TRANSFER_H_
-#define   _PPBOX_MUX_TS_TRANSFER_H_
+#ifndef _PPBOX_MUX_TS_TS_TRANSFER_H_
+#define _PPBOX_MUX_TS_TS_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 #include "ppbox/mux/ts/Mpeg2Ts.h"
 
 #include <framework/system/ScaleTransform.h>
@@ -25,10 +25,10 @@ namespace ppbox
 
         private:
             virtual void transfer(
-                ppbox::mux::MediaInfoEx & media);
+                ppbox::mux::StreamInfo & media);
 
             virtual void transfer(
-                ppbox::demux::Sample & sample);
+                Sample & sample);
 
             virtual void on_seek(
                 boost::uint32_t time);
@@ -65,4 +65,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_TS_TRANSFER_H_
+#endif // _PPBOX_MUX_TS_TS_TRANSFER_H_

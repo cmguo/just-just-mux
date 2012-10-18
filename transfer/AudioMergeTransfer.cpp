@@ -20,7 +20,8 @@ namespace ppbox
         {
         }
 
-        void AudioMergeTransfer::transfer(ppbox::demux::Sample & sample)
+        void AudioMergeTransfer::transfer(
+            Sample & sample)
         {
             size_t audio_frame_size = sample.size;
             if (last_audio_dts_ == boost::uint64_t(-1)) {
@@ -49,5 +50,5 @@ namespace ppbox
             }
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

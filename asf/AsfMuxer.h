@@ -1,13 +1,11 @@
 // AsfMuxer.h
 
-#ifndef _PPBOX_MUX_ASF_MUXER_H_
-#define _PPBOX_MUX_ASF_MUXER_H_
+#ifndef _PPBOX_MUX_ASF_ASF_MUXER_H_
+#define _PPBOX_MUX_ASF_ASF_MUXER_H_
 
-#include  "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/MuxerBase.h"
 
-#include  <boost/asio/streambuf.hpp>
-#include  <ppbox/avformat/asf/AsfGuid.h>
-#include  <ppbox/avformat/asf/AsfObjectType.h>
+#include <boost/asio/streambuf.hpp>
 
 namespace ppbox
 {
@@ -26,16 +24,16 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfoex);
+                StreamInfo & infoex);
 
             void stream_header(
                 boost::uint32_t index, 
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
             void file_header(
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
-            boost::system::error_code seek(
+            boost::system::error_code time_seek(
                 boost::uint64_t & time,
                 boost::system::error_code & ec);
 
@@ -54,4 +52,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_ASF_MUXER_H_
+#endif // _PPBOX_MUX_ASF_ASF_MUXER_H_

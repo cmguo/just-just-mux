@@ -1,9 +1,9 @@
 // AdtsAudioTransfer.h
 
-#ifndef   _PPBOX_MUX_ADTS_AUDIO_TRANSFER_H_
-#define   _PPBOX_MUX_ADTS_AUDIO_TRANSFER_H_
+#ifndef _PPBOX_MUX_TRANSFER_ADTS_AUDIO_TRANSFER_H_
+#define _PPBOX_MUX_TRANSFER_ADTS_AUDIO_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 
 namespace ppbox
 {
@@ -18,8 +18,9 @@ namespace ppbox
 
             ~AdtsAudioTransfer();
 
+        public:
             virtual void transfer(
-                ppbox::demux::Sample & sample);
+                Sample & sample);
 
         private:
             void MakeAdtsHeaderWithData(
@@ -41,4 +42,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_ADTS_AUDIO_TRANSFER_H_
+#endif // _PPBOX_MUX_TRANSFER_ADTS_AUDIO_TRANSFER_H_

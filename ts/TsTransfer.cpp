@@ -31,7 +31,7 @@ namespace ppbox
         }
 
         void TsTransfer::transfer(
-            ppbox::mux::MediaInfoEx & media)
+            ppbox::mux::StreamInfo & media)
         {
             if (media.type == MEDIA_TYPE_VIDE) {
                 scale_.reset(media.time_scale, PES_TIME_SCALE);
@@ -48,10 +48,10 @@ namespace ppbox
         }
 
         void TsTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
-            MediaInfoEx const & media = 
-                *(MediaInfoEx const *)sample.media_info;
+            StreamInfo const & media = 
+                *(StreamInfo const *)sample.media_info;
             boost::uint64_t cts = 0;
             //std::cout << "sample track = " << sample.itrack << ", dts = " << dts << ", cts = " << cts << std::endl;
             if (time_adjust_ == 0) {

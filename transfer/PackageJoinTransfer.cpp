@@ -13,7 +13,13 @@ namespace ppbox
     namespace mux
     {
 
-        void PackageJoinTransfer::transfer(ppbox::demux::Sample & sample)
+        PackageJoinTransfer::PackageJoinTransfer()
+            : frame_data_size_(0)
+        {
+        }
+
+        void PackageJoinTransfer::transfer(
+            Sample & sample)
         {
             NaluList const * nalus = 
                 (NaluList const * )sample.context;
@@ -44,5 +50,5 @@ namespace ppbox
             sample.data.swap(datas);
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

@@ -22,7 +22,7 @@ namespace ppbox
         }
 
         void RtpAudioMpegTransfer::transfer(
-            MediaInfoEx & media)
+            StreamInfo & media)
         {
             using namespace framework::string;
 
@@ -39,7 +39,7 @@ namespace ppbox
         }
 
         void RtpAudioMpegTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             RtpTransfer::clear(sample.ustime);
             RtpPacket packet(scale_.transfer(sample.dts), true);
@@ -50,5 +50,5 @@ namespace ppbox
             sample.context = (void*)&packets_;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

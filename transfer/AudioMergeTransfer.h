@@ -3,7 +3,7 @@
 #ifndef   _PPBOX_MUX_AUDIO_MERGE_TRANSFER_H_
 #define   _PPBOX_MUX_AUDIO_MERGE_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 
 const boost::uint32_t AUDIO_MAX_DATA_SIZE = 1024 * 10;
 
@@ -19,7 +19,7 @@ namespace ppbox
 
            ~AudioMergeTransfer();
 
-            virtual void transfer(ppbox::demux::Sample & sample);
+            virtual void transfer(Sample & sample);
 
         private:
             boost::uint64_t last_audio_dts_;
@@ -27,6 +27,8 @@ namespace ppbox
             boost::uint32_t audio_data_size_;
 
         };
-    }
-}
-#endif // _PPBOX_MUX_TS_AUDIO_TRANSFER_H_
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_TRANSFER_AUDIO_TRANSFER_H_

@@ -13,6 +13,12 @@ namespace ppbox
     namespace mux
     {
 
+        FlvAudioTransfer::FlvAudioTransfer(
+            boost::uint8_t type)
+            : FlvTransfer(type)
+        {
+        }
+
         void FlvAudioTransfer::transfer(Sample & sample)
         {
             boost::uint32_t data_length = sample.size;
@@ -25,9 +31,9 @@ namespace ppbox
             sample.size += 17;
         }
 
-        void FlvAudioTransfer::transfer(MediaInfoEx & mediainfo)
+        void FlvAudioTransfer::transfer(StreamInfo & info)
         {
-            switch(mediainfo.sub_type)
+            switch(info.sub_type)
             {
             case AUDIO_TYPE_MP4A:
                 audiotagheader_.SoundFormat = 10;
@@ -43,26 +49,26 @@ namespace ppbox
                 break;
             }
 
-            if (mediainfo.audio_format.sample_rate >= 44100 ) {
+            if (info.audio_format.sample_rate >= 44100 ) {
                 audiotagheader_.SoundRate = 3;
-            } else if (mediainfo.audio_format.sample_rate >= 22000 ){
+            } else if (info.audio_format.sample_rate >= 22000 ){
                 audiotagheader_.SoundRate = 2;
-            } else if (mediainfo.audio_format.sample_rate >= 11000) {
+            } else if (info.audio_format.sample_rate >= 11000) {
                 audiotagheader_.SoundRate = 1;
-            } else if (mediainfo.audio_format.sample_rate >= 5500) {
+            } else if (info.audio_format.sample_rate >= 5500) {
                 audiotagheader_.SoundRate = 0;
             } else {
                 audiotagheader_.SoundRate = 0;
             }
 
-            if (mediainfo.audio_format.channel_count <= 1) {
+            if (info.audio_format.channel_count <= 1) {
                 // for aac always 1;
                 audiotagheader_.SoundType = 1;
             } else {
                 audiotagheader_.SoundType = 1;
             }
 
-            if (8 == mediainfo.audio_format.sample_size) {
+            if (8 == info.audio_format.sample_size) {
                 audiotagheader_.SoundSize = 0;
             } else {
                 audiotagheader_.SoundSize = 1;
@@ -70,5 +76,5 @@ namespace ppbox
             audiotagheader_.AACPacketType = 1;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

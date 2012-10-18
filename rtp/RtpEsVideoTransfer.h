@@ -1,7 +1,7 @@
 // RtpEsVideoTransfer.h
 
-#ifndef _PPBOX_MUX_RTP_ES_VIDEO_TRANSFER_H_
-#define _PPBOX_MUX_RTP_ES_VIDEO_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_ES_VIDEO_TRANSFER_H_
+#define _PPBOX_MUX_RTP_RTP_ES_VIDEO_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpTransfer.h"
 
@@ -19,11 +19,12 @@ namespace ppbox
 
             ~RtpEsVideoTransfer();
 
+        public:
             virtual void transfer(
-                MediaInfoEx & info);
+                StreamInfo & info);
 
             virtual void transfer(
-                ppbox::demux::Sample & sample);
+                Sample & sample);
 
         private:
             boost::uint32_t mtu_size_;
@@ -31,6 +32,8 @@ namespace ppbox
             boost::uint32_t sample_description_index_;
             boost::uint32_t use_dts_;
         };
-    }
-}
-#endif // _PPBOX_MUX_RTP_ES_VIDEO_TRANSFER_H_
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_RTP_RTP_ES_VIDEO_TRANSFER_H_

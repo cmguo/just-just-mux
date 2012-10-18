@@ -1,7 +1,7 @@
 // RtpAudioMpegTransfer.h
 
-#ifndef _PPBOX_MUX_RTP_AUDIO_MPEG_TRANSFER_H_
-#define _PPBOX_MUX_RTP_AUDIO_MPEG_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_AUDIO_MPEG_TRANSFER_H_
+#define _PPBOX_MUX_RTP_RTP_AUDIO_MPEG_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpTransfer.h"
 
@@ -19,15 +19,18 @@ namespace ppbox
 
             ~RtpAudioMpegTransfer();
 
+        public:
             virtual void transfer(
-                MediaInfoEx & info);
+                StreamInfo & info);
 
             virtual void transfer(
-                ppbox::demux::Sample & sample);
+                Sample & sample);
 
         private:
             boost::uint16_t header_[2];
         };
-    }
-}
-#endif // _PPBOX_MUX_RTP_AUDIO_MPEG_TRANSFER_H_
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_MUX_RTP_RTP_AUDIO_MPEG_TRANSFER_H_

@@ -11,7 +11,13 @@ namespace ppbox
     namespace mux
     {
 
-        void PackageSplitTransfer::transfer(ppbox::demux::Sample & sample)
+        PackageSplitTransfer::PackageSplitTransfer()
+            : nalu_length_(4)
+        {
+        }
+
+        void PackageSplitTransfer::transfer(
+            Sample & sample)
         {
             //sample.data.clear();
             //boost::uint8_t buf1[3] = {1,2,3};
@@ -35,5 +41,5 @@ namespace ppbox
             sample.context = (void *)&nalus_;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

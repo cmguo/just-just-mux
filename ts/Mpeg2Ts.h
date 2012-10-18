@@ -4,7 +4,7 @@
 #define      _PPBOX_MUX_TS_MPEG2TS_H_
 
 #include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 #include "ppbox/mux/ts/MpegTsType.h"
 
 #include <bento4/Core/Ap4.h>
@@ -49,7 +49,7 @@ namespace ppbox
                 }
             }
 
-            virtual void transfer(ppbox::demux::Sample & sample)
+            virtual void transfer(Sample & sample)
             {
             }
 

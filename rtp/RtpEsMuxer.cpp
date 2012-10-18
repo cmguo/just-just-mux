@@ -27,32 +27,32 @@ namespace ppbox
         }
 
         void RtpEsMuxer::add_stream(
-            MediaInfoEx & mediainfo)
+            StreamInfo & info)
         {
             Transfer * transfer = NULL;
-            if (mediainfo.type == MEDIA_TYPE_VIDE) {
-                if (mediainfo.format_type == StreamInfo::video_avc_packet) {
+            if (info.type == MEDIA_TYPE_VIDE) {
+                if (info.format_type == StreamInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
-                    mediainfo.transfers.push_back(transfer);
+                    info.transfers.push_back(transfer);
                     //transfer = new ParseH264Transfer();
-                    //mediainfo.transfers.push_back(transfer);
-                } else if (mediainfo.format_type == StreamInfo::video_avc_byte_stream) {
+                    //info.transfers.push_back(transfer);
+                } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    mediainfo.transfers.push_back(transfer);
+                    info.transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    mediainfo.transfers.push_back(transfer);
+                    info.transfers.push_back(transfer);
                 }
                 RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this);
-                mediainfo.transfers.push_back(rtp_transfer);
+                info.transfers.push_back(rtp_transfer);
                 add_transfer(rtp_transfer);
-            } else if (MEDIA_TYPE_AUDI == mediainfo.type){
+            } else if (MEDIA_TYPE_AUDI == info.type){
                 RtpTransfer * rtp_transfer = NULL;
-                if (mediainfo.sub_type == AUDIO_TYPE_MP1A) {
+                if (info.sub_type == AUDIO_TYPE_MP1A) {
                     rtp_transfer = new RtpAudioMpegTransfer(*this);
                 } else {
                     rtp_transfer = new RtpEsAudioTransfer(*this);
                 }
-                mediainfo.transfers.push_back(rtp_transfer);
+                info.transfers.push_back(rtp_transfer);
                 add_transfer(rtp_transfer);
             }
         }

@@ -16,14 +16,14 @@ namespace ppbox
     {
 
         error_code KeyFrameFilter::open(
-            MediaFileInfo const & media_file_info, 
+            MediaStreamInfo const & media_info, 
             boost::system::error_code & ec)
         {
-            if (Filter::open(media_file_info, ec))
+            if (Filter::open(media_info, ec))
                 return ec;
             video_track_ = boost::uint32_t(-1);
-            for (size_t i = 0; i < media_file_info.stream_infos.size(); ++i) {
-                if (media_file_info.stream_infos[i].type == MEDIA_TYPE_VIDE) {
+            for (size_t i = 0; i < media_info.streams.size(); ++i) {
+                if (media_info.streams[i].type == MEDIA_TYPE_VIDE) {
                     video_track_ = i;
                     break;
                 }
@@ -32,7 +32,7 @@ namespace ppbox
         }
 
         error_code KeyFrameFilter::get_sample(
-            ppbox::demux::Sample & sample,
+            Sample & sample,
             boost::system::error_code & ec)
         {
             Filter::get_sample(sample, ec);
@@ -47,5 +47,5 @@ namespace ppbox
             return boost::asio::error::would_block; 
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

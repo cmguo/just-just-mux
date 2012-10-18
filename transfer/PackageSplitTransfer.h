@@ -1,9 +1,9 @@
 // PackageSplitTransfer.h
 
-#ifndef   _PPBOX_MUX_PACKAGE_SPLIT_TRANSFER_H_
-#define   _PPBOX_MUX_PACKAGE_SPLIT_TRANSFER_H_
+#ifndef _PPBOX_TRANSFER_MUX_PACKAGE_SPLIT_TRANSFER_H_
+#define _PPBOX_TRANSFER_MUX_PACKAGE_SPLIT_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
 
 namespace ppbox
@@ -15,21 +15,18 @@ namespace ppbox
             : public Transfer
         {
         public:
-            PackageSplitTransfer()
-                : nalu_length_(4)
-            {
-            }
+            PackageSplitTransfer();
 
-            ~PackageSplitTransfer()
-            {
-            }
-
-            virtual void transfer(ppbox::demux::Sample & sample);
+        public:
+            virtual void transfer(
+                Sample & sample);
 
         private:
             boost::uint32_t nalu_length_;
             NaluList nalus_;
         };
-    }
-}
-#endif
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_TRANSFER_MUX_PACKAGE_SPLIT_TRANSFER_H_

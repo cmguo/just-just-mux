@@ -5,7 +5,7 @@
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h" // for Nalu
 
-#include <ppbox/avformat/codec/AvcConfig.h>
+#include <ppbox/avformat/codec/AvcCodec.h>
 using namespace ppbox::avformat;
 
 #include <util/buffers/BufferCopy.h>
@@ -34,7 +34,7 @@ namespace ppbox
         }
 
         void RtpEsVideoTransfer::transfer(
-            MediaInfoEx & media)
+            StreamInfo & media)
         {
             using namespace framework::string;
             std::string map_id_str = format(rtp_head_.mpt);
@@ -89,9 +89,9 @@ namespace ppbox
         }
 
         void RtpEsVideoTransfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
-            MediaInfoEx const & media = *(MediaInfoEx const *)sample.media_info;
+            StreamInfo const & media = *(StreamInfo const *)sample.media_info;
             NaluList & nalus = *(NaluList *)sample.context;
 
             boost::uint64_t cts_time = 0;
@@ -112,16 +112,16 @@ namespace ppbox
             // add two sps pps rtp packet
             if (sample.idesc != sample_description_index_) {
                 sample_description_index_ = sample.idesc;
-                AvcConfig const * stream_config = (AvcConfig const *)media.config;;
+                AvcConfig const & avc_config = ((AvcCodec const *)media.codec)->config();
 
                 RtpPacket sps_p(cts_time, false);
-                sps_p.size = stream_config->sequence_parameters()[0].size();
-                sps_p.push_buffers(boost::asio::buffer(stream_config->sequence_parameters()[0]));
+                sps_p.size = avc_config.sequence_parameters()[0].size();
+                sps_p.push_buffers(boost::asio::buffer(avc_config.sequence_parameters()[0]));
                 push_packet(sps_p);
 
                 RtpPacket pps_p(cts_time, false);
-                pps_p.size = stream_config->picture_parameters()[0].size();
-                pps_p.push_buffers(boost::asio::buffer(stream_config->picture_parameters()[0]));
+                pps_p.size = avc_config.picture_parameters()[0].size();
+                pps_p.push_buffers(boost::asio::buffer(avc_config.picture_parameters()[0]));
                 push_packet(pps_p);
             }
 
@@ -172,5 +172,5 @@ namespace ppbox
             sample.context = (void*)&packets_;
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

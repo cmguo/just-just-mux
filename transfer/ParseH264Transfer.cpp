@@ -4,15 +4,14 @@
 #include "ppbox/mux/transfer/ParseH264Transfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
 
-#include <ppbox/avformat/codec/AvcConfig.h>
+#include <ppbox/avformat/BitsOStream.h>
+#include <ppbox/avformat/BitsIStream.h>
+#include <ppbox/avformat/BitsBuffer.h>
+#include <ppbox/avformat/codec/AvcCodec.h>
 #include <ppbox/avformat/codec/AvcType.h>
-#include <ppbox/avformat/BitsIStream.h>
-#include <ppbox/avformat/BitsOStream.h>
-#include <ppbox/avformat/BitsBuffer.h>
-
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/CycleBuffers.h>
-
+
 // This transfer is for debug
 
 namespace ppbox
@@ -24,10 +23,8 @@ namespace ppbox
         std::map<boost::uint32_t, ppbox::avformat::PicParameterSetRbsp> ppss;
 
         void ParseH264Transfer::transfer(
-            ppbox::mux::MediaInfoEx & media)
-        {
-            ppbox::avformat::AvcConfig const & avc_config = 
-                *(ppbox::avformat::AvcConfig const *)media.config;;
+            StreamInfo & media)        {            ppbox::avformat::AvcConfig const & avc_config = 
+                ((ppbox::avformat::AvcCodec const *)media.codec)->config();
             for (boost::uint32_t i = 0; i < avc_config.sequence_parameters().size(); i++) {
                 std::vector<boost::uint8_t> sps_vec = avc_config.sequence_parameters()[i];
                 util::archive::ArchiveBuffer<boost::uint8_t> buf((boost::uint8_t *)&sps_vec[0], sps_vec.size(), sps_vec.size());
@@ -62,7 +59,7 @@ namespace ppbox
         }
 
         void ParseH264Transfer::transfer(
-            ppbox::demux::Sample & sample)
+            Sample & sample)
         {
             NaluList const & nalus = 
                 *(NaluList const * )sample.context;
@@ -100,5 +97,5 @@ namespace ppbox
             }
         }
 
-    }
-}
+    } // namespace mux
+} // namespace ppbox

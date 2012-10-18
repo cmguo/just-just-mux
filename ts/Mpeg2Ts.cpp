@@ -2,7 +2,6 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/ts/Mpeg2Ts.h"
-using namespace ppbox::demux;
 using namespace ppbox::mux;
 
 #include <util/archive/ArchiveBuffer.h>

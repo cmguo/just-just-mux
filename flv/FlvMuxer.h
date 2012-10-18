@@ -1,7 +1,7 @@
 // FlvMuxer.h
 
-#ifndef _PPBOX_MUX_FLV_MUXER_H_
-#define _PPBOX_MUX_FLV_MUXER_H_
+#ifndef _PPBOX_MUX_FLV_FLV_MUXER_H_
+#define _PPBOX_MUX_FLV_FLV_MUXER_H_
 
 #include "ppbox/mux/MuxerBase.h"
 
@@ -22,14 +22,14 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo);
+                StreamInfo & info);
 
             void file_header(
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
             void stream_header(
                 boost::uint32_t index, 
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
         private:
             ppbox::avformat::FlvHeader flv_header_;
@@ -48,4 +48,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_FLV_MUXER_H_
+#endif // _PPBOX_MUX_FLV_FLV_MUXER_H_

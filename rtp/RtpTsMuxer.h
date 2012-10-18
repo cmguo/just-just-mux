@@ -1,7 +1,7 @@
 // RtpTsMuxer.h
 
-#ifndef _PPBOX_MUX_RTP_TS_MUXER_H_
-#define _PPBOX_MUX_RTP_TS_MUXER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_TS_MUXER_H_
+#define _PPBOX_MUX_RTP_RTP_TS_MUXER_H_
 
 #include "ppbox/mux/ts/TsMuxer.h"
 #include "ppbox/mux/rtp/RtpMuxer.h"
@@ -23,10 +23,10 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo);
+                StreamInfo & info);
 
             void file_header(
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
         private:
             TsMuxer ts_mux_;
@@ -38,4 +38,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_TS_MUXER_H_
+#endif // _PPBOX_MUX_RTP_RTP_TS_MUXER_H_

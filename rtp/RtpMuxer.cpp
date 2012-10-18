@@ -1,4 +1,4 @@
-// RtpMux.cpp
+// RtpMuxer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/rtp/RtpMuxer.h"
@@ -28,15 +28,15 @@ namespace ppbox
         }
 
         void RtpMuxer::add_stream(
-            MediaInfoEx & mediainfo)
+            StreamInfo & info)
         {
             if (base_) {
-                ((RtpMuxer *)base_)->add_stream(mediainfo);
+                ((RtpMuxer *)base_)->add_stream(info);
             }
         }
 
         void RtpMuxer::file_header(
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             if (base_) {
                 ((RtpMuxer *)base_)->file_header(tag);
@@ -45,7 +45,7 @@ namespace ppbox
 
         void RtpMuxer::stream_header(
             boost::uint32_t index, 
-            ppbox::demux::Sample & tag)
+            Sample & tag)
         {
             if (base_) {
                 ((RtpMuxer *)base_)->stream_header(index, tag);

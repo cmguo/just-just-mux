@@ -20,14 +20,14 @@ namespace ppbox
 
         public:
             void add_stream(
-                MediaInfoEx & mediainfo);
+                StreamInfo & info);
 
             void file_header(
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
             void stream_header(
                 boost::uint32_t index, 
-                ppbox::demux::Sample & tag);
+                Sample & tag);
 
         private:
             void WritePAT(boost::uint8_t * ptr);

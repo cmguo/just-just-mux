@@ -1,33 +1,31 @@
 // PackageJoinTransfer.h
 
-#ifndef   _PPBOX_MUX_PACKAGE_TRANSFER_H_
-#define   _PPBOX_MUX_PACKAGE_TRANSFER_H_
+#ifndef _PPBOX_TRANSFER_MUX_PACKAGE_JOIN_TRANSFER_H_
+#define _PPBOX_TRANSFER_MUX_PACKAGE_JOIN_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 
 namespace ppbox
 {
     namespace mux
     {
+
         class PackageJoinTransfer
             : public Transfer
         {
         public:
-            PackageJoinTransfer()
-                : frame_data_size_(0)
-            {
-            }
+            PackageJoinTransfer();
 
-            ~PackageJoinTransfer()
-            {
-            }
-
-            virtual void transfer(ppbox::demux::Sample & sample);
+        public:
+            virtual void transfer(
+                Sample & sample);
 
         private:
             boost::uint32_t frame_data_size_;
             std::vector<boost::uint8_t> sps_pps_data_;
         };
-    }
-}
-#endif
+
+    } // namespace mux
+} // namespace ppbox
+
+#endif // _PPBOX_TRANSFER_MUX_PACKAGE_JOIN_TRANSFER_H_
