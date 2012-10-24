@@ -4,8 +4,8 @@
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
 
-#include <ppbox/avformat/codec/AvcCodec.h>
-#include <ppbox/avformat/codec/AvcNalu.h>
+#include <ppbox/avformat/codec/avc/AvcCodec.h>
+#include <ppbox/avformat/codec/avc/AvcNalu.h>
 
 namespace ppbox
 {
@@ -36,18 +36,7 @@ namespace ppbox
             access_unit_delimiter_.push_back(9);
             access_unit_delimiter_.push_back(0xF0);
             // sps
-            sps_pps_.clear();
-            for (boost::uint32_t i = 0; i < avc_config.sequence_parameters().size(); i++) {
-                std::vector<boost::uint8_t> const & sps_vec = avc_config.sequence_parameters()[i];
-                sps_pps_.insert(sps_pps_.end(), nalu_start_code_.begin(), nalu_start_code_.end());
-                sps_pps_.insert(sps_pps_.end(), sps_vec.begin(), sps_vec.end());
-            }
-            // pps
-            for (boost::uint32_t i = 0; i < avc_config.picture_parameters().size(); i++) {
-                std::vector<boost::uint8_t> const & pps_vec = avc_config.picture_parameters()[i];
-                sps_pps_.insert(sps_pps_.end(), nalu_start_code_.begin(), nalu_start_code_.end());
-                sps_pps_.insert(sps_pps_.end(), pps_vec.begin(), pps_vec.end());
-            }
+            avc_config.to_es_data(sps_pps_);
         }
 
         void StreamJoinTransfer::transfer(

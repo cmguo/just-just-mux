@@ -9,7 +9,7 @@
 
 #include <ppbox/avformat/asf/AsfGuid.h>
 #include <ppbox/avformat/asf/AsfObjectType.h>
-#include <ppbox/avformat/codec/AvcConfig.h>
+#include <ppbox/avformat/codec/avc/AvcConfig.h>
 using namespace ppbox::avformat;
 
 #include <util/archive/BigEndianBinaryOArchive.h>
@@ -64,24 +64,15 @@ namespace ppbox
                 streams_object.Video_Media_Type.FormatData.ImageHeight = infoex.video_format.height;
                 streams_object.Video_Media_Type.FormatData.BitsPerPixelCount = 24;
                 if (infoex.sub_type == VIDEO_TYPE_AVC1) {
-                    streams_object.Video_Media_Type.FormatData.CompressionID = 
-                        MAKE_FOURC_TYPE('H', '2', '6', '4');
-                }
-                else
+                    streams_object.Video_Media_Type.FormatData.CompressionID = MAKE_FOURC_TYPE('H', '2', '6', '4');
+                } else {
                     streams_object.Video_Media_Type.FormatData.CompressionID = 0;
-                AvcConfig avc_config(&infoex.format_data.at(0), infoex.format_data.size());
-                avc_config.creat();
-                std::vector<boost::uint8_t> vec_0001;
-                vec_0001.push_back(0);
-                vec_0001.push_back(0);
-                vec_0001.push_back(0);
-                vec_0001.push_back(1);
-                std::vector<boost::uint8_t> sps_pps;
-                sps_pps = vec_0001;
-                sps_pps.insert(sps_pps.end(), avc_config.sequence_parameters()[0].begin(), avc_config.sequence_parameters()[0].end());
-                sps_pps.insert(sps_pps.end(), vec_0001.begin(), vec_0001.end());
-                sps_pps.insert(sps_pps.end(), avc_config.picture_parameters()[0].begin(), avc_config.picture_parameters()[0].end());
-                streams_object.Video_Media_Type.FormatData.CodecSpecificData = sps_pps;
+                }
+                {
+                    AvcConfig avc_config(infoex.format_data);
+                    avc_config.to_es_data(
+                        streams_object.Video_Media_Type.FormatData.CodecSpecificData);
+                }
                 streams_object.Video_Media_Type.FormatData.FormatDataSize = 
                     streams_object.Video_Media_Type.FormatData.CodecSpecificData.size() + 40;
                 streams_object.Video_Media_Type.FormatDataSize = 

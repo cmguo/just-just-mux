@@ -5,7 +5,7 @@
 #include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h" // for Nalu
 
-#include <ppbox/avformat/codec/AvcCodec.h>
+#include <ppbox/avformat/codec/avc/AvcCodec.h>
 using namespace ppbox::avformat;
 
 #include <util/buffers/BufferCopy.h>
@@ -114,15 +114,19 @@ namespace ppbox
                 sample_description_index_ = sample.idesc;
                 AvcConfig const & avc_config = ((AvcCodec const *)media.codec)->config();
 
-                RtpPacket sps_p(cts_time, false);
-                sps_p.size = avc_config.sequence_parameters()[0].size();
-                sps_p.push_buffers(boost::asio::buffer(avc_config.sequence_parameters()[0]));
-                push_packet(sps_p);
-
-                RtpPacket pps_p(cts_time, false);
-                pps_p.size = avc_config.picture_parameters()[0].size();
-                pps_p.push_buffers(boost::asio::buffer(avc_config.picture_parameters()[0]));
-                push_packet(pps_p);
+                for (size_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); ++i) {
+                    RtpPacket sps_p(cts_time, false);
+                    sps_p.size = avc_config.sequenceParameterSetNALUnit[i].size();
+                    sps_p.push_buffers(boost::asio::buffer(avc_config.sequenceParameterSetNALUnit[i]));
+                    push_packet(sps_p);
+                }
+                
+                for (size_t i = 0; i < avc_config.pictureParameterSetNALUnit.size(); ++i) {
+                    RtpPacket pps_p(cts_time, false);
+                    pps_p.size = avc_config.pictureParameterSetNALUnit[i].size();
+                    pps_p.push_buffers(boost::asio::buffer(avc_config.pictureParameterSetNALUnit[i]));
+                    push_packet(pps_p);
+                }
             }
 
             for (size_t i = 0; i < nalus.size(); ++i) {

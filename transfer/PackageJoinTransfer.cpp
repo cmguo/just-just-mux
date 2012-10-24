@@ -4,7 +4,7 @@
 #include "ppbox/mux/transfer/PackageJoinTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
 
-#include <ppbox/avformat/codec/AvcNalu.h>
+#include <ppbox/avformat/codec/avc/AvcNalu.h>
 
 #include <framework/system/BytesOrder.h>
 

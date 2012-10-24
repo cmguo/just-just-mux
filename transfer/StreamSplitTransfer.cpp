@@ -3,7 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 
-#include <ppbox/avformat/codec/AvcNalu.h>
+#include <ppbox/avformat/codec/avc/AvcNalu.h>
 
 namespace ppbox
 {

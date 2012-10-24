@@ -13,7 +13,7 @@ using namespace ppbox::demux;
 #include <ppbox/data/MediaBase.h>
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
-#include <ppbox/avformat/codec/AvcCodec.h>
+#include <ppbox/avformat/codec/avc/AvcCodec.h>
 using namespace ppbox::avformat;
 
 #include <util/buffers/BufferCopy.h>

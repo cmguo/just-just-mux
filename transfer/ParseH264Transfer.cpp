@@ -7,8 +7,8 @@
 #include <ppbox/avformat/BitsOStream.h>
 #include <ppbox/avformat/BitsIStream.h>
 #include <ppbox/avformat/BitsBuffer.h>
-#include <ppbox/avformat/codec/AvcCodec.h>
-#include <ppbox/avformat/codec/AvcType.h>
+#include <ppbox/avformat/codec/avc/AvcCodec.h>
+#include <ppbox/avformat/codec/avc/AvcType.h>
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/CycleBuffers.h>
 
@@ -25,8 +25,8 @@ namespace ppbox
         void ParseH264Transfer::transfer(
             StreamInfo & media)        {            ppbox::avformat::AvcConfig const & avc_config = 
                 ((ppbox::avformat::AvcCodec const *)media.codec)->config();
-            for (boost::uint32_t i = 0; i < avc_config.sequence_parameters().size(); i++) {
-                std::vector<boost::uint8_t> sps_vec = avc_config.sequence_parameters()[i];
+            for (boost::uint32_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); i++) {
+                std::vector<boost::uint8_t> sps_vec = avc_config.sequenceParameterSetNALUnit[i];
                 util::archive::ArchiveBuffer<boost::uint8_t> buf((boost::uint8_t *)&sps_vec[0], sps_vec.size(), sps_vec.size());
                 ppbox::avformat::BitsBuffer<boost::uint8_t> bits_buf(buf);
                 ppbox::avformat::BitsIStream<boost::uint8_t> bits_reader(bits_buf);
@@ -47,8 +47,8 @@ namespace ppbox
                 spss.insert(std::make_pair(sps.sps_seq_parameter_set_id, sps));
             }
             // pps
-            for (boost::uint32_t i = 0; i < avc_config.picture_parameters().size(); i++) {
-                std::vector<boost::uint8_t> const & pps_vec = avc_config.picture_parameters()[i];
+            for (boost::uint32_t i = 0; i < avc_config.pictureParameterSetNALUnit.size(); i++) {
+                std::vector<boost::uint8_t> const & pps_vec = avc_config.pictureParameterSetNALUnit[i];
                 util::archive::ArchiveBuffer<boost::uint8_t> buf((boost::uint8_t *)&pps_vec[0], pps_vec.size(), pps_vec.size());
                 ppbox::avformat::BitsBuffer<boost::uint8_t> bits_buf(buf);
                 ppbox::avformat::BitsIStream<boost::uint8_t> bits_reader(bits_buf);
