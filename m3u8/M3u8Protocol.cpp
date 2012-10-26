@@ -84,13 +84,10 @@ namespace ppbox
         bool M3u8Protocol::create(
             std::ostream & out, 
             M3u8Config const & config, 
-            ppbox::data::MediaBase const & media, 
+            MediaInfo const & info1, 
             boost::system::error_code & ec)
         {
-            ppbox::data::MediaInfo info;
-            if (!media.get_info(info, ec)) {
-                return false;
-            }
+            MediaInfo info = info1;
             if (info.is_live && info.delay < (config.live_delay * config.interval * 1000)) {
                 ec = framework::system::logic_error::invalid_argument;
                 return false;

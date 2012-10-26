@@ -51,7 +51,7 @@ namespace ppbox
                 Sample & tag);
 
         protected:
-           void add_transfer(
+           void add_rtp_transfer(
                RtpTransfer * rtp_transfer);
 
         private:

@@ -30,6 +30,8 @@ namespace ppbox
     namespace mux
     {
 
+        class Transfer;
+
         class MuxerBase
         {
         public:
@@ -108,6 +110,13 @@ namespace ppbox
                 filters_.push_back(&filter);
             }
 
+            void add_transfer(
+                boost::uint32_t index, 
+                Transfer & transfer)
+            {
+                transfers_[index].push_back(&transfer);
+            }
+
         private:
             boost::system::error_code get_sample(
                 Sample & sample,
@@ -126,11 +135,14 @@ namespace ppbox
             static std::map<std::string, MuxerBase::register_type> & muxer_map();
 
         protected:
-            MediaStreamInfo media_info_;
+            MediaInfo media_info_;
+            std::vector<StreamInfo> streams_;
 
         private:
             ppbox::demux::SegmentDemuxer * demuxer_;
             framework::container::List<Filter> filters_;
+            std::vector<std::vector<Transfer *> > transfers_;
+
             bool paused_;
             boost::uint64_t play_time_; // ms
             // For reset 

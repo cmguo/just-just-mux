@@ -22,10 +22,11 @@ namespace ppbox
 
         public:
             virtual boost::system::error_code open(
-                MediaInfo const & media_file_info, 
+                MediaInfo const & media_info, 
+                std::vector<StreamInfo> const & streams, 
                 boost::system::error_code & ec)
             {
-                return prev()->open(media_file_info, ec);
+                return prev()->open(media_info, streams, ec);
             }
 
             virtual boost::system::error_code get_sample(

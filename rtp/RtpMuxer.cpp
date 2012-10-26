@@ -52,7 +52,7 @@ namespace ppbox
             }
         }
 
-        void RtpMuxer::add_transfer(
+        void RtpMuxer::add_rtp_transfer(
             RtpTransfer * rtp_transfer)
         {
             rtp_transfers_.push_back(rtp_transfer);

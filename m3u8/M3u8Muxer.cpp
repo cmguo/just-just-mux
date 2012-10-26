@@ -62,15 +62,16 @@ namespace ppbox
         void M3u8Muxer::media_info(
             MediaInfo & info)
         {
-            if (media_info_.is_live || media_info_.attachment == NULL) {
+            TsMuxer::media_info(info);
+            if (info.is_live || m3u8_cache_.empty()) {
                 boost::system::error_code ec;
                 std::ostringstream oss;
-                M3u8Protocol::create(oss, m3u8_config_, demuxer().media(), ec);
+                M3u8Protocol::create(oss, m3u8_config_, info, ec);
                 assert(!ec);
                 m3u8_cache_ = oss.str();
-                media_info_.attachment = &m3u8_cache_;
             }
-            return TsMuxer::media_info(info);
+            info.format = "m3u8";
+            info.format_data = m3u8_cache_;
         }
 
     } // namespace mux

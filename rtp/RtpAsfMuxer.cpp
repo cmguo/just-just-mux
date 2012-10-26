@@ -32,10 +32,10 @@ namespace ppbox
             RtpMuxer::add_stream(info);
             if (rtp_asf_transfer_ == NULL) {
                 rtp_asf_transfer_ = new RtpAsfTransfer(*this);
-                add_transfer(rtp_asf_transfer_);
+                add_rtp_transfer(rtp_asf_transfer_);
             }
             Transfer * transfer = new MergeTransfer(rtp_asf_transfer_);
-            info.transfers.push_back(transfer);
+            add_transfer(info.index, *transfer);
         }
 
         error_code RtpAsfMuxer::get_sdp(

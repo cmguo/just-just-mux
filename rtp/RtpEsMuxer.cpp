@@ -33,18 +33,18 @@ namespace ppbox
             if (info.type == MEDIA_TYPE_VIDE) {
                 if (info.format_type == StreamInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                     //transfer = new ParseH264Transfer();
-                    //info.transfers.push_back(transfer);
+                    //add_transfer(info.index, *transfer);
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                     transfer = new PtsComputeTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                 }
                 RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this);
-                info.transfers.push_back(rtp_transfer);
-                add_transfer(rtp_transfer);
+                add_transfer(info.index, *transfer);
+                add_rtp_transfer(rtp_transfer);
             } else if (MEDIA_TYPE_AUDI == info.type){
                 RtpTransfer * rtp_transfer = NULL;
                 if (info.sub_type == AUDIO_TYPE_MP1A) {
@@ -52,8 +52,8 @@ namespace ppbox
                 } else {
                     rtp_transfer = new RtpEsAudioTransfer(*this);
                 }
-                info.transfers.push_back(rtp_transfer);
-                add_transfer(rtp_transfer);
+                add_transfer(info.index, *transfer);
+                add_rtp_transfer(rtp_transfer);
             }
         }
 

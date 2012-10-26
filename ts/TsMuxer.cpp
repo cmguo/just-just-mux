@@ -112,28 +112,28 @@ namespace ppbox
             if (info.type == MEDIA_TYPE_VIDE) {
                 if (info.format_type == StreamInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                     transfer = new StreamJoinTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                     transfer = new PtsComputeTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                 }
                 transfer = new TsTransfer(video_pid_, video_stream_id_);
-                info.transfers.push_back(transfer);
+                add_transfer(info.index, *transfer);
                 has_video_ = true;
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 has_audio_ = true;
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     transfer = new AdtsAudioTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                 } else if (info.sub_type == AUDIO_TYPE_MP1A) {
                     audio_stream_type_ = AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_3;
                 }
                 transfer = new TsTransfer(audio_pid_, audio_stream_id_);
-                info.transfers.push_back(transfer);
+                add_transfer(info.index, *transfer);
             }
         }
 

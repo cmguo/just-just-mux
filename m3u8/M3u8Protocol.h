@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_M3U8_M3U8_PROTOCOL_H_
 #define _PPBOX_MUX_M3U8_M3U8_PROTOCOL_H_
 
-#include <ppbox/data/MediaBase.h>
+#include <ppbox/mux/MuxBase.h>
 
 namespace ppbox
 {
@@ -25,7 +25,7 @@ namespace ppbox
             static bool create(
                 std::ostream & out, 
                 M3u8Config const & config, 
-                ppbox::data::MediaBase const & media, 
+                MediaInfo const & info, 
                 boost::system::error_code & ec);
 
         private:

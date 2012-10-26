@@ -33,10 +33,10 @@ namespace ppbox
             RtpMuxer::add_stream(info);
             if (rtp_ts_transfer_ == NULL) {
                 rtp_ts_transfer_ = new RtpTsTransfer(*this);
-                add_transfer(rtp_ts_transfer_);
+                add_rtp_transfer(rtp_ts_transfer_);
             }
             Transfer * transfer = new MergeTransfer(rtp_ts_transfer_);
-            info.transfers.push_back(transfer);
+            add_transfer(info.index, *transfer);
         }
 
         void RtpTsMuxer::file_header(

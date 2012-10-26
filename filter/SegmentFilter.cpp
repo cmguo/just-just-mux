@@ -25,14 +25,15 @@ namespace ppbox
         }
 
         error_code SegmentFilter::open(
-            MediaStreamInfo const & media_info, 
+            MediaInfo const & media_info, 
+            std::vector<StreamInfo> const & streams, 
             boost::system::error_code & ec)
         {
-            if (Filter::open(media_info, ec))
+            if (Filter::open(media_info, streams, ec))
                 return ec;
             video_track_ = boost::uint32_t(-1);
-            for (size_t i = 0; i < media_info.streams.size(); ++i) {
-                if (media_info.streams[i].type == MEDIA_TYPE_VIDE) {
+            for (size_t i = 0; i < streams.size(); ++i) {
+                if (streams[i].type == MEDIA_TYPE_VIDE) {
                     video_track_ = i;
                     break;
                 }

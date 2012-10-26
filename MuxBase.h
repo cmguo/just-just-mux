@@ -14,32 +14,9 @@ namespace ppbox
     namespace mux
     {
 
+        using ppbox::data::MediaInfo;
         using ppbox::avformat::Sample;
-
-        class Transfer;
-
-        struct MediaInfo
-            : ppbox::data::MediaInfo
-        {
-            MediaInfo()
-                : attachment(NULL)
-            {
-            }
-
-            void * attachment;
-        };
-
-        struct StreamInfo
-            : ppbox::avformat::StreamInfo
-        {
-            std::vector<Transfer *> transfers;
-        };
-
-        struct MediaStreamInfo
-            : MediaInfo
-        {
-            std::vector<StreamInfo> streams;
-        };
+        using ppbox::avformat::StreamInfo;
 
     }
 }

@@ -111,26 +111,27 @@ namespace ppbox
             if (ec)
                 return ec;
             size_t stream_count = demuxer_->get_stream_count(ec);
+            transfers_.clear();
+            transfers_.resize(stream_count);
             for (size_t i = 0; i < stream_count; ++i) {
                 StreamInfo stream;
                 demuxer_->get_stream_info(i, stream, ec);
                 if (ec) {
                     break;
                 }
-                stream.attachment = NULL;
-                // TODO: add attachment
+                // TODO: add codec
                 if (stream.type == MEDIA_TYPE_VIDE 
                     && stream.sub_type == VIDEO_TYPE_AVC1) {
                         stream.codec = new AvcCodec(stream.format_data);
                 }
                 add_stream(stream);
-                for(boost::uint32_t i = 0; i < stream.transfers.size(); ++i) {
-                    stream.transfers[i]->transfer(stream);
+                streams_.push_back(stream);
+                for(boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
+                    transfers_[i][j]->transfer(stream);
                 }
-                media_info_.streams.push_back(stream);
             }
             if (!ec) {
-                filters_.last()->open(media_info_, ec);
+                filters_.last()->open(media_info_, streams_, ec);
             }
             return ec;
         }
@@ -159,7 +160,7 @@ namespace ppbox
                 if (!tag.data.empty())
                     return ec;
             } else if (read_step_ > 0 && read_step_ != boost::uint32_t(-1)) {
-                while(read_step_ <= media_info_.streams.size()) {
+                while(read_step_ <= transfers_.size()) {
                     stream_header(read_step_-1, tag);
                     read_step_++;
                     if (!tag.data.empty()) 
@@ -189,9 +190,9 @@ namespace ppbox
                     if (filters_.size() < 2) {
                         filters_.push_back(&key_filter_);
                     }
-                    for (boost::uint32_t i = 0; i < media_info_.streams.size(); ++i) {
-                        for (boost::uint32_t j = 0; j < media_info_.streams[i].transfers.size(); ++j) {
-                            media_info_.streams[i].transfers[j]->on_seek(time);
+                    for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
+                        for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
+                            transfers_[i][j]->on_seek(time);
                         }
                     }
                 }
@@ -216,7 +217,8 @@ namespace ppbox
         void MuxerBase::media_info(
             MediaInfo & info) const
         {
-            info = media_info_;
+            boost::system::error_code ec;
+            demuxer_->media().get_info(info, ec);
         }
 
         error_code MuxerBase::get_sample(
@@ -229,7 +231,7 @@ namespace ppbox
                 paused_ = false;
                 filters_.last()->get_sample(sample, ec);
                 if (!ec) {
-                    sample.media_info = &media_info_.streams[sample.itrack];
+                    sample.media_info = &streams_[sample.itrack];
                     play_time_ = sample.time;
                 }
             }
@@ -242,13 +244,13 @@ namespace ppbox
         {
             get_sample(sample, ec);
             if (!ec) {
-                StreamInfo & info = media_info_.streams[sample.itrack];
+                std::vector<Transfer *> & transfers = transfers_[sample.itrack];
                 //if (sample.flags & Sample::stream_changed) {
                     //release_info();
                     //open_impl(ec);
                 //}
-                for(boost::uint32_t i = 0; i < info.transfers.size(); ++i) {
-                    info.transfers[i]->transfer(sample);
+                for(boost::uint32_t i = 0; i < transfers.size(); ++i) {
+                    transfers[i]->transfer(sample);
                 }
             }
             return ec;
@@ -256,16 +258,16 @@ namespace ppbox
 
         void MuxerBase::release_info(void)
         {
-            for (boost::uint32_t i = 0; i < media_info_.streams.size(); ++i) {
-                if (media_info_.streams[i].codec) {
-                    delete media_info_.streams[i].codec;
+            for (boost::uint32_t i = 0; i < streams_.size(); ++i) {
+                if (streams_[i].codec) {
+                    delete streams_[i].codec;
                 }
-                for (boost::uint32_t j = 0; j < media_info_.streams[i].transfers.size(); ++j) {
-                    delete media_info_.streams[i].transfers[j];
+                for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
+                    delete transfers_[i][j];
                 }
-                media_info_.streams[i].transfers.clear();
             }
-            media_info_.streams.clear();
+            streams_.clear();
+            transfers_.clear();
         }
 
     } // namespace mux

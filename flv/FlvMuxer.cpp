@@ -35,17 +35,17 @@ namespace ppbox
                     // empty
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                     transfer = new PtsComputeTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                     transfer = new PackageJoinTransfer();
-                    info.transfers.push_back(transfer);
+                    add_transfer(info.index, *transfer);
                 }
                 transfer = new FlvVideoTransfer(9);
-                info.transfers.push_back(transfer);
+                add_transfer(info.index, *transfer);
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 transfer = new FlvAudioTransfer(8);
-                info.transfers.push_back(transfer);
+                add_transfer(info.index, *transfer);
             }
         }
 
@@ -77,7 +77,7 @@ namespace ppbox
             tag.dts = 0;
             tag.cts_delta = 0;
 
-            StreamInfo const & stream_info = media_info_.streams[index];
+            StreamInfo const & stream_info = streams_[index];
             if (stream_info.type == MEDIA_TYPE_VIDE) {
                 spec_data_size = stream_info.format_data.size();
                 flv_tag_header_.Type = 0x09;

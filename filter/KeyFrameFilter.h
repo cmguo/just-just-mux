@@ -18,7 +18,8 @@ namespace ppbox
 
         public:
             virtual boost::system::error_code open(
-                MediaStreamInfo const & media_info, 
+                MediaInfo const & media_info, 
+                std::vector<StreamInfo> const & streams, 
                 boost::system::error_code & ec);
 
             virtual boost::system::error_code get_sample(
