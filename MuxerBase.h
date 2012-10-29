@@ -41,14 +41,14 @@ namespace ppbox
 
         public:
             static void register_muxer(
-                std::string const & name,
+                std::string const & format,
                 register_type func);
 
             static MuxerBase * create(
-                std::string const & proto);
+                std::string const & format);
 
             static void destory(
-                MuxerBase* & source);
+                MuxerBase* & muxer);
 
         public:
             MuxerBase();
@@ -143,6 +143,7 @@ namespace ppbox
             framework::container::List<Filter> filters_;
             std::vector<std::vector<Transfer *> > transfers_;
 
+            std::string format_;
             bool paused_;
             boost::uint64_t play_time_; // ms
             // For reset 

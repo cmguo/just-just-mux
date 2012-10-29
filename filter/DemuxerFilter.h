@@ -27,7 +27,8 @@ namespace ppbox
             }
 
             virtual boost::system::error_code open(
-                MediaInfo const & media_file_info, 
+                MediaInfo const & media_info, 
+                std::vector<StreamInfo> const & streams, 
                 boost::system::error_code & ec)
             {
                 assert(demuxer_);

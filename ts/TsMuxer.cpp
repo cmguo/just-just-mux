@@ -147,6 +147,7 @@ namespace ppbox
             tag.ustime = 0;
             tag.dts = 0;
             tag.cts_delta = 0;
+            tag.size = 376;
             tag.data.push_back(boost::asio::buffer(header_, 376));
         }
 

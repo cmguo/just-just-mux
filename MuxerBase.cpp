@@ -38,28 +38,30 @@ namespace ppbox
         }
 
         void MuxerBase::register_muxer(
-            std::string const & name, 
+            std::string const & format, 
             register_type func)
         {
-            muxer_map().insert(std::make_pair(name, func));
+            muxer_map().insert(std::make_pair(format, func));
             return;
         }
 
         MuxerBase * MuxerBase::create(
-            std::string const & proto)
+            std::string const & format)
         {
-            std::map< std::string, register_type >::iterator iter = muxer_map().find(proto);
+            std::map< std::string, register_type >::iterator iter = muxer_map().find(format);
             if (muxer_map().end() == iter) {
                 return NULL;
             }
-            return iter->second();
+            MuxerBase * muxer = iter->second();
+            muxer->format_ = format;
+            return muxer;
         }
 
         void MuxerBase::destory(
-            MuxerBase* & source)
+            MuxerBase* & muxer)
         {
-            delete source;
-            source = NULL;
+            delete muxer;
+            muxer = NULL;
         }
 
         MuxerBase::MuxerBase()
@@ -219,6 +221,8 @@ namespace ppbox
         {
             boost::system::error_code ec;
             demuxer_->media().get_info(info, ec);
+            info.file_size = ppbox::data::invalid_size;
+            info.format = format_;
         }
 
         error_code MuxerBase::get_sample(
