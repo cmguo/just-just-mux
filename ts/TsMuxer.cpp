@@ -138,24 +138,25 @@ namespace ppbox
         }
 
         void TsMuxer::file_header(
-            Sample & tag)
+            Sample & sample)
         {
             WritePAT(header_);
             WritePMT(header_ + 188);
-            tag.data.clear();
-            tag.time = 0;
-            tag.ustime = 0;
-            tag.dts = 0;
-            tag.cts_delta = 0;
-            tag.size = 376;
-            tag.data.push_back(boost::asio::buffer(header_, 376));
+            sample.data.clear();
+            sample.time = 0;
+            sample.ustime = 0;
+            sample.dts = 0;
+            sample.cts_delta = 0;
+            sample.size = 376;
+            sample.data.push_back(boost::asio::buffer(header_, 376));
         }
 
         void TsMuxer::stream_header(
             boost::uint32_t index, 
-            Sample & tag)
+            Sample & sample)
         {
-            tag.data.clear();
+            sample.size = 0;
+            sample.data.clear();
         }
 
         void TsMuxer::WritePAT(boost::uint8_t * ptr)

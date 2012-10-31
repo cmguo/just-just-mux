@@ -74,7 +74,7 @@ namespace ppbox
                 sample.dts = scale_.transfer(sample.dts);
             } else if (time_adjust_ == 1) {
                 StreamInfo const & media = 
-                    *(StreamInfo const *)sample.media_info;
+                    *(StreamInfo const *)sample.stream_info;
                 sample.dts = scale_.static_transfer(media.time_scale, media.audio_format.sample_rate, sample.dts);
                 scale_.set(sample.dts);
                 time_adjust_ = 2;

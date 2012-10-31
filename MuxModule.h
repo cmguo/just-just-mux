@@ -12,15 +12,8 @@
 
 namespace ppbox
 {
-    namespace demux
-    {
-        class DemuxModule;
-    }
-
     namespace mux
     {
-
-        struct MuxerInfo;
 
         class MuxModule
             : public ppbox::common::CommonModuleBase<MuxModule>
@@ -37,50 +30,23 @@ namespace ppbox
 
             ~MuxModule();
 
+        public:
             virtual boost::system::error_code startup();
 
             virtual void shutdown();
 
         public:
-            void async_open(
-                framework::string::Url const & playlink,
-                std::string const & format,
-                size_t & token,
-                open_respone_type const & resp);
-
-            MuxerBase * open(
-                framework::string::Url const & playlink,
-                std::string const & format,
-                size_t & token,
-                boost::system::error_code & ec);
-
-            // For without using demux module
             MuxerBase * open(
                 ppbox::demux::SegmentDemuxer * demuxer,
-                std::string format,
-                size_t & token);
+                std::string const & format,
+                boost::system::error_code & ec);
 
-            boost::system::error_code close(
-                size_t close_token,
+            bool close(
+                MuxerBase * muxer, 
                 boost::system::error_code & ec);
 
         private:
-            MuxerInfo * create(
-                std::string format,
-                boost::system::error_code & ec);
-
-            void destory(
-                MuxerInfo * info);
-
-            void open_callback(
-                MuxerInfo * info,
-                boost::system::error_code const & ec,
-                ppbox::demux::SegmentDemuxer * demuxer);
-
-        private:
-            ppbox::demux::DemuxModule & demux_mod_;
-            std::vector<MuxerInfo *> muxers_;
-            std::string format_;
+            std::vector<MuxerBase *> muxers_;
             boost::mutex mutex_;
         };
     }

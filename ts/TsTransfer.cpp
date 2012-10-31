@@ -51,7 +51,7 @@ namespace ppbox
             Sample & sample)
         {
             StreamInfo const & media = 
-                *(StreamInfo const *)sample.media_info;
+                *(StreamInfo const *)sample.stream_info;
             boost::uint64_t cts = 0;
             //std::cout << "sample track = " << sample.itrack << ", dts = " << dts << ", cts = " << cts << std::endl;
             if (time_adjust_ == 0) {

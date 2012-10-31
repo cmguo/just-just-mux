@@ -35,7 +35,7 @@ namespace ppbox
                 videotagheader_.FrameType = 2;
             }
 
-            boost::uint32_t CompositionTime = sample.cts_delta * 1000 / sample.media_info->time_scale;
+            boost::uint32_t CompositionTime = sample.cts_delta * 1000 / sample.stream_info->time_scale;
             videotagheader_.CompositionTime = CompositionTime;
             util::archive::ArchiveBuffer<char> buf(video_tag_header_, 16);
             ppbox::avformat::FLVOArchive flv_archive(buf);

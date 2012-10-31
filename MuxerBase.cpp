@@ -66,9 +66,9 @@ namespace ppbox
 
         MuxerBase::MuxerBase()
             : demuxer_(NULL)
-            , paused_(false)
             , play_time_(0)
-            , read_step_(0)
+            , read_flag_(0)
+            , head_step_(0)
         {
             filters_.push_back(&demux_filter_);
             filters_.push_back(&key_filter_);
@@ -82,36 +82,129 @@ namespace ppbox
             }
         }
 
-        error_code MuxerBase::open(
+        bool MuxerBase::open(
             demux::SegmentDemuxer * demuxer,
             error_code & ec)
         {
             assert(demuxer != NULL);
             demuxer_ = demuxer;
             demux_filter_.set_demuxer(demuxer_);
-            open_impl(ec);
+            open(ec);
             if (ec) {
                 demuxer_ = NULL;
-            }
-            return ec;
-        }
-
-        bool MuxerBase::is_open()
-        {
-            if (demuxer_) {
-                return true;
             } else {
-                return false;
+                read_flag_ = f_head;
             }
+            return !ec;
         }
 
-        error_code MuxerBase::open_impl(
+        bool MuxerBase::read(
+            Sample & sample,
+            error_code & ec)
+        {
+            if (read_flag_) {
+                if (read_flag_ & f_head) {
+                    do {
+                        if (head_step_ == 0) {
+                            file_header(sample);
+                            ++head_step_;
+                        } else {
+                            assert(head_step_ <= streams_.size());
+                            stream_header(head_step_ - 1, sample);
+                            if (head_step_ == streams_.size()) {
+                                head_step_ = 0;
+                                read_flag_ &= ~f_head;
+                            } else {
+                                ++head_step_;
+                            }
+                        }
+                    } while (sample.size == 0 && (read_flag_ & f_head));
+                    if (sample.size) {
+                        ec.clear();
+                        return true;
+                    }
+                } else if (read_flag_ & f_seek) {
+                    boost::uint64_t time = demuxer_->get_cur_time(ec);
+                    if (!ec) {
+                        on_seek(time);
+                        read_flag_ &= ~f_seek;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+
+            get_sample(sample, ec);
+
+            return !ec;
+        }
+
+        bool MuxerBase::reset(
+            error_code & ec)
+        {
+            demuxer_->reset(ec);
+            if (!ec) {
+                read_flag_ |= f_head;
+                boost::uint64_t time = demuxer_->get_cur_time(ec);
+                if (!ec) {
+                    on_seek(time);
+                }
+            } else if (ec ==boost::asio::error::would_block) {
+                read_flag_ |= f_head;
+                read_flag_ |= f_seek;
+            }
+            return !ec;
+        }
+
+        bool MuxerBase::time_seek(
+            boost::uint64_t & time,
+            error_code & ec)
+        {
+            demuxer_->seek(time, ec);
+            if (!ec) {
+                read_flag_ |= f_head;
+                on_seek(time);
+            } else if (ec ==boost::asio::error::would_block) {
+                read_flag_ |= f_head;
+                read_flag_ |= f_seek;
+            }
+            return !ec;
+        }
+
+        bool MuxerBase::byte_seek(
+            boost::uint64_t & offset,
+            boost::system::error_code & ec)
+        {
+            boost::uint64_t seek_time = (offset * media_info_.duration) / media_info_.file_size;
+            return time_seek(seek_time, ec);
+        }
+
+        void MuxerBase::media_info(
+            MediaInfo & info) const
+        {
+            boost::system::error_code ec;
+            demuxer_->media().get_info(info, ec);
+            info.file_size = ppbox::data::invalid_size;
+            info.format = format_;
+        }
+
+        bool MuxerBase::close(
+            boost::system::error_code & ec)
+        {
+            close();
+            demuxer_ = NULL;
+            ec.clear();
+            return true;
+        }
+
+        void MuxerBase::open(
             error_code & ec)
         {
             assert(demuxer_ != NULL);
             demuxer_->get_media_info(media_info_, ec);
-            if (ec)
-                return ec;
+            if (ec) {
+                return;
+            }
             size_t stream_count = demuxer_->get_stream_count(ec);
             transfers_.clear();
             transfers_.resize(stream_count);
@@ -135,132 +228,41 @@ namespace ppbox
             if (!ec) {
                 filters_.last()->open(media_info_, streams_, ec);
             }
-            return ec;
         }
 
-        error_code MuxerBase::read(
-            Sample & tag,
-            error_code & ec)
+        void MuxerBase::on_seek(
+            boost::uint64_t time)
         {
-            ec.clear();
-            if (!is_open()) {
-                ec = error::mux_not_open;
-                return ec;
-            }
-            if (paused_) {
-                paused_ = false;
-            }
-
-            if (0 == read_step_) {
-                read_step_ = 1;
-                tag.itrack = boost::uint32_t(-1);
-                tag.idesc = boost::uint32_t(-1);
-                tag.flags = 0;
-                tag.ustime = 0;
-                tag.context = NULL;
-                file_header(tag);
-                if (!tag.data.empty())
-                    return ec;
-            } else if (read_step_ > 0 && read_step_ != boost::uint32_t(-1)) {
-                while(read_step_ <= transfers_.size()) {
-                    stream_header(read_step_-1, tag);
-                    read_step_++;
-                    if (!tag.data.empty()) 
-                        return ec;
-                }
-                read_step_ = boost::uint32_t(-1);
-            }
-            MuxerBase::get_sample_with_transfer(tag, ec);
-            return ec;
-        }
-
-        void MuxerBase::reset(void)
-        {
-            read_step_ = 0;
-        }
-
-        error_code MuxerBase::time_seek(
-            boost::uint64_t & time,
-            error_code & ec)
-        {
-            if (!is_open()) {
-                ec = error::mux_not_open;
-            } else {
-                demuxer_->seek(time, ec);
-                if (!ec || ec == boost::asio::error::would_block) {
-                    play_time_ = time;
-                    if (filters_.size() < 2) {
-                        filters_.push_back(&key_filter_);
-                    }
-                    for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
-                        for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
-                            transfers_[i][j]->on_seek(time);
-                        }
-                    }
+            play_time_ = time;
+            for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
+                for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
+                    transfers_[i][j]->on_seek(time);
                 }
             }
-            return ec;
         }
 
-        error_code MuxerBase::byte_seek(
-            boost::uint64_t & offset,
-            boost::system::error_code & ec)
-        {
-            boost::uint64_t seek_time = (offset * media_info_.duration) / media_info_.file_size;
-            return time_seek(seek_time, ec);
-        }
-
-        void MuxerBase::close(void)
-        {
-            demuxer_ = NULL;
-            release_info();
-        }
-
-        void MuxerBase::media_info(
-            MediaInfo & info) const
-        {
-            boost::system::error_code ec;
-            demuxer_->media().get_info(info, ec);
-            info.file_size = ppbox::data::invalid_size;
-            info.format = format_;
-        }
-
-        error_code MuxerBase::get_sample(
+        void MuxerBase::get_sample(
             Sample & sample,
             error_code & ec)
         {
-            if (!is_open()) {
-                ec = error::mux_not_open;
-            } else {
-                paused_ = false;
-                filters_.last()->get_sample(sample, ec);
-                if (!ec) {
-                    sample.media_info = &streams_[sample.itrack];
-                    play_time_ = sample.time;
-                }
-            }
-            return ec;
-        }
-
-        error_code MuxerBase::get_sample_with_transfer(
-            Sample & sample,
-            error_code & ec)
-        {
-            get_sample(sample, ec);
+            filters_.last()->get_sample(sample, ec);
             if (!ec) {
-                std::vector<Transfer *> & transfers = transfers_[sample.itrack];
+                sample.stream_info = &streams_[sample.itrack];
                 //if (sample.flags & Sample::stream_changed) {
                     //release_info();
                     //open_impl(ec);
+                    //read_flag_ |= f_head;
+                    //head_step_ = 1;
                 //}
+                play_time_ = sample.time;
+                std::vector<Transfer *> & transfers = transfers_[sample.itrack];
                 for(boost::uint32_t i = 0; i < transfers.size(); ++i) {
                     transfers[i]->transfer(sample);
                 }
             }
-            return ec;
         }
 
-        void MuxerBase::release_info(void)
+        void MuxerBase::close()
         {
             for (boost::uint32_t i = 0; i < streams_.size(); ++i) {
                 if (streams_[i].codec) {

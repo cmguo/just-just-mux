@@ -18,45 +18,9 @@ namespace ppbox
     namespace mux
     {
 
-        struct MuxerInfo
-        {
-            MuxerInfo(MuxerBase * imuxer)
-                : muxer(imuxer)
-                , demuxer_id(size_t(-1))
-            {
-                static size_t static_id = 0;
-                id = ++static_id;
-            }
-
-            size_t id;
-            MuxerBase * muxer;
-            size_t demuxer_id;
-            SegmentDemuxer * demuxer;
-            MuxModule::open_respone_type resp;
-
-            struct Finder
-            {
-                Finder(
-                    size_t id)
-                    : id_(id)
-                {
-                }
-
-                bool operator()(
-                    MuxerInfo const * info)
-                {
-                    return info->id == id_;
-                }
-
-            private:
-                size_t id_;
-            };
-        };
-
         MuxModule::MuxModule(
             util::daemon::Daemon & daemon)
-            : ppbox::common::CommonModuleBase<MuxModule>(daemon, "muxer")
-            , demux_mod_(util::daemon::use_module<ppbox::demux::DemuxModule>(daemon))
+            : ppbox::common::CommonModuleBase<MuxModule>(daemon, "MuxModule")
         {
         }
 
@@ -74,115 +38,44 @@ namespace ppbox
         {
         }
 
-        void MuxModule::async_open(
-            framework::string::Url const & playlink,
-            std::string const & format,
-            size_t & token,
-            open_respone_type const & resp)
-        {
-            error_code ec;
-            MuxerInfo * mux_info = create(format, ec);
-            mux_info->resp = resp;
-            token = mux_info->id;
-            demux_mod_.async_open(
-                playlink,
-                mux_info->demuxer_id,
-                boost::bind(&MuxModule::open_callback, this, mux_info, _1, _2));
-        }
-
-        void MuxModule::open_callback(
-            MuxerInfo * info,
-            error_code const & ec,
-            ppbox::demux::SegmentDemuxer * demuxer)
-        {
-            error_code lec = ec;
-            if (!lec) {
-                info->demuxer = demuxer;
-                info->muxer->open(info->demuxer, lec);
-            }
-            info->resp(lec, info->muxer);
-        }
-
-        MuxerBase * MuxModule::open(
-            framework::string::Url const & playlink,
-            std::string const & format,
-            size_t & token,
-            error_code & ec)
-        {
-            MuxerInfo * mux_info = create(format, ec);
-            token = mux_info->id;
-            mux_info->demuxer = demux_mod_.open(playlink, mux_info->demuxer_id, ec);
-            if (!ec) {
-                mux_info->muxer->open(mux_info->demuxer, ec);
-                if (!ec) {
-                    return mux_info->muxer;
-                }
-            }
-            return NULL;
-        }
-
         MuxerBase * MuxModule::open(
             ppbox::demux::SegmentDemuxer * demuxer,
-            std::string format,
-            size_t & token)
-        {
-            error_code ec;
-            MuxerInfo * mux_info = create(format, ec);
-            token = mux_info->id;
-            mux_info->demuxer = demuxer;
-            mux_info->muxer->open(mux_info->demuxer, ec);
-            if (!ec) {
-                return mux_info->muxer;
-            }
-            return NULL;
-        }
-
-        error_code MuxModule::close(
-            size_t close_token,
-            error_code & ec)
-        {
-            boost::mutex::scoped_lock lock(mutex_);
-            std::vector<MuxerInfo *>::const_iterator iter = 
-                std::find_if(muxers_.begin(), muxers_.end(), MuxerInfo::Finder(close_token));
-            if (iter == muxers_.end()) {
-                ec = framework::system::logic_error::item_not_exist;
-            } else {
-                MuxerInfo * muxer_info = *iter;
-                if (muxer_info->demuxer_id != size_t(-1)) {
-                    lock.unlock();
-                    demux_mod_.close(muxer_info->demuxer_id, ec);
-                    lock.lock();
-                }
-                destory(muxer_info);
-            }
-            return ec;
-        }
-
-        MuxerInfo * MuxModule::create(
-            std::string format,
-            error_code & ec)
+            std::string const & format,
+            boost::system::error_code & ec)
         {
             MuxerBase * muxer = MuxerBase::create(format);
-            boost::mutex::scoped_lock lock(mutex_);
-            MuxerInfo * muxer_info = new MuxerInfo(muxer);
-            muxers_.push_back(muxer_info);
-            return muxer_info;
+            if (muxer == NULL) {
+                ec = error::mux_format_error;
+            } else {
+                muxer->open(demuxer, ec);
+            }
+            if (muxer) {
+                boost::mutex::scoped_lock lock(mutex_);
+                muxers_.push_back(muxer);
+            }
+            return muxer;
         }
 
-        void MuxModule::destory(
-            MuxerInfo * info)
+        bool MuxModule::close(
+            MuxerBase * muxer, 
+            error_code & ec)
         {
-            if (info->muxer) {
-                info->muxer->close();
-                MuxerBase::destory(info->muxer);
-                info->muxer = NULL;
+            {
+                boost::mutex::scoped_lock lock(mutex_);
+                std::vector<MuxerBase *>::iterator iter = 
+                    std::find(muxers_.begin(), muxers_.end(), muxer);
+                if (iter == muxers_.end()) {
+                    ec = framework::system::logic_error::item_not_exist;
+                    muxer = NULL;
+                } else {
+                    muxers_.erase(iter);
+                }
             }
-            info->demuxer = NULL;
-            muxers_.erase(
-                std::remove(muxers_.begin(), muxers_.end(), info), 
-                muxers_.end());
-            delete info;
-            info = NULL;
+            if (muxer) {
+                muxer->close(ec);
+                delete muxer;
+            }
+            return !ec;
         }
 
     } // namespace mux

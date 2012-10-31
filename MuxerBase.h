@@ -22,11 +22,6 @@ namespace ppbox
         class SegmentDemuxer;
     }
 
-    namespace cdn
-    {
-         struct DurationInfo;
-    }
-
     namespace mux
     {
 
@@ -56,27 +51,27 @@ namespace ppbox
             virtual ~MuxerBase();
 
         public:
-            boost::system::error_code open(
-                demux::SegmentDemuxer * demuxer,
+            bool open(
+                ppbox::demux::SegmentDemuxer * demuxer, 
                 boost::system::error_code & ec);
 
-            boost::system::error_code read(
-                Sample & tag,
+            bool read(
+                Sample & sample,
                 boost::system::error_code & ec);
 
-            void reset(void);
-
-            bool is_open();
-
-            virtual boost::system::error_code time_seek(
-                boost::uint64_t & time,
+            bool reset(
                 boost::system::error_code & ec);
 
-            virtual boost::system::error_code byte_seek(
+            virtual bool time_seek(
                 boost::uint64_t & offset,
                 boost::system::error_code & ec);
 
-            void close(void);
+            virtual bool byte_seek(
+                boost::uint64_t & offset,
+                boost::system::error_code & ec);
+
+            bool close(
+                boost::system::error_code & ec);
 
         public:
             framework::configure::Config & config()
@@ -92,11 +87,11 @@ namespace ppbox
                 StreamInfo & info) = 0;
 
             virtual void file_header(
-                Sample & tag) = 0;
+                Sample & sample) = 0;
 
             virtual void stream_header(
                 boost::uint32_t index, 
-                Sample & tag) = 0;
+                Sample & sample) = 0;
 
         protected:
             ppbox::demux::SegmentDemuxer const & demuxer() const
@@ -118,18 +113,17 @@ namespace ppbox
             }
 
         private:
-            boost::system::error_code get_sample(
+            void get_sample(
                 Sample & sample,
                 boost::system::error_code & ec);
 
-            boost::system::error_code get_sample_with_transfer(
-                Sample & sample,
+            void on_seek(
+                boost::uint64_t time);
+
+            void open(
                 boost::system::error_code & ec);
 
-            boost::system::error_code open_impl(
-                boost::system::error_code & ec);
-
-            void release_info(void);
+            void close();
 
         private:
             static std::map<std::string, MuxerBase::register_type> & muxer_map();
@@ -143,11 +137,16 @@ namespace ppbox
             framework::container::List<Filter> filters_;
             std::vector<std::vector<Transfer *> > transfers_;
 
+            enum FlagEnum
+            {
+                f_head = 1, // 头部没有输出
+                f_seek = 2, // 拖动没有完成
+            };
+
             std::string format_;
-            bool paused_;
             boost::uint64_t play_time_; // ms
-            // For reset 
-            boost::uint32_t read_step_;
+            boost::uint32_t read_flag_;
+            boost::uint32_t head_step_;
             DemuxerFilter demux_filter_;
             KeyFrameFilter key_filter_;
 

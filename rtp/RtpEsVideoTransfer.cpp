@@ -91,7 +91,7 @@ namespace ppbox
         void RtpEsVideoTransfer::transfer(
             Sample & sample)
         {
-            StreamInfo const & media = *(StreamInfo const *)sample.media_info;
+            StreamInfo const & media = *(StreamInfo const *)sample.stream_info;
             NaluList & nalus = *(NaluList *)sample.context;
 
             boost::uint64_t cts_time = 0;

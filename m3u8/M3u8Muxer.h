@@ -35,7 +35,7 @@ namespace ppbox
                 boost::uint32_t index, 
                 Sample & tag);
 
-            boost::system::error_code time_seek(
+            bool time_seek(
                 boost::uint64_t & time,
                 boost::system::error_code & ec);
 

@@ -36,7 +36,7 @@ namespace ppbox
         void RtpTsTransfer::transfer(
             Sample & sample)
         {
-            RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / sample.media_info->time_scale);
+            RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / sample.stream_info->time_scale);
             std::vector<size_t> const & off_segs = 
                 *(std::vector<size_t> const *)sample.context;
             std::deque<boost::asio::const_buffer>::const_iterator buf_beg = sample.data.begin();

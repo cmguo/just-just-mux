@@ -50,32 +50,32 @@ namespace ppbox
         }
 
         void FlvMuxer::file_header(
-            Sample & tag)
+            Sample & sample)
         {
-            tag.data.clear();
-            tag.time = 0;
-            tag.ustime = 0;
-            tag.dts = 0;
-            tag.cts_delta = 0;
+            sample.data.clear();
+            sample.time = 0;
+            sample.ustime = 0;
+            sample.dts = 0;
+            sample.cts_delta = 0;
             util::archive::ArchiveBuffer<char> file_header_buf(flv_file_header_buffer_, 13);
             ppbox::avformat::FLVOArchive flv_file_archive(file_header_buf);
             flv_file_archive << flv_header_;
-            tag.data.push_back(boost::asio::buffer(
+            sample.data.push_back(boost::asio::buffer(
                 (boost::uint8_t *)&flv_file_header_buffer_, 13));
-            tag.size = 13;
+            sample.size = 13;
         }
 
         void FlvMuxer::stream_header(
             boost::uint32_t index, 
-            Sample & tag)
+            Sample & sample)
         {
             boost::uint32_t spec_data_size = 0;
 
-            tag.data.clear();
-            tag.time = 0;
-            tag.ustime = 0;
-            tag.dts = 0;
-            tag.cts_delta = 0;
+            sample.data.clear();
+            sample.time = 0;
+            sample.ustime = 0;
+            sample.dts = 0;
+            sample.cts_delta = 0;
 
             StreamInfo const & stream_info = streams_[index];
             if (stream_info.type == MEDIA_TYPE_VIDE) {
@@ -102,13 +102,13 @@ namespace ppbox
                 }
                 flv_video_tag_header_.CompositionTime = framework::system::UInt24(0);
                 flv_archive << flv_video_tag_header_;
-                tag.data.push_back(boost::asio::buffer(
+                sample.data.push_back(boost::asio::buffer(
                     (boost::uint8_t *)&video_header_buffer_, 16));
-                tag.data.push_back(boost::asio::buffer(stream_info.format_data));
+                sample.data.push_back(boost::asio::buffer(stream_info.format_data));
                 video_header_size_ = spec_data_size + 16;
-                tag.size = video_header_size_ + 4;
+                sample.size = video_header_size_ + 4;
                 video_header_size_ = framework::system::BytesOrder::big_endian_to_host_long(video_header_size_);
-                tag.data.push_back(boost::asio::buffer(
+                sample.data.push_back(boost::asio::buffer(
                     (boost::uint8_t *)&video_header_size_, 4));
 
             } else if (stream_info.type == MEDIA_TYPE_AUDI) {
@@ -167,13 +167,13 @@ namespace ppbox
                 flv_audio_tag_header_.AACPacketType = 0;
 
                 flv_archive << flv_audio_tag_header_;
-                tag.data.push_back(boost::asio::buffer(
+                sample.data.push_back(boost::asio::buffer(
                     (boost::uint8_t *)&audio_header_buffer_, 13));
-                tag.data.push_back(boost::asio::buffer(stream_info.format_data));
+                sample.data.push_back(boost::asio::buffer(stream_info.format_data));
                 audio_header_size_ = spec_data_size + 13;
-                tag.size = audio_header_size_ + 4;
+                sample.size = audio_header_size_ + 4;
                 audio_header_size_ = framework::system::BytesOrder::big_endian_to_host_long(audio_header_size_);
-                tag.data.push_back(boost::asio::buffer(
+                sample.data.push_back(boost::asio::buffer(
                     (boost::uint8_t *)&audio_header_size_, 4));
             }
         }

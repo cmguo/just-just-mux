@@ -41,7 +41,7 @@ namespace ppbox
             TsMuxer::stream_header(index, tag);
         }
 
-        error_code M3u8Muxer::time_seek(
+        bool M3u8Muxer::time_seek(
             boost::uint64_t & time,
             error_code & ec)
         {
@@ -56,7 +56,7 @@ namespace ppbox
                 next_index_ = index + 1;
                 segment_filter_.set_end_time(m3u8_config_.interval * next_index_ * 1000000);
             }
-            return ec;
+            return !ec;
         }
 
         void M3u8Muxer::media_info(

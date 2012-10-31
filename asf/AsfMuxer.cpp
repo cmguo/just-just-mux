@@ -180,7 +180,7 @@ namespace ppbox
             tag.data.push_back( data_buf_.data() );
         }
 
-        boost::system::error_code AsfMuxer::time_seek(
+        bool AsfMuxer::time_seek(
             boost::uint64_t & time,
             boost::system::error_code & ec)
         {
@@ -188,7 +188,7 @@ namespace ppbox
             if (!ec || ec == boost::asio::error::would_block) {
                 transfer_->on_seek(time);
             }
-            return ec;
+            return !ec;
         }
 
     } // namespace mux
