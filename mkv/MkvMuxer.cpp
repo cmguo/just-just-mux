@@ -1,31 +1,33 @@
-//MkvMux.cpp
+// MkvMuxer.cpp
+
 #include "ppbox/mux/Common.h"
+#include "ppbox/mux/mkv/MkvMuxer.h"
+#include "ppbox/mux/mkv/MkvTransfer.h""
+
 #include "ppbox/mux/transfer/MergeTransfer.h"
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 
-#include <ppbox/mux/mkv/MkvMux.h>
-#include <ppbox/mux/mkv/MkvTransfer.h>
-
-using namespace ppbox::demux;
 using namespace ppbox::avformat;
+
 namespace ppbox
 {
     namespace mux
     {
 
-        MkvMux::MkvMux()
+        MkvMuxer::MkvMuxer()
             : stream_number_(0)
-             , transfer_(NULL)
+            , transfer_(NULL)
         {
         }
 
-        MkvMux::~MkvMux()
+        MkvMuxer::~MkvMuxer()
         {
         }
 
-        void MkvMux::add_stream(
-            MediaInfoEx & mediainfoex)
+        void MkvMuxer::add_stream(
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
             stream_number_++;
 
@@ -39,29 +41,29 @@ namespace ppbox
             //}
             if (transfer_ == NULL)
                 transfer_ = new MkvTransfer();
-            mediainfoex.transfers.push_back(new MergeTransfer(transfer_));
+            transfers.push_back(new MergeTransfer(transfer_));
 
             //每添加一个流需要添加一个track_entry
             MKV_Track_Entry track_entry;
-            track_entry.TrackNumber = mediainfoex.index + 1;
-            std::vector<boost::uint8_t> tem(4, (boost::uint8_t)(mediainfoex.index + 1));
+            track_entry.TrackNumber = info.index + 1;
+            std::vector<boost::uint8_t> tem(4, (boost::uint8_t)(info.index + 1));
             track_entry.TrackUID = tem;
             track_entry.Language = "eng";
-            if (mediainfoex.type == MEDIA_TYPE_VIDE) {
+            if (info.type == MEDIA_TYPE_VIDE) {
                 track_entry.TrackType = VIDEO_TRACKE_TYPE_VALUE;
                 track_entry.CodecID = "V_MPEG4/ISO/AVC";
-                track_entry.CodecPrivate = mediainfoex.format_data;
-                track_entry.Video.PixelWidth = mediainfoex.video_format.width;
-                track_entry.Video.PixelHeight = mediainfoex.video_format.height;
+                track_entry.CodecPrivate = info.format_data;
+                track_entry.Video.PixelWidth = info.video_format.width;
+                track_entry.Video.PixelHeight = info.video_format.height;
                 track_entry.Video.size = track_entry.Video.data_size();
-            } else if (mediainfoex.type == MEDIA_TYPE_AUDI){
+            } else if (info.type == MEDIA_TYPE_AUDI){
                 track_entry.TrackType = AUDIO_TRACKE_TYPE_VALUE;
                 track_entry.CodecID = "A_AAC";
-                track_entry.CodecPrivate = mediainfoex.format_data;
+                track_entry.CodecPrivate = info.format_data;
                 track_entry.Audio.SamplingFrequency = 
-                    (float)mediainfoex.audio_format.sample_rate;
+                    (float)info.audio_format.sample_rate;
                 track_entry.Audio.Channels = 
-                    mediainfoex.audio_format.channel_count;
+                    info.audio_format.channel_count;
                 //track_entry.Audio.BitDepth = 
                 //    mediainfoex.audio_format.sample_size * 8;
                 track_entry.Audio.size = track_entry.Audio.data_size();
@@ -77,17 +79,17 @@ namespace ppbox
 
         }
 
-        void MkvMux::stream_header(
+        void MkvMuxer::stream_header(
             boost::uint32_t index, 
-            ppbox::demux::Sample & tag)
+            ppbox::demux::Sample & sample)
         {
-            tag.data.clear();
+            sample.data.clear();
         }
 
-        void MkvMux::file_header(
-            ppbox::demux::Sample & tag)
+        void MkvMuxer::file_header(
+            ppbox::demux::Sample & sample)
         {
-            tag.data.clear();
+            sample.data.clear();
             if(ebml_buf_.size() != 0) {
                 ebml_buf_.reset();
                 segment_buf_.reset();
@@ -129,22 +131,11 @@ namespace ppbox
             MKVOArchive oar_track_head(track_head_buf_);
             oar_track_head << tracks_head;
 
-            tag.data.push_back( ebml_buf_.data() );
-            tag.data.push_back( segment_buf_.data() );
-            tag.data.push_back( track_head_buf_.data() );
-            tag.data.push_back( track_buf_.data() );
+            sample.data.push_back( ebml_buf_.data() );
+            sample.data.push_back( segment_buf_.data() );
+            sample.data.push_back( track_head_buf_.data() );
+            sample.data.push_back( track_buf_.data() );
         }
 
-        boost::system::error_code MkvMux::seek(
-            boost::uint32_t & time,
-            boost::system::error_code & ec)
-        {
-            Muxer::seek(time, ec);
-            if (!ec || ec == boost::asio::error::would_block) {
-                transfer_->on_seek();
-            }
-            return ec;
-        }
-    }//mux
-}//ppbox
-
+    } // namespace mux
+} // namespace ppbox

@@ -1,4 +1,5 @@
-//MkvTransfer.h
+// MkvTransfer.h
+
 #ifndef _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 #define _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 
@@ -18,15 +19,18 @@ namespace ppbox
         {
         public:
             MkvTransfer();
-            ~MkvTransfer();
+
+            virtual ~MkvTransfer();
+
+        public:
+            virtual void transfer(
+                StreamInfo & info);
 
             virtual void transfer(
-                ppbox::demux::MediaInfo & mediainfo);
+                Sample & sample);
 
-            virtual void transfer(
-                ppbox::demux::Sample & sample);
-
-            void on_seek();
+            virtual void on_seek(
+                boost::uint64_t time);
 
         private:
             boost::asio::streambuf block_head_buf_;
@@ -34,10 +38,7 @@ namespace ppbox
             boost::uint64_t time_code_;
         };
 
-    }//mux
-}//ppbox
+    } // namespace mux
+} // namespace ppbox
 
-
-#endif
-
-
+#endif // _PPBOX_MUX_MKV_MKV_TRANSFER_H_
