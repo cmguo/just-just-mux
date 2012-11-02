@@ -12,6 +12,13 @@ namespace ppbox
 
         struct M3u8Config
         {
+            M3u8Config()
+                : interval(10)
+                , live_delay(3)
+                , url_format("/%n.ts")
+            {
+            }
+
             boost::uint32_t interval; // 秒
             boost::uint32_t live_delay; // 直播退后分段数
             std::string url_format; // %n - 分段号， %t 分段起始时间
@@ -36,7 +43,7 @@ namespace ppbox
 
             static void append_body(
                 std::ostream & out, 
-                UrlFormator const & format, 
+                UrlFormator const & formator, 
                 boost::uint32_t interval, 
                 boost::uint64_t begin, 
                 boost::uint64_t end);
@@ -44,7 +51,7 @@ namespace ppbox
             // 零头
             static void append_remnant(
                 std::ostream & out, 
-                UrlFormator const & format, 
+                UrlFormator const & formator, 
                 boost::uint32_t interval,
                 boost::uint64_t index, 
                 boost::uint32_t remnant); // 毫秒

@@ -2,6 +2,7 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/filter/SegmentFilter.h"
+#include "ppbox/mux/MuxError.h"
 
 using namespace ppbox::avformat;
 
@@ -24,13 +25,13 @@ namespace ppbox
         {
         }
 
-        error_code SegmentFilter::open(
+        bool SegmentFilter::open(
             MediaInfo const & media_info, 
             std::vector<StreamInfo> const & streams, 
             boost::system::error_code & ec)
         {
-            if (Filter::open(media_info, streams, ec))
-                return ec;
+            if (!Filter::open(media_info, streams, ec))
+                return false;
             video_track_ = boost::uint32_t(-1);
             for (size_t i = 0; i < streams.size(); ++i) {
                 if (streams[i].type == MEDIA_TYPE_VIDE) {
@@ -38,10 +39,10 @@ namespace ppbox
                     break;
                 }
             }
-            return ec;
+            return true;
         }
 
-        error_code SegmentFilter::get_sample(
+        bool SegmentFilter::get_sample(
             Sample & sample,
             boost::system::error_code & ec)
         {
@@ -50,8 +51,8 @@ namespace ppbox
                 is_save_sample_ = false;
                 ec.clear();
             } else {
-                if (Filter::get_sample(sample, ec))
-                    return ec;
+                if (!Filter::get_sample(sample, ec))
+                    return false;
             }
             if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1)
                 && (video_track_ == boost::uint32_t(-1)
@@ -66,11 +67,12 @@ namespace ppbox
                 && (video_track_ == boost::uint32_t(-1)
                     || (sample.itrack == video_track_
                     && (sample.flags & Sample::sync)))) {
-                        ec = error::mux_segment_end;
+                        ec = error::end_of_stream;
                         is_save_sample_ = true;
                         sample_ = sample;
+                        return false;
             }
-            return ec;
+            return true;
         }
 
         void SegmentFilter::set_end_time(

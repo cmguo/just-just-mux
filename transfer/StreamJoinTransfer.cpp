@@ -94,9 +94,9 @@ namespace ppbox
                 //if (nalu_header.nal_unit_type == avformat::NaluHeader::PPS) {
                 //    continue;
                 //}
-                //if (nalu_header.nal_unit_type == avformat::NaluHeader::SEI) {
-                //    continue;
-                //}
+                if (nalu_header.nal_unit_type == avformat::NaluHeader::SEI) {
+                    continue;
+                }
                 if (nalu_header.nal_unit_type == avformat::NaluHeader::IDR) {
                     datas.push_back(boost::asio::buffer(sps_pps_));
                     sample.size += sps_pps_.size();

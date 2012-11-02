@@ -17,12 +17,12 @@ namespace ppbox
             KeyFrameFilter();
 
         public:
-            virtual boost::system::error_code open(
+            virtual bool open(
                 MediaInfo const & media_info, 
                 std::vector<StreamInfo> const & streams, 
                 boost::system::error_code & ec);
 
-            virtual boost::system::error_code get_sample(
+            virtual bool get_sample(
                 Sample & sample,
                 boost::system::error_code & ec);
 

@@ -3,6 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxModule.h"
 #include "ppbox/mux/Version.h"
+#include "ppbox/mux/MuxError.h"
 #include "ppbox/mux/MuxerTypes.h"
 
 #include <ppbox/demux/DemuxModule.h>
@@ -45,7 +46,7 @@ namespace ppbox
         {
             MuxerBase * muxer = MuxerBase::create(format);
             if (muxer == NULL) {
-                ec = error::mux_format_error;
+                ec = error::format_not_support;
             } else {
                 muxer->open(demuxer, ec);
             }

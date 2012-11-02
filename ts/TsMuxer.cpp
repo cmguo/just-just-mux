@@ -106,34 +106,35 @@ namespace ppbox
         }
 
         void TsMuxer::add_stream(
-            StreamInfo & info)
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
                 if (info.format_type == StreamInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                     transfer = new StreamJoinTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                 }
                 transfer = new TsTransfer(video_pid_, video_stream_id_);
-                add_transfer(info.index, *transfer);
+                transfers.push_back(transfer);
                 has_video_ = true;
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 has_audio_ = true;
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     transfer = new AdtsAudioTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                 } else if (info.sub_type == AUDIO_TYPE_MP1A) {
                     audio_stream_type_ = AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_3;
                 }
                 transfer = new TsTransfer(audio_pid_, audio_stream_id_);
-                add_transfer(info.index, *transfer);
+                transfers.push_back(transfer);
             }
         }
 

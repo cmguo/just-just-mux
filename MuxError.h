@@ -12,19 +12,10 @@ namespace ppbox
 
             enum errors
             {
-                mux_success = 0,
-                mux_not_open,
-                mux_already_open,
-                mux_format_error,
-                mux_playlink_error,
-                mux_stream_count_error,
-                mux_set_metadata_error,
-                mux_set_audiotag_error,
-                mux_set_videotag_error,
-                mux_segment_end,
-                mux_invalid_sample,
-                mux_not_support,
-                mux_other_error = 3000, 
+                not_open = 1, 
+                already_open, 
+                format_not_support, 
+                end_of_stream, 
             };
 
             namespace detail {
@@ -46,30 +37,16 @@ namespace ppbox
                     std::string message(int value) const
                     {
                         switch (value) {
-                            case mux_not_open:
-                                return "mux not open";
-                            case mux_already_open:
-                                return "mux already open";
-                            case mux_format_error:
-                                return "mux setting error format";
-                            case mux_playlink_error:
-                                return "mux setting error playlink";
-                            case mux_stream_count_error:
-                                return "mux get stream count error";
-                            case mux_set_metadata_error:
-                                return "mux set metadata error";
-                            case mux_set_audiotag_error:
-                                return "mux set audio information error";
-                            case mux_set_videotag_error:
-                                return "mux set video information error";
-                            case mux_segment_end:
-                                return "mux segment end";
-                            case mux_not_support:
-                                return "mux not support";
-                            case mux_invalid_sample:
-                                return "mux invalid sample";
+                            case not_open:
+                                return "mux: not open";
+                            case already_open:
+                                return "mux: already open";
+                            case format_not_support:
+                                return "mux: format not support";
+                            case end_of_stream:
+                                return "mux: end of stream";
                             default:
-                                return "mux other error";
+                                return "mux: unknown error";
                         }
                     }
                 };

@@ -22,7 +22,8 @@ namespace ppbox
 
         public:
             void add_stream(
-                StreamInfo & info);
+                StreamInfo & info, 
+                std::vector<Transfer *> & transfers);
 
             void file_header(
                 Sample & tag);

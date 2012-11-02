@@ -6,7 +6,8 @@
 #include "ppbox/avformat/Format.h"
 #include "ppbox/avformat/codec/Codec.h"
 
-#include <ppbox/data/MediaBase.h>
+#include <ppbox/data/MediaInfo.h>
+#include <ppbox/data/PlayInfo.h>
 
 namespace ppbox
 {
@@ -15,6 +16,7 @@ namespace ppbox
     {
 
         using ppbox::data::MediaInfo;
+        using ppbox::data::PlayInfo;
         using ppbox::avformat::Sample;
         using ppbox::avformat::StreamInfo;
 

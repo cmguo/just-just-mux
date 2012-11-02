@@ -26,22 +26,23 @@ namespace ppbox
                 demuxer_ = NULL;
             }
 
-            virtual boost::system::error_code open(
+            virtual bool open(
                 MediaInfo const & media_info, 
                 std::vector<StreamInfo> const & streams, 
                 boost::system::error_code & ec)
             {
                 assert(demuxer_);
                 ec.clear();
-                return ec;
+                return true;
             }
 
-            virtual boost::system::error_code get_sample(
+            virtual bool get_sample(
                 Sample & sample,
                 boost::system::error_code & ec)
             {
                 assert(demuxer_);
-                return demuxer_->get_sample(sample, ec);
+                demuxer_->get_sample(sample, ec);
+                return !ec;
             }
 
             void set_demuxer(

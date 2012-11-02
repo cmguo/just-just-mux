@@ -20,13 +20,13 @@ namespace ppbox
         {
         }
 
-        error_code KeyFrameFilter::open(
+        bool KeyFrameFilter::open(
             MediaInfo const & media_info, 
             std::vector<StreamInfo> const & streams, 
             boost::system::error_code & ec)
         {
-            if (Filter::open(media_info, streams, ec))
-                return ec;
+            if (!Filter::open(media_info, streams, ec))
+                return false;
             video_track_ = boost::uint32_t(-1);
             for (size_t i = 0; i < streams.size(); ++i) {
                 if (streams[i].type == MEDIA_TYPE_VIDE) {
@@ -34,23 +34,23 @@ namespace ppbox
                     break;
                 }
             }
-            return ec; 
+            return true; 
         }
 
-        error_code KeyFrameFilter::get_sample(
+        bool KeyFrameFilter::get_sample(
             Sample & sample,
             boost::system::error_code & ec)
         {
-            Filter::get_sample(sample, ec);
-            if (ec)
-                return ec;
+            if (!Filter::get_sample(sample, ec))
+                return false;
             if (video_track_ == boost::uint32_t(-1) 
                 || (sample.itrack == video_track_
                 && (sample.flags & Sample::sync))) {
                     detach_self();
-                    return ec;
+                    return true;
             }
-            return boost::asio::error::would_block; 
+            ec = boost::asio::error::would_block; 
+            return false;
         }
 
     } // namespace mux

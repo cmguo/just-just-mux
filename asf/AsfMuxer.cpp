@@ -30,21 +30,22 @@ namespace ppbox
         }
 
         void AsfMuxer::add_stream(
-            StreamInfo & info)
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
              Transfer * transfer = NULL;
              if (info.type == MEDIA_TYPE_VIDE) {
                  if (info.format_type == StreamInfo::video_avc_packet) {
                      transfer = new PackageSplitTransfer();
-                     add_transfer(info.index, *transfer);
+                     transfers.push_back(transfer);
                      transfer = new StreamJoinTransfer();
-                     add_transfer(info.index, *transfer);
+                     transfers.push_back(transfer);
                  }
              }
              if (transfer_ == NULL)
                  transfer_ = new AsfTransfer(*this);
              transfer=  new MergeTransfer(transfer_);
-             add_transfer(info.index, *transfer);
+             transfers.push_back(transfer);
 
             //structure ASF_Stream_Properties_Object
             stream_number_++;
@@ -120,13 +121,13 @@ namespace ppbox
 
         void AsfMuxer::stream_header(
             boost::uint32_t index, 
-            Sample & tag)
+            Sample & sample)
         {
-            tag.data.clear();
+            sample.data.clear();
         }
 
         void AsfMuxer::file_header(
-            Sample & tag)
+            Sample & sample)
         {
             if(0 != file_buf_.size()) {
                 head_buf_.reset();
@@ -134,7 +135,7 @@ namespace ppbox
                 file_buf_.reset();
                 data_buf_.reset();
             }
-            tag.data.clear();
+            sample.data.clear();
 
             //ASF_Header_Extension_Object
             ASF_Header_Extension_Object extension_object;
@@ -173,11 +174,11 @@ namespace ppbox
             ASFOArchiveChar oar_data(data_buf_);
             oar_data << data_object;
 
-            tag.data.push_back( head_buf_.data() );
-            tag.data.push_back( file_buf_.data() );
-            tag.data.push_back( extension_buf_.data() );
-            tag.data.push_back( stream_buf_.data() );
-            tag.data.push_back( data_buf_.data() );
+            sample.data.push_back( head_buf_.data() );
+            sample.data.push_back( file_buf_.data() );
+            sample.data.push_back( extension_buf_.data() );
+            sample.data.push_back( stream_buf_.data() );
+            sample.data.push_back( data_buf_.data() );
         }
 
         bool AsfMuxer::time_seek(

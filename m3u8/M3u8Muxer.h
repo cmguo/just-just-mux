@@ -18,33 +18,36 @@ namespace ppbox
         public:
             M3u8Muxer();
 
-            ~M3u8Muxer();
+            virtual ~M3u8Muxer();
 
         public:
-            virtual void media_info(
-                MediaInfo & info);
-
-        private:
-            void add_stream(
-                StreamInfo & info);
-
-            void file_header(
-                Sample & tag);
-
-            void stream_header(
-                boost::uint32_t index, 
-                Sample & tag);
-
-            bool time_seek(
+            virtual bool time_seek(
                 boost::uint64_t & time,
                 boost::system::error_code & ec);
 
+            virtual void media_info(
+                MediaInfo & info) const;
+
+        private:
+            virtual void add_stream(
+                StreamInfo & info, 
+                std::vector<Transfer *> & transfers);
+
+            virtual void file_header(
+                Sample & tag);
+
+            virtual void stream_header(
+                boost::uint32_t index, 
+                Sample & tag);
+
         private:
             boost::uint64_t next_index_;
-            std::string m3u8_cache_;
+            mutable std::string m3u8_cache_;
             M3u8Config m3u8_config_;
             SegmentFilter segment_filter_;
         };
+
+        PPBOX_REGISTER_MUXER(m3u8, M3u8Muxer);
 
     } // namespace mux
 } // namespace ppbox

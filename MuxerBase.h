@@ -55,6 +55,10 @@ namespace ppbox
                 ppbox::demux::SegmentDemuxer * demuxer, 
                 boost::system::error_code & ec);
 
+            virtual bool setup(
+                boost::uint32_t index, 
+                boost::system::error_code & ec);
+
             bool read(
                 Sample & sample,
                 boost::system::error_code & ec);
@@ -74,17 +78,22 @@ namespace ppbox
                 boost::system::error_code & ec);
 
         public:
+            virtual void media_info(
+                MediaInfo & info) const;
+
+            virtual void play_info(
+                PlayInfo & info) const;
+
+        public:
             framework::configure::Config & config()
             {
                 return config_;
             }
 
-            virtual void media_info(
-                MediaInfo & info) const;
-
         protected:
             virtual void add_stream(
-                StreamInfo & info) = 0;
+                StreamInfo & info, 
+                std::vector<Transfer *> & transfers) = 0;
 
             virtual void file_header(
                 Sample & sample) = 0;
@@ -105,23 +114,20 @@ namespace ppbox
                 filters_.push_back(&filter);
             }
 
-            void add_transfer(
-                boost::uint32_t index, 
-                Transfer & transfer)
-            {
-                transfers_[index].push_back(&transfer);
-            }
+            void reset_header(
+                bool file_header = true, 
+                bool stream_header = true);
 
         private:
+            void open(
+                boost::system::error_code & ec);
+
             void get_sample(
                 Sample & sample,
                 boost::system::error_code & ec);
 
             void on_seek(
                 boost::uint64_t time);
-
-            void open(
-                boost::system::error_code & ec);
 
             void close();
 
@@ -144,6 +150,7 @@ namespace ppbox
             };
 
             std::string format_;
+            boost::uint64_t seek_time_; // ms
             boost::uint64_t play_time_; // ms
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;

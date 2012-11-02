@@ -3,28 +3,18 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/Transfer.h"
+#include "ppbox/mux/MuxError.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
-#include "ppbox/mux/rtp/RtpPacket.h"
 
 #include <ppbox/demux/base/SegmentDemuxer.h>
-#include <ppbox/demux/base/SourceError.h>
-using namespace ppbox::demux;
+#include <ppbox/demux/base/DemuxError.h>
 
-#include <ppbox/data/MediaBase.h>
-
-#include <ppbox/avformat/asf/AsfObjectType.h>
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
 using namespace ppbox::avformat;
 
-#include <util/buffers/BufferCopy.h>
-#include <util/archive/ArchiveBuffer.h>
+#include <util/buffers/BuffersSize.h>
 
-#include <framework/memory/MemoryPage.h>
-
-#include <boost/thread/thread.hpp>
 using namespace boost::system;
-
-#include <iostream>
 
 namespace ppbox
 {
@@ -66,6 +56,7 @@ namespace ppbox
 
         MuxerBase::MuxerBase()
             : demuxer_(NULL)
+            , seek_time_(0)
             , play_time_(0)
             , read_flag_(0)
             , head_step_(0)
@@ -98,6 +89,18 @@ namespace ppbox
             return !ec;
         }
 
+        bool MuxerBase::setup(
+            boost::uint32_t index, 
+            boost::system::error_code & ec)
+        {
+            if (index != -1) {
+                ec == framework::system::logic_error::not_supported;
+            } else {
+                ec.clear();
+            }
+            return !ec;
+        }
+
         bool MuxerBase::read(
             Sample & sample,
             error_code & ec)
@@ -105,6 +108,7 @@ namespace ppbox
             if (read_flag_) {
                 if (read_flag_ & f_head) {
                     do {
+                        sample.data.clear();
                         if (head_step_ == 0) {
                             file_header(sample);
                             ++head_step_;
@@ -118,8 +122,9 @@ namespace ppbox
                                 ++head_step_;
                             }
                         }
-                    } while (sample.size == 0 && (read_flag_ & f_head));
-                    if (sample.size) {
+                    } while (sample.data.empty() && (read_flag_ & f_head));
+                    if (!sample.data.empty()) {
+                        sample.size = util::buffers::buffers_size(sample.data);
                         ec.clear();
                         return true;
                     }
@@ -188,6 +193,19 @@ namespace ppbox
             info.format = format_;
         }
 
+        void MuxerBase::play_info(
+            PlayInfo & info) const
+        {
+            MediaInfo info1;
+            media_info(info1);
+            info.byte_range.beg = 0;
+            info.byte_range.pos = 0;
+            info.byte_range.end = info1.file_size;
+            info.time_range.beg = seek_time_;
+            info.time_range.pos = play_time_;
+            info.time_range.end = info1.duration;
+        }
+
         bool MuxerBase::close(
             boost::system::error_code & ec)
         {
@@ -197,8 +215,16 @@ namespace ppbox
             return true;
         }
 
+        void MuxerBase::reset_header(
+            bool file_header, 
+            bool stream_header)
+        {
+            read_flag_ |= f_head;
+            head_step_ = file_header ? 0 : 1;
+        }
+
         void MuxerBase::open(
-            error_code & ec)
+                error_code & ec)
         {
             assert(demuxer_ != NULL);
             demuxer_->get_media_info(media_info_, ec);
@@ -219,7 +245,7 @@ namespace ppbox
                     && stream.sub_type == VIDEO_TYPE_AVC1) {
                         stream.codec = new AvcCodec(stream.format_data);
                 }
-                add_stream(stream);
+                add_stream(stream, transfers_[i]);
                 streams_.push_back(stream);
                 for(boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
                     transfers_[i][j]->transfer(stream);
@@ -233,6 +259,7 @@ namespace ppbox
         void MuxerBase::on_seek(
             boost::uint64_t time)
         {
+            seek_time_ = time;
             play_time_ = time;
             for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
                 for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
@@ -259,6 +286,8 @@ namespace ppbox
                 for(boost::uint32_t i = 0; i < transfers.size(); ++i) {
                     transfers[i]->transfer(sample);
                 }
+            } else if (ec == ppbox::demux::error::no_more_sample) {
+                ec = error::end_of_stream;
             }
         }
 

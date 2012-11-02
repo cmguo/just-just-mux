@@ -24,14 +24,15 @@ namespace ppbox
 
         public:
             void add_stream(
-                StreamInfo & infoex);
+                StreamInfo & info, 
+                std::vector<Transfer *> & transfers);
 
             void stream_header(
                 boost::uint32_t index, 
-                Sample & tag);
+                Sample & sample);
 
             void file_header(
-                Sample & tag);
+                Sample & sample);
 
             bool time_seek(
                 boost::uint64_t & time,

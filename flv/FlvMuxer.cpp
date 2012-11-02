@@ -27,7 +27,8 @@ namespace ppbox
         }
 
         void FlvMuxer::add_stream(
-            StreamInfo & info)
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
@@ -35,17 +36,17 @@ namespace ppbox
                     // empty
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                     transfer = new PackageJoinTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                 }
                 transfer = new FlvVideoTransfer(9);
-                add_transfer(info.index, *transfer);
+                transfers.push_back(transfer);
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 transfer = new FlvAudioTransfer(8);
-                add_transfer(info.index, *transfer);
+                transfers.push_back(transfer);
             }
         }
 

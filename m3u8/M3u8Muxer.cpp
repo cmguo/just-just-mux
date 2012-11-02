@@ -15,6 +15,11 @@ namespace ppbox
         M3u8Muxer::M3u8Muxer()
             : next_index_(0)
         {
+            config().register_module("M3u8Protocol")
+                << CONFIG_PARAM_NAME_RDWR("interval", m3u8_config_.interval)
+                << CONFIG_PARAM_NAME_RDWR("live_delay", m3u8_config_.live_delay)
+                << CONFIG_PARAM_NAME_RDWR("url_format", m3u8_config_.url_format);
+
             add_filter(segment_filter_);
         }
 
@@ -23,22 +28,23 @@ namespace ppbox
         }
 
         void M3u8Muxer::add_stream(
-            StreamInfo & info)
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
-            TsMuxer::add_stream(info);
+            TsMuxer::add_stream(info, transfers);
         }
 
         void M3u8Muxer::file_header(
-            Sample & tag)
+            Sample & sample)
         {
-            TsMuxer::file_header(tag);
+            TsMuxer::file_header(sample);
         }
 
         void M3u8Muxer::stream_header(
             boost::uint32_t index, 
-            Sample & tag)
+            Sample & sample)
         {
-            TsMuxer::stream_header(index, tag);
+            TsMuxer::stream_header(index, sample);
         }
 
         bool M3u8Muxer::time_seek(
@@ -50,7 +56,9 @@ namespace ppbox
             if (next_index_ != index || !segment_filter_.is_sequence()) {
                 segment_filter_.reset();
                 time = index * m3u8_config_.interval * 1000;
-                TsMuxer::time_seek(index, ec);
+                TsMuxer::time_seek(time, ec);
+            } else {
+                reset_header();
             }
             if (!ec) {
                 next_index_ = index + 1;
@@ -60,7 +68,7 @@ namespace ppbox
         }
 
         void M3u8Muxer::media_info(
-            MediaInfo & info)
+            MediaInfo & info) const
         {
             TsMuxer::media_info(info);
             if (info.is_live || m3u8_cache_.empty()) {
@@ -70,7 +78,7 @@ namespace ppbox
                 assert(!ec);
                 m3u8_cache_ = oss.str();
             }
-            info.format = "m3u8";
+            info.format = "ts";
             info.format_data = m3u8_cache_;
         }
 

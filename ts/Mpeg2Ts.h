@@ -13,7 +13,7 @@
 const boost::uint16_t AP4_MPEG2_TS_DEFAULT_PID_PMT         = 0x64;
 const boost::uint16_t AP4_MPEG2_TS_DEFAULT_PID_VIDEO       = 0x65;
 const boost::uint16_t AP4_MPEG2_TS_DEFAULT_PID_AUDIO       = 0x66;
-const boost::uint16_t AP4_MPEG2_TS_DEFAULT_STREAM_ID_AUDIO = 0xbd;
+const boost::uint16_t AP4_MPEG2_TS_DEFAULT_STREAM_ID_AUDIO = 0xc0;
 const boost::uint16_t AP4_MPEG2_TS_DEFAULT_STREAM_ID_VIDEO = 0xe0;
 
 const boost::uint8_t AP4_MPEG2_STREAM_TYPE_ISO_IEC_13818_7 = 0x0F;
