@@ -38,24 +38,14 @@ namespace ppbox
             virtual void setup();
 
         protected:
-            void clear(
-                boost::uint64_t cts_ustime)
-            {
-                packets_.clear();
-                packets_.ustime = cts_ustime;
-            }
+            void begin(
+                Sample & sample);
 
             void push_packet(
-                RtpPacket & packet)
-            {
-                packet.vpxcc = rtp_head_.vpxcc;
-                packet.mpt |= rtp_head_.mpt;
-                packet.sequence = framework::system::BytesOrder::host_to_big_endian(rtp_head_.sequence++);
-                packet.timestamp = framework::system::BytesOrder::host_to_big_endian(
-                    rtp_head_.timestamp + packet.timestamp);
-                packet.ssrc = rtp_head_.ssrc;
-                packets_.push_back(packet);
-            }
+                RtpPacket & packet);
+
+            void finish(
+                Sample & sample);
 
         protected:
             RtpHead rtp_head_;

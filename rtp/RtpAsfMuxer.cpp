@@ -27,15 +27,16 @@ namespace ppbox
         }
 
         void RtpAsfMuxer::add_stream(
-            StreamInfo & info)
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
-            RtpMuxer::add_stream(info);
+            RtpMuxer::add_stream(info, transfers);
             if (rtp_asf_transfer_ == NULL) {
                 rtp_asf_transfer_ = new RtpAsfTransfer(*this);
                 add_rtp_transfer(rtp_asf_transfer_);
             }
             Transfer * transfer = new MergeTransfer(rtp_asf_transfer_);
-            add_transfer(info.index, *transfer);
+            transfers.push_back(transfer);
         }
 
         error_code RtpAsfMuxer::get_sdp(

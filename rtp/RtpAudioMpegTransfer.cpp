@@ -41,13 +41,13 @@ namespace ppbox
         void RtpAudioMpegTransfer::transfer(
             Sample & sample)
         {
-            RtpTransfer::clear(sample.ustime);
+            RtpTransfer::begin(sample);
             RtpPacket packet(scale_.transfer(sample.dts), true);
             packet.size = sample.size + 4;
             packet.push_buffers(boost::asio::buffer(header_, 4));
             packet.push_buffers(sample.data);
             push_packet(packet);
-            sample.context = (void*)&packets_;
+            RtpTransfer::finish(sample);
         }
 
     } // namespace mux

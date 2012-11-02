@@ -27,23 +27,24 @@ namespace ppbox
         }
 
         void RtpEsMuxer::add_stream(
-            StreamInfo & info)
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
                 if (info.format_type == StreamInfo::video_avc_packet) {
                     transfer = new PackageSplitTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                     //transfer = new ParseH264Transfer();
-                    //add_transfer(info.index, *transfer);
+                    //transfers.push_back(transfer);
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     transfer = new StreamSplitTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                     transfer = new PtsComputeTransfer();
-                    add_transfer(info.index, *transfer);
+                    transfers.push_back(transfer);
                 }
                 RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this);
-                add_transfer(info.index, *transfer);
+                transfers.push_back(rtp_transfer);
                 add_rtp_transfer(rtp_transfer);
             } else if (MEDIA_TYPE_AUDI == info.type){
                 RtpTransfer * rtp_transfer = NULL;
@@ -52,7 +53,7 @@ namespace ppbox
                 } else {
                     rtp_transfer = new RtpEsAudioTransfer(*this);
                 }
-                add_transfer(info.index, *transfer);
+                transfers.push_back(rtp_transfer);
                 add_rtp_transfer(rtp_transfer);
             }
         }

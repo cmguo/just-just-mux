@@ -106,7 +106,7 @@ namespace ppbox
             //std::cout << "video cts_delta = " << sample.cts_delta << std::endl;
             //std::cout << "video cts = " << cts_time << std::endl;
 
-            RtpTransfer::clear(sample.ustime + (boost::uint64_t)sample.cts_delta * 1000000 / media.time_scale);
+            RtpTransfer::begin(sample);
 
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             // add two sps pps rtp packet
@@ -173,7 +173,7 @@ namespace ppbox
                     push_packet(p);
                 }
             }
-            sample.context = (void*)&packets_;
+            RtpTransfer::finish(sample);
         }
 
     } // namespace mux

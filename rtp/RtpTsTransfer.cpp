@@ -36,7 +36,7 @@ namespace ppbox
         void RtpTsTransfer::transfer(
             Sample & sample)
         {
-            RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / sample.stream_info->time_scale);
+            RtpTransfer::begin(sample);
             std::vector<size_t> const & off_segs = 
                 *(std::vector<size_t> const *)sample.context;
             std::deque<boost::asio::const_buffer>::const_iterator buf_beg = sample.data.begin();
@@ -57,18 +57,19 @@ namespace ppbox
             p.size = (off_segs.size() - i) * AP4_MPEG2TS_PACKET_SIZE;
             p.push_buffers(buf_beg, buf_end);
             push_packet(p);
-
-            sample.context = (void*)&packets_;
+            RtpTransfer::finish(sample);
         }
 
         void RtpTsTransfer::header_rtp_packet(
-            Sample & tag)
+            Sample & sample)
         {
-            RtpTransfer::clear(0);
+            //RtpTransfer::begin(sample);
+            packets_.clear();
+            packets_.ustime = 0;
             RtpPacket p(rtp_info_.timestamp, true);
-            p.push_buffers(tag.data);
+            p.push_buffers(sample.data);
             push_packet(p);
-            tag.context = (void*)&packets_;
+            RtpTransfer::finish(sample);
         }
 
     } // namespace mux

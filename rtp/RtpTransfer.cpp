@@ -62,5 +62,32 @@ namespace ppbox
             rtp_info_.seek_time = (boost::uint32_t)time;
         }
 
+        void RtpTransfer::begin(
+            Sample & sample)
+        {
+            packets_.clear();
+            packets_.ustime = sample.ustime + sample.cts_delta * 1000000 / sample.stream_info->time_scale;
+        }
+
+        void RtpTransfer::push_packet(
+            RtpPacket & packet)
+        {
+            packet.vpxcc = rtp_head_.vpxcc;
+            packet.mpt |= rtp_head_.mpt;
+            packet.sequence = framework::system::BytesOrder::host_to_big_endian(rtp_head_.sequence++);
+            packet.timestamp = framework::system::BytesOrder::host_to_big_endian(
+                rtp_head_.timestamp + packet.timestamp);
+            packet.ssrc = rtp_head_.ssrc;
+            packets_.push_back(packet);
+        }
+
+        void RtpTransfer::finish(
+            Sample & sample)
+        {
+            sample.size = packets_.size();
+            sample.data.clear();
+            sample.data.push_back(boost::asio::const_buffer(&packets_[0], sample.size));
+        }
+
     } // namespace mux
 } // namespace ppbox

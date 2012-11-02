@@ -20,7 +20,8 @@ namespace ppbox
 
         public:
             void add_stream(
-                StreamInfo & info);
+                StreamInfo & info, 
+                std::vector<Transfer *> & transfers);
         };
 
         PPBOX_REGISTER_MUXER(rtp_es, RtpEsMuxer);

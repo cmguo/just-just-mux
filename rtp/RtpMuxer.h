@@ -25,30 +25,28 @@ namespace ppbox
             ~RtpMuxer();
 
         public:
-            virtual boost::system::error_code get_sdp(
-                std::string & sdp_out, 
-                boost::system::error_code & ec);
-
-            virtual boost::system::error_code setup(
+            virtual bool setup(
                 boost::uint32_t index, 
-                std::string & setup_out, 
-                boost::system::error_code & ec);
-
-            virtual boost::system::error_code get_rtp_info(
-                std::string & rtp_info_out, 
-                boost::uint32_t & seek_time,
                 boost::system::error_code & ec);
 
         public:
+            virtual void media_info(
+                MediaInfo & info) const;
+
+            virtual void play_info(
+                PlayInfo & info) const;
+
+        public:
             void add_stream(
-                StreamInfo & info);
+                StreamInfo & info, 
+                std::vector<Transfer *> & transfers);
 
             void file_header(
-                Sample & tag);
+                Sample & sample);
 
             void stream_header(
                 boost::uint32_t index, 
-                Sample & tag);
+                Sample & sample);
 
         protected:
            void add_rtp_transfer(

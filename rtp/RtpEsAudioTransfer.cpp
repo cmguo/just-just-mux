@@ -86,13 +86,13 @@ namespace ppbox
                 //std::cout << "audio dts = " << sample.dts << ", dts2 = " << dts2 << std::endl;
             }
             //std::cout << "sample track = " << sample.itrack << ", dts = " << dts << ", cts = " << cts << std::endl;
-            RtpTransfer::clear(sample.ustime);
+            RtpTransfer::begin(sample);
             RtpPacket packet(sample.dts, true);
             packet.size = sample.size + 4;
             packet.push_buffers(boost::asio::buffer(au_header_section_, 4));
             packet.push_buffers(sample.data);
             push_packet(packet);
-            sample.context = (void*)&packets_;
+            RtpTransfer::finish(sample);
         }
 
         void RtpEsAudioTransfer::on_seek(

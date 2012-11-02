@@ -57,7 +57,7 @@ namespace ppbox
         void RtpAsfTransfer::transfer(
             Sample & sample)
         {
-            RtpTransfer::clear(sample.ustime + sample.cts_delta * 1000000 / sample.stream_info->time_scale);
+            RtpTransfer::begin(sample);
             std::vector<AsfTransfer::AsfPacket> const & packets = 
                 *(std::vector<AsfTransfer::AsfPacket> const *)sample.context;
             std::deque<boost::asio::const_buffer>::const_iterator buf_beg = sample.data.begin();
@@ -71,7 +71,7 @@ namespace ppbox
                 push_packet(p);
                 buf_beg = buf_end;
             }
-            sample.context = (void*)&packets_;
+            RtpTransfer::finish(sample);
         }
 
         void RtpAsfTransfer::get_sdp(

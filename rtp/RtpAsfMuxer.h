@@ -23,7 +23,8 @@ namespace ppbox
 
         public:
             void add_stream(
-                StreamInfo & info);
+                StreamInfo & info, 
+                std::vector<Transfer *> & transfers);
 
             boost::system::error_code get_sdp(
                 std::string & sdp_out,

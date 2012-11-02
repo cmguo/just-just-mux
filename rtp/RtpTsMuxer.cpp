@@ -28,15 +28,16 @@ namespace ppbox
         }
 
         void RtpTsMuxer::add_stream(
-            StreamInfo & info)
+            StreamInfo & info, 
+            std::vector<Transfer *> & transfers)
         {
-            RtpMuxer::add_stream(info);
+            RtpMuxer::add_stream(info, transfers);
             if (rtp_ts_transfer_ == NULL) {
                 rtp_ts_transfer_ = new RtpTsTransfer(*this);
                 add_rtp_transfer(rtp_ts_transfer_);
             }
             Transfer * transfer = new MergeTransfer(rtp_ts_transfer_);
-            add_transfer(info.index, *transfer);
+            transfers.push_back(transfer);
         }
 
         void RtpTsMuxer::file_header(
