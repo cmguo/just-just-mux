@@ -93,7 +93,7 @@ namespace ppbox
             boost::uint32_t index, 
             boost::system::error_code & ec)
         {
-            if (index != -1) {
+            if (index != (boost::uint32_t)-1) {
                 ec == framework::system::logic_error::not_supported;
             } else {
                 ec.clear();
