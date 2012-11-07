@@ -34,17 +34,10 @@ namespace ppbox
             void file_header(
                 Sample & sample);
 
-            bool time_seek(
-                boost::uint64_t & time,
-                boost::system::error_code & ec);
-
         private:
-            boost::asio::streambuf extension_buf_;
-            boost::asio::streambuf head_buf_;
             boost::asio::streambuf file_buf_;
             boost::asio::streambuf stream_buf_;
             boost::asio::streambuf data_buf_;
-            boost::uint8_t stream_number_;
             AsfTransfer * transfer_;
         };
 
