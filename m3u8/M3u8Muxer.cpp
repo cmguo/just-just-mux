@@ -71,7 +71,7 @@ namespace ppbox
             MediaInfo & info) const
         {
             TsMuxer::media_info(info);
-            if (info.is_live || m3u8_cache_.empty()) {
+            if (info.type == MediaInfo::live || m3u8_cache_.empty()) {
                 boost::system::error_code ec;
                 std::ostringstream oss;
                 M3u8Protocol::create(oss, m3u8_config_, info, ec);

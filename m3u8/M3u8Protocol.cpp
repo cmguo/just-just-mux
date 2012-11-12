@@ -30,12 +30,12 @@ namespace ppbox
             boost::system::error_code & ec)
         {
             MediaInfo info = info1;
-            if (info.is_live && info.delay < (config.live_delay * config.interval * 1000)) {
+            if (info.type == MediaInfo::live && info.delay < (config.live_delay * config.interval * 1000)) {
                 ec = framework::system::logic_error::invalid_argument;
                 return false;
             }
             boost::uint32_t interval = config.interval * 1000;
-            if (info.is_live) {
+            if (info.type == MediaInfo::live) {
                 info.current -= info.duration;
                 info.duration += info.current;
                 info.duration -= info.delay;
@@ -45,7 +45,7 @@ namespace ppbox
                 info.duration *= interval;
                 info.duration += config.live_delay * interval;
             }
-            boost::uint64_t time_beg = info.is_live ? info.current : 0;
+            boost::uint64_t time_beg = info.type == MediaInfo::live ? info.current : 0;
             boost::uint64_t time_end = info.duration;
             boost::uint64_t index_beg = time_beg / interval;
             boost::uint64_t index_end = time_end / interval;
@@ -55,7 +55,7 @@ namespace ppbox
             if (index_end * interval < time_end) {
                 append_remnant(out, formator, config.interval, index_end, (boost::uint32_t)(time_end - index_end * interval));
             }
-            append_tail(out, !info.is_live);
+            append_tail(out, !info.type == MediaInfo::live);
             ec.clear();
             return true;
         }
