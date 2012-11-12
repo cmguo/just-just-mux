@@ -7,13 +7,9 @@
 #include "ppbox/mux/filter/DemuxerFilter.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
-#include <ppbox/common/Call.h>
-#include <ppbox/common/Create.h>
+#include <ppbox/common/ClassFactory.h>
 
 #include <framework/configure/Config.h>
-
-#define PPBOX_REGISTER_MUXER(n, c) \
-    static ppbox::common::Call reg ## n(ppbox::mux::MuxerBase::register_muxer, BOOST_PP_STRINGIZE(n), ppbox::common::Creator<c>())
 
 namespace ppbox
 {
@@ -28,23 +24,12 @@ namespace ppbox
         class Transfer;
 
         class MuxerBase
+            : public ppbox::common::ClassFactory<
+                MuxerBase, 
+                std::string, 
+                MuxerBase * ()
+            >
         {
-        public:
-            typedef boost::function<
-                MuxerBase * (void)
-            > register_type;
-
-        public:
-            static void register_muxer(
-                std::string const & format,
-                register_type func);
-
-            static MuxerBase * create(
-                std::string const & format);
-
-            static void destory(
-                MuxerBase* & muxer);
-
         public:
             MuxerBase();
 
@@ -131,9 +116,6 @@ namespace ppbox
 
             void close();
 
-        private:
-            static std::map<std::string, MuxerBase::register_type> & muxer_map();
-
         protected:
             MediaInfo media_info_;
             std::vector<StreamInfo> streams_;
@@ -162,5 +144,7 @@ namespace ppbox
 
     } // namespace mux
 } // namespace ppbox
+
+#define PPBOX_REGISTER_MUXER(k, c) PPBOX_REGISTER_CLASS(k, c)
 
 #endif // _PPBOX_MUX_MUXER_BASE_H_

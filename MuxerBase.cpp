@@ -21,39 +21,6 @@ namespace ppbox
     namespace mux
     {
 
-        std::map< std::string, MuxerBase::register_type > & MuxerBase::muxer_map()
-        {
-            static std::map< std::string, MuxerBase::register_type > get_map;
-            return get_map;
-        }
-
-        void MuxerBase::register_muxer(
-            std::string const & format, 
-            register_type func)
-        {
-            muxer_map().insert(std::make_pair(format, func));
-            return;
-        }
-
-        MuxerBase * MuxerBase::create(
-            std::string const & format)
-        {
-            std::map< std::string, register_type >::iterator iter = muxer_map().find(format);
-            if (muxer_map().end() == iter) {
-                return NULL;
-            }
-            MuxerBase * muxer = iter->second();
-            muxer->format_ = format;
-            return muxer;
-        }
-
-        void MuxerBase::destory(
-            MuxerBase* & muxer)
-        {
-            delete muxer;
-            muxer = NULL;
-        }
-
         MuxerBase::MuxerBase()
             : demuxer_(NULL)
             , seek_time_(0)
@@ -85,6 +52,11 @@ namespace ppbox
                 demuxer_ = NULL;
             } else {
                 read_flag_ = f_head;
+                seek_time_ = play_time_ = demuxer_->get_cur_time(ec);
+                if (ec == boost::asio::error::would_block) {
+                    ec.clear();
+                    read_flag_ = f_seek;
+                }
             }
             return !ec;
         }
@@ -203,7 +175,7 @@ namespace ppbox
             info.byte_range.end = info1.file_size;
             info.time_range.beg = seek_time_;
             info.time_range.pos = play_time_;
-            info.time_range.end = info1.duration;
+            info.time_range.end = info1.type == MediaInfo::live ? 0 : info1.duration;
         }
 
         bool MuxerBase::close(

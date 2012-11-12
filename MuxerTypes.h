@@ -3,6 +3,8 @@
 #ifndef _PPBOX_MUX_MUXER_TYPES_H_
 #define _PPBOX_MUX_MUXER_TYPES_H_
 
+#define PPBOX_ENABLE_REGISTER_CLASS
+
 #include "ppbox/mux/flv/FlvMuxer.h"
 #include "ppbox/mux/asf/AsfMuxer.h"
 #include "ppbox/mux/mkv/MkvMuxer.h"
