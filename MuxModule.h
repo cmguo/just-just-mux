@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_MODULE_H_
 #define _PPBOX_MUX_MODULE_H_
 
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/MuxBase.h"
 
 #include <framework/string/Url.h>
 
@@ -14,6 +14,8 @@ namespace ppbox
 {
     namespace mux
     {
+
+        class MuxerBase;
 
         class MuxModule
             : public ppbox::common::CommonModuleBase<MuxModule>

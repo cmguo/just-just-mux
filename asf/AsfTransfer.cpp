@@ -26,8 +26,9 @@ namespace ppbox
 
         AsfTransfer::AsfTransfer(
             MuxerBase & muxer)
-            : packet_length_(4096)
-            , single_payload_(false)
+            : single_payload_(false)
+            , packet_length_(4096)
+            , max_packet_length_(4096)
             , p_index_(0)
             , packet_left_(0)
             , media_number_(0)

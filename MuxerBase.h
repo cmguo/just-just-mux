@@ -13,11 +13,6 @@
 
 namespace ppbox
 {
-    namespace demux
-    {
-        class SegmentDemuxer;
-    }
-
     namespace mux
     {
 
