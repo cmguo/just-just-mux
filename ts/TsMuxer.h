@@ -49,7 +49,7 @@ namespace ppbox
             boost::uint8_t header_[512];
         };
 
-        PPBOX_REGISTER_MUXER(ts, TsMuxer);
+        PPBOX_REGISTER_MUXER("ts", TsMuxer);
 
     } // namespace mux
 } // namespace ppbox

@@ -34,7 +34,7 @@ namespace ppbox
             RtpTsTransfer * rtp_ts_transfer_;
         };
 
-        PPBOX_REGISTER_MUXER(rtp_ts, RtpTsMuxer);
+        PPBOX_REGISTER_MUXER("rtp-ts", RtpTsMuxer);
 
     } // namespace mux
 } // namespace ppbox

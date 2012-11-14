@@ -35,7 +35,7 @@ namespace ppbox
             RtpAsfTransfer * rtp_asf_transfer_;
         };
 
-        PPBOX_REGISTER_MUXER(rtp_asf, RtpAsfMuxer);
+        PPBOX_REGISTER_MUXER("rtp-asf", RtpAsfMuxer);
 
     } // namespace mux
 } // namespace ppbox

@@ -41,7 +41,7 @@ namespace ppbox
             AsfTransfer * transfer_;
         };
 
-        PPBOX_REGISTER_MUXER(asf, AsfMuxer);
+        PPBOX_REGISTER_MUXER("asf", AsfMuxer);
 
     } // namespace mux
 } // namespace ppbox

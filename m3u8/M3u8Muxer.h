@@ -47,7 +47,7 @@ namespace ppbox
             SegmentFilter segment_filter_;
         };
 
-        PPBOX_REGISTER_MUXER(m3u8, M3u8Muxer);
+        PPBOX_REGISTER_MUXER("m3u8", M3u8Muxer);
 
     } // namespace mux
 } // namespace ppbox

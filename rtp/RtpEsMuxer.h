@@ -24,7 +24,7 @@ namespace ppbox
                 std::vector<Transfer *> & transfers);
         };
 
-        PPBOX_REGISTER_MUXER(rtp_es, RtpEsMuxer);
+        PPBOX_REGISTER_MUXER("rtp-es", RtpEsMuxer);
 
     } // namespace mux
 } // namespace ppbox

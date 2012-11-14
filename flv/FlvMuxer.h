@@ -44,7 +44,7 @@ namespace ppbox
             boost::uint32_t video_header_size_;
         };
 
-        PPBOX_REGISTER_MUXER(flv, FlvMuxer);
+        PPBOX_REGISTER_MUXER("flv", FlvMuxer);
 
     } // namespace mux
 } // namespace ppbox
