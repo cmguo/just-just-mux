@@ -13,16 +13,15 @@
 
 #include <boost/asio/streambuf.hpp>
 
-using namespace ppbox::demux;
 using namespace ppbox::avformat;
-
-size_t const PACKET_HEAD_LENGTH = 14;
-size_t const PAYLOAD_HEAD_LENGTH = 17;
 
 namespace ppbox
 {
     namespace mux
     {
+
+        size_t const PACKET_HEAD_LENGTH = 14;
+        size_t const PAYLOAD_HEAD_LENGTH = 17;
 
         AsfTransfer::AsfTransfer(
             MuxerBase & muxer)
@@ -30,9 +29,8 @@ namespace ppbox
             , packet_length_(4096)
             , max_packet_length_(4096)
             , p_index_(0)
-            , packet_left_(0)
-            , media_number_(0)
             , packet_head_(max_packet_length_)
+            , packet_left_(0)
         {
             muxer.config().register_module("Asf")
                 << CONFIG_PARAM_NAME_RDWR("packet_length", packet_length_)

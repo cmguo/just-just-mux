@@ -21,6 +21,16 @@ namespace ppbox
     namespace mux
     {
 
+        MuxerBase * MuxerBase::create(
+            std::string const & format)
+        {
+            MuxerBase * muxer = factory_type::create(format);
+            if (muxer) {
+                muxer->format_ = format;
+            }
+            return muxer;
+        }
+
         MuxerBase::MuxerBase()
             : demuxer_(NULL)
             , seek_time_(0)

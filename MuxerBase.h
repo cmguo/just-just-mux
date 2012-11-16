@@ -31,6 +31,10 @@ namespace ppbox
             virtual ~MuxerBase();
 
         public:
+            static MuxerBase * create(
+                std::string const & format);
+
+        public:
             bool open(
                 ppbox::demux::SegmentDemuxer * demuxer, 
                 boost::system::error_code & ec);

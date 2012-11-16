@@ -81,6 +81,7 @@ namespace ppbox
             boost::uint32_t max_packet_length_;
 
         private:
+            std::vector<boost::uint8_t> media_number_;
             std::deque<boost::asio::const_buffer> data_;//保存buffer的地址和长度记录
             size_t p_index_;                            //保存当前的packet在data_中下标值
             std::vector<AsfPacket> packets_;
@@ -89,7 +90,6 @@ namespace ppbox
             AsfBufferQueue head_buf_queue_;
             boost::uint8_t * data_buf_[2];
             boost::uint8_t * data_ptr_;                 //指向当前使用的cpoy data内存
-            std::vector<boost::uint8_t> media_number_;
             boost::asio::streambuf pad_buf_;
         };
 
