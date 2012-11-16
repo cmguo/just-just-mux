@@ -3,7 +3,6 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/m3u8/M3u8Muxer.h"
 #include "ppbox/mux/m3u8/M3u8Protocol.h"
-#include "ppbox/demux/base/SegmentDemuxer.h"
 
 using namespace boost::system;
 

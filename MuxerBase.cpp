@@ -6,7 +6,7 @@
 #include "ppbox/mux/MuxError.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
-#include <ppbox/demux/base/SegmentDemuxer.h>
+#include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/demux/base/DemuxError.h>
 
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
@@ -51,7 +51,7 @@ namespace ppbox
         }
 
         bool MuxerBase::open(
-            demux::SegmentDemuxer * demuxer,
+            ppbox::demux::DemuxerBase * demuxer,
             error_code & ec)
         {
             assert(demuxer != NULL);
@@ -170,7 +170,7 @@ namespace ppbox
             MediaInfo & info) const
         {
             boost::system::error_code ec;
-            demuxer_->media().get_info(info, ec);
+            demuxer_->get_media_info(info, ec);
             info.file_size = ppbox::data::invalid_size;
             info.format = format_;
         }

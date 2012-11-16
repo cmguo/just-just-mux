@@ -36,7 +36,7 @@ namespace ppbox
 
         public:
             bool open(
-                ppbox::demux::SegmentDemuxer * demuxer, 
+                ppbox::demux::DemuxerBase * demuxer, 
                 boost::system::error_code & ec);
 
             virtual bool setup(
@@ -87,7 +87,7 @@ namespace ppbox
                 Sample & sample) = 0;
 
         protected:
-            ppbox::demux::SegmentDemuxer const & demuxer() const
+            ppbox::demux::DemuxerBase const & demuxer() const
             {
                 return *demuxer_;
             };
@@ -120,7 +120,7 @@ namespace ppbox
             std::vector<StreamInfo> streams_;
 
         private:
-            ppbox::demux::SegmentDemuxer * demuxer_;
+            ppbox::demux::DemuxerBase * demuxer_;
             framework::container::List<Filter> filters_;
             std::vector<std::vector<Transfer *> > transfers_;
 

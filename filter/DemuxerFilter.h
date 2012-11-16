@@ -5,7 +5,7 @@
 
 #include "ppbox/mux/Filter.h"
 
-#include <ppbox/demux/base/SegmentDemuxer.h>
+#include <ppbox/demux/base/DemuxerBase.h>
 
 namespace ppbox
 {
@@ -46,13 +46,13 @@ namespace ppbox
             }
 
             void set_demuxer(
-                ppbox::demux::SegmentDemuxer * demuxer)
+                ppbox::demux::DemuxerBase * demuxer)
             {
                 demuxer_ = demuxer;
             }
 
         private:
-            ppbox::demux::SegmentDemuxer * demuxer_;
+            ppbox::demux::DemuxerBase * demuxer_;
         };
 
     } // namespace mux

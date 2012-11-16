@@ -40,7 +40,7 @@ namespace ppbox
         }
 
         MuxerBase * MuxModule::open(
-            ppbox::demux::SegmentDemuxer * demuxer,
+            ppbox::demux::DemuxerBase * demuxer,
             std::string const & format,
             boost::system::error_code & ec)
         {
