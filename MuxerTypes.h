@@ -5,6 +5,7 @@
 
 #define PPBOX_ENABLE_REGISTER_CLASS
 
+#include "ppbox/mux/raw/RawMuxer.h"
 #include "ppbox/mux/flv/FlvMuxer.h"
 #include "ppbox/mux/asf/AsfMuxer.h"
 #include "ppbox/mux/mkv/MkvMuxer.h"

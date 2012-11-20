@@ -1,4 +1,4 @@
-// M3U8Mux.h
+// M3u8Muxer.h
 
 #ifndef _PPBOX_MUX_M3U8_M3U8_MUXER_H_
 #define _PPBOX_MUX_M3U8_M3U8_MUXER_H_
