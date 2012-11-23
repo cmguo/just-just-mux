@@ -4,7 +4,6 @@
 #define _PPBOX_MUX_TS_TS_TRANSFER_H_
 
 #include "ppbox/mux/Transfer.h"
-#include "ppbox/mux/ts/Mpeg2Ts.h"
 
 #include <framework/system/ScaleTransform.h>
 
@@ -14,18 +13,20 @@ namespace ppbox
     {
 
         class TsTransfer
-            : public Stream
+            : public Transfer
         {
         public:
             TsTransfer(
-                boost::uint16_t pid, 
-                boost::uint8_t stream_id);
+                boost::uint16_t pid);
 
             ~TsTransfer();
 
-        private:
+        public:
             virtual void transfer(
-                ppbox::mux::StreamInfo & media);
+                StreamInfo & info);
+
+            virtual void transfer_time(
+                Sample & sample);
 
             virtual void transfer(
                 Sample & sample);
@@ -50,16 +51,15 @@ namespace ppbox
             }
 
         private:
-            boost::uint8_t stream_id_;
+            boost::uint16_t pid_;
+            boost::uint8_t continuity_counter_;
+            bool with_pcr_;
             boost::uint8_t time_adjust_;
             framework::system::ScaleTransform scale_;
-            bool with_pcr_;
-            bool with_dts_;
             // buffer
-            std::vector<boost::uint8_t> ts_headers_;
+            std::vector<boost::uint8_t> header_buffer_;
             std::deque<boost::asio::const_buffer> ts_buffers_;
             std::vector<size_t> off_segs_;
-            char pes_heaher_buffer_[19];
         };
 
     } // namespace mux

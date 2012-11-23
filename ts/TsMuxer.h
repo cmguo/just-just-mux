@@ -4,12 +4,14 @@
 #define _PPBOX_MUX_TS_MUXER_H_
 
 #include "ppbox/mux/MuxerBase.h"
-#include "ppbox/mux/ts/Mpeg2Ts.h"
+
+#include <ppbox/avformat/ts/PsiPacket.h>
 
 namespace ppbox
 {
     namespace mux
     {
+
         class TsMuxer
             : public MuxerBase
         {
@@ -31,22 +33,9 @@ namespace ppbox
                 Sample & tag);
 
         private:
-            void WritePAT(boost::uint8_t * ptr);
-            void WritePMT(boost::uint8_t * ptr);
-
-        private:
-            Stream * pat_;
-            Stream * pmt_;
-            bool has_audio_;
-            bool has_video_;
-            boost::uint16_t audio_pid_;
-            boost::uint16_t video_pid_;
-            boost::uint8_t audio_stream_id_;
-            boost::uint8_t video_stream_id_;
-            boost::uint8_t audio_stream_type_;
-            boost::uint8_t video_stream_type_;
-            // buffer
-            boost::uint8_t header_[512];
+            ppbox::avformat::PatPacket pat_;
+            ppbox::avformat::PmtPacket pmt_;
+            boost::uint8_t header_buffer_[512];
         };
 
         PPBOX_REGISTER_MUXER("ts", TsMuxer);
