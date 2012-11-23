@@ -57,5 +57,17 @@ namespace ppbox
             }
         }
 
+        void RawMuxer::file_header(
+            Sample & sample)
+        {
+        }
+
+        void RawMuxer::stream_header(
+            boost::uint32_t index, 
+            Sample & sample)
+        {
+        }
+
+
     } // namespace mux
 } // namespace ppbox

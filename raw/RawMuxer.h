@@ -24,6 +24,14 @@ namespace ppbox
                 std::vector<Transfer *> & transfers);
 
         private:
+            virtual void file_header(
+                Sample & sample);
+
+            virtual void stream_header(
+                boost::uint32_t index, 
+                Sample & sample);
+
+        private:
             std::string video_format_;
             std::string audio_format_;
         };

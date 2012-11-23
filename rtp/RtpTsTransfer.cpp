@@ -2,9 +2,11 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerBase.h"
-#include "ppbox/mux/ts/TsTransfer.h"
 #include "ppbox/mux/rtp/RtpTsTransfer.h"
 #include "ppbox/mux/rtp/RtpPacket.h"
+
+#include <ppbox/avformat/ts/TsPacket.h>
+using namespace ppbox::avformat;
 
 const boost::uint32_t TS_PACKETS_PER_RTP_PACKET       = 7;
 
@@ -46,7 +48,7 @@ namespace ppbox
                 // i + 1，这里+1是为了保证至少有一个RTP在后面生成，因为需要mark置为true
                 buf_end = sample.data.begin() + off_segs[i];
                 RtpPacket p(sample.dts + sample.cts_delta, false);
-                p.size = TS_PACKETS_PER_RTP_PACKET * AP4_MPEG2TS_PACKET_SIZE;
+                p.size = TS_PACKETS_PER_RTP_PACKET * TsPacket::PACKET_SIZE;
                 p.push_buffers(buf_beg, buf_end);
                 push_packet(p);
                 buf_beg = buf_end;
@@ -54,7 +56,7 @@ namespace ppbox
             i -= TS_PACKETS_PER_RTP_PACKET;
             buf_end = sample.data.end();
             RtpPacket p(sample.dts + sample.cts_delta, true);
-            p.size = (off_segs.size() - i) * AP4_MPEG2TS_PACKET_SIZE;
+            p.size = (off_segs.size() - i) * TsPacket::PACKET_SIZE;
             p.push_buffers(buf_beg, buf_end);
             push_packet(p);
             RtpTransfer::finish(sample);
