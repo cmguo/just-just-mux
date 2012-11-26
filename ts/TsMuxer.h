@@ -5,7 +5,8 @@
 
 #include "ppbox/mux/MuxerBase.h"
 
-#include <ppbox/avformat/ts/PsiPacket.h>
+#include <ppbox/avformat/ts/PatPacket.h>
+#include <ppbox/avformat/ts/PmtPacket.h>
 
 namespace ppbox
 {
