@@ -22,7 +22,6 @@ namespace ppbox
 
         private:
             boost::uint32_t frame_data_size_;
-            std::vector<boost::uint8_t> sps_pps_data_;
         };
 
     } // namespace mux

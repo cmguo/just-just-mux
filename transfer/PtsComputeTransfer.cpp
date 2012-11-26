@@ -8,6 +8,7 @@
 #include <ppbox/avformat/BitsOStream.h>
 #include <ppbox/avformat/BitsBuffer.h>
 #include <ppbox/avformat/codec/avc/AvcSliceType.h>
+using namespace ppbox::avformat;
 
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/CycleBuffers.h>
@@ -28,8 +29,8 @@ namespace ppbox
             MyBuffers buffers(iter);
             util::buffers::CycleBuffers<MyBuffers, boost::uint8_t> buf(buffers);
             buf.commit(n.size);
-            ppbox::avformat::BitsBuffer<boost::uint8_t> bits_buf(buf);
-            ppbox::avformat::BitsIStream<boost::uint8_t> bits_reader(bits_buf);
+            BitsBuffer<boost::uint8_t> bits_buf(buf);
+            BitsIStream<boost::uint8_t> bits_reader(bits_buf);
             bits_reader >> t;
             return !!bits_reader;
         }
@@ -58,18 +59,18 @@ namespace ppbox
                 *(NaluList const * )sample.context;
             util::buffers::BuffersLimit<ConstBuffers::const_iterator> limit(sample.data.begin(), sample.data.end());
             for (size_t i = 0; i < nalus.size(); ++i) {
-                avformat::NaluHeader nalu_header(nalus[i].begin.dereference_byte());
-                if (avformat::NaluHeader::SPS == nalu_header.nal_unit_type) {
-                    ppbox::avformat::SeqParameterSetRbsp sps;
+                NaluHeader nalu_header(nalus[i].begin.dereference_byte());
+                if (NaluHeader::SPS == nalu_header.nal_unit_type) {
+                    SeqParameterSetRbsp sps;
                     parse(sps, sample, nalus[i]);
                     spss_.insert(std::make_pair(sps.sps_seq_parameter_set_id, sps));
-                } else if (avformat::NaluHeader::PPS == nalu_header.nal_unit_type) {
-                    ppbox::avformat::PicParameterSetRbsp pps(spss_);
+                } else if (NaluHeader::PPS == nalu_header.nal_unit_type) {
+                    PicParameterSetRbsp pps(spss_);
                     parse(pps, sample, nalus[i]);
                     ppss_.insert(std::make_pair(pps.pps_pic_parameter_set_id, pps));
-                } else if (avformat::NaluHeader::UNIDR == nalu_header.nal_unit_type
-                    || avformat::NaluHeader::IDR == nalu_header.nal_unit_type) {
-                    ppbox::avformat::SliceLayerWithoutPartitioningRbsp slice(ppss_);
+                } else if (NaluHeader::UNIDR == nalu_header.nal_unit_type
+                    || NaluHeader::IDR == nalu_header.nal_unit_type) {
+                    SliceLayerWithoutPartitioningRbsp slice(ppss_);
                     parse(slice, sample, nalus[i]);
                     sample.cts_delta = (boost::uint32_t)(idr_dts_ + frame_scale_ * slice.slice_header.pic_order_cnt_lsb / 2 - sample.dts);
                     // iphoneÂ¼ÖÆÊ¹ÓÃ
