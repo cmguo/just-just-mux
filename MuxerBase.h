@@ -123,6 +123,7 @@ namespace ppbox
             ppbox::demux::DemuxerBase * demuxer_;
             framework::container::List<Filter> filters_;
             std::vector<std::vector<Transfer *> > transfers_;
+            std::vector<ppbox::avformat::Codec *> codecs_; // 由Muxer创建的codec
 
             enum FlagEnum
             {
