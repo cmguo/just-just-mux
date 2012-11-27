@@ -4,7 +4,6 @@
 #define _PPBOX_MUX_MUX_BASE_H_
 
 #include "ppbox/avformat/Format.h"
-#include "ppbox/avformat/codec/Codec.h"
 
 #include <ppbox/demux/base/DemuxerBase.h>
 

@@ -9,7 +9,7 @@
 #include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/demux/base/DemuxError.h>
 
-#include <ppbox/avformat/codec/avc/AvcCodec.h>
+#include <ppbox/avformat/codec/Codec.h>
 using namespace ppbox::avformat;
 
 #include <util/buffers/BuffersSize.h>
@@ -236,9 +236,8 @@ namespace ppbox
                     break;
                 }
                 // TODO: add codec
-                if (stream.type == MEDIA_TYPE_VIDE 
-                    && stream.sub_type == VIDEO_TYPE_AVC1) {
-                        stream.codec = new AvcCodec(stream.format_data);
+                if (stream.codec == NULL) {
+                    stream.codec = Codec::create(stream.sub_type, stream.format_data);
                 }
                 add_stream(stream, transfers_[i]);
                 streams_.push_back(stream);

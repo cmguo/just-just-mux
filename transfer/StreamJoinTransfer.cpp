@@ -5,6 +5,7 @@
 #include "ppbox/mux/detail/BitsReader.h"
 
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
+#include <ppbox/avformat/codec/avc/AvcConfig.h>
 #include <ppbox/avformat/codec/avc/AvcNalu.h>
 
 namespace ppbox
@@ -29,8 +30,8 @@ namespace ppbox
         void StreamJoinTransfer::transfer(
             ppbox::mux::StreamInfo & media)
         {
-            ppbox::avformat::AvcConfig const & avc_config = 
-                ((ppbox::avformat::AvcCodec const *)media.codec)->config();
+            ppbox::avformat::AvcConfigHelper const & avc_config = 
+                ((ppbox::avformat::AvcCodec const *)media.codec)->config_helper();
             // access unit delimiter
             access_unit_delimiter_ = nalu_start_code_;
             access_unit_delimiter_.push_back(9);

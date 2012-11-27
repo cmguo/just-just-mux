@@ -7,6 +7,7 @@
 #include <ppbox/avformat/BitsOStream.h>
 #include <ppbox/avformat/BitsIStream.h>
 #include <ppbox/avformat/BitsBuffer.h>
+#include <ppbox/avformat/codec/avc/AvcConfig.h>
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
 #include <ppbox/avformat/codec/avc/AvcType.h>
 #include <util/archive/ArchiveBuffer.h>
@@ -23,8 +24,8 @@ namespace ppbox
         std::map<boost::uint32_t, ppbox::avformat::PicParameterSetRbsp> ppss;
 
         void ParseH264Transfer::transfer(
-            StreamInfo & media)        {            ppbox::avformat::AvcConfig const & avc_config = 
-                ((ppbox::avformat::AvcCodec const *)media.codec)->config();
+            StreamInfo & info)        {            ppbox::avformat::AvcConfig const & avc_config = 
+                ((ppbox::avformat::AvcCodec const *)info.codec)->config();
             for (boost::uint32_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); i++) {
                 std::vector<boost::uint8_t> sps_vec = avc_config.sequenceParameterSetNALUnit[i];
                 util::archive::ArchiveBuffer<boost::uint8_t> buf((boost::uint8_t *)&sps_vec[0], sps_vec.size(), sps_vec.size());

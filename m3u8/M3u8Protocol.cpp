@@ -4,12 +4,6 @@
 #include "ppbox/mux/m3u8/M3u8Protocol.h"
 #include "ppbox/mux/m3u8/UrlFormator.h"
 
-std::string const M3U8_BEGIN = "#EXTM3U";
-std::string const M3U8_TARGETDURATION = "#EXT-X-TARGETDURATION:";
-std::string const M3U8_SEQUENCE = "#EXT-X-MEDIA-SEQUENCE:";
-std::string const M3U8_EXTINF = "#EXTINF:";
-std::string const M3U8_END  = "#EXT-X-ENDLIST";
-std::string const M3U8_ENDLINE = "\n";
 
 namespace ppbox
 {
@@ -59,6 +53,12 @@ namespace ppbox
             ec.clear();
             return true;
         }
+
+        char const * const M3U8_BEGIN = "#EXTM3U";
+        char const * const M3U8_TARGETDURATION = "#EXT-X-TARGETDURATION:";
+        char const * const M3U8_SEQUENCE = "#EXT-X-MEDIA-SEQUENCE:";
+        char const * const M3U8_EXTINF = "#EXTINF:";
+        char const * const M3U8_END  = "#EXT-X-ENDLIST";
 
         void M3u8Protocol::append_head(
             std::ostream & out, 

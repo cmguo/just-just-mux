@@ -6,6 +6,7 @@
 #include "ppbox/mux/detail/BitsReader.h" // for Nalu
 
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
+#include <ppbox/avformat/codec/avc/AvcConfig.h>
 using namespace ppbox::avformat;
 
 #include <util/buffers/BufferCopy.h>
@@ -34,58 +35,37 @@ namespace ppbox
         }
 
         void RtpEsVideoTransfer::transfer(
-            StreamInfo & media)
+            StreamInfo & info)
         {
             using namespace framework::string;
             std::string map_id_str = format(rtp_head_.mpt);
 
-            boost::uint8_t const * p = &media.format_data.at(0) + 5;
-            boost::uint8_t const * sps_buf = p;
-            boost::uint8_t const * pps_buf = p;
-            boost::uint16_t sps_len = 0;
-            boost::uint16_t pps_len = 0;
-            size_t n = (*p++) & 31;
-            for (size_t i = 0; i < n; ++i) {
-                size_t l = (*p++);
-                l = (l << 8) + (*p++);
-                sps_buf = p;
-                sps_len = l;
-                p += l;
-            }
-            n = (*p++);
-            for (size_t i = 0; i < n; ++i) {
-                size_t l = (*p++);
-                l = (l << 8) + (*p++);
-                pps_buf = p;
-                pps_len = l;
-                p += l;
-            }
+            AvcCodec & codec = *(AvcCodec *)info.codec;
+            std::vector<boost::uint8_t> sps_data = codec.config().sequenceParameterSetNALUnit[0];
+            std::vector<boost::uint8_t> pps_data = codec.config().pictureParameterSetNALUnit[0];
 
-            boost::uint8_t profile_level_id[3] = {
-                sps_buf[1], 
-                sps_buf[2], 
-                sps_buf[3]
-            };
+            boost::uint8_t const * profile_level_id = &sps_data.front() + 1;
 
             std::string profile_level_id_str = 
-                Base16::encode(std::string((char *)profile_level_id, 3));
-            std::string sps = Base64::encode(std::string((char *)sps_buf, sps_len));
-            std::string pps = Base64::encode(std::string((char *)pps_buf, pps_len));
+                Base16::encode(std::string((char const *)profile_level_id, 3));
+            std::string sps = Base64::encode(&sps_data.front(), sps_data.size());
+            std::string pps = Base64::encode(&pps_data.front(), pps_data.size());
 
             rtp_info_.sdp = "m=video 0 RTP/AVP " + map_id_str + "\r\n";
             rtp_info_.sdp += "a=rtpmap:" + map_id_str + " H264/90000\r\n";
-            rtp_info_.sdp += "a=framesize:" + map_id_str + " " + format(media.video_format.width)
-                + "-" + format(media.video_format.height) + "\r\n";
-            rtp_info_.sdp += "a=cliprect:0,0,"+format(media.video_format.height)+","+format(media.video_format.width)+ "\r\n";
+            rtp_info_.sdp += "a=framesize:" + map_id_str + " " + format(info.video_format.width)
+                + "-" + format(info.video_format.height) + "\r\n";
+            rtp_info_.sdp += "a=cliprect:0,0," 
+                + format(info.video_format.height) + "," + format(info.video_format.width) + "\r\n";
             rtp_info_.sdp += "a=fmtp:" + map_id_str 
                 + " packetization-mode=1" 
                 + ";profile-level-id=" + profile_level_id_str
                 + ";sprop-parameter-sets=" + sps + "," + pps + "\r\n";
-            rtp_info_.sdp += "a=control:track" + format(media.index) + "\r\n";
+            rtp_info_.sdp += "a=control:track" + format(info.index) + "\r\n";
 
-            rtp_info_.stream_index = media.index;
+            rtp_info_.stream_index = info.index;
 
-            scale_.reset(media.time_scale, 90000);
+            scale_.reset(info.time_scale, 90000);
         }
 
         void RtpEsVideoTransfer::transfer(

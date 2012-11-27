@@ -5,11 +5,10 @@
 #include "ppbox/mux/MuxerBase.h"
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
-#include <ppbox/avformat/codec/avc/AvcConfig.h>
+#include <ppbox/avformat/codec/avc/AvcCodec.h>
 
-#include <util/archive/BigEndianBinaryOArchive.h>
 #include <util/archive/ArchiveBuffer.h>
-#include <util/buffers/BufferCopy.h>
+#include <util/buffers/BuffersCopy.h>
 
 #include <boost/asio/streambuf.hpp>
 
@@ -206,13 +205,10 @@ namespace ppbox
                 streams_object.Video_Media_Type.FormatData.BitsPerPixelCount = 24;
                 if (info.sub_type == VIDEO_TYPE_AVC1) {
                     streams_object.Video_Media_Type.FormatData.CompressionID = MAKE_FOURC_TYPE('H', '2', '6', '4');
+                    ((AvcCodec *)info.codec)->config_helper().to_es_data(
+                        streams_object.Video_Media_Type.FormatData.CodecSpecificData);
                 } else {
                     streams_object.Video_Media_Type.FormatData.CompressionID = 0;
-                }
-                {
-                    AvcConfig avc_config(info.format_data);
-                    avc_config.to_es_data(
-                        streams_object.Video_Media_Type.FormatData.CodecSpecificData);
                 }
                 streams_object.Video_Media_Type.FormatData.FormatDataSize = 
                     streams_object.Video_Media_Type.FormatData.CodecSpecificData.size() + 40;
@@ -361,7 +357,7 @@ namespace ppbox
             //»Ù–Ë“™øΩ±¥data
             if(copy_flag) {
                 assert(packet_left_< packet_length_);
-                util::buffers::buffer_copy(
+                util::buffers::buffers_copy(
                     boost::asio::buffer(data_ptr_ + packet_length_ - packet_left_, payload_size), 
                     MyBuffers(MyBufferIterator(limit, pos1, pos2)));
                 data_.push_back(boost::asio::buffer(data_ptr_ + packet_length_ - packet_left_, payload_size));
