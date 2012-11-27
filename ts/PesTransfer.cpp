@@ -34,8 +34,6 @@ namespace ppbox
         {
             TsTransfer::transfer_time(sample);
 
-            StreamInfo const & media = 
-                *(StreamInfo const *)sample.stream_info;
             util::archive::ArchiveBuffer<boost::uint8_t> buf(pes_heaher_buffer_, sizeof(pes_heaher_buffer_));
             TsOArchive oa(buf);
             if (with_dts_) {

@@ -26,10 +26,6 @@ namespace ppbox
             Sample & sample)
         {
             //std::cout << "Audio sample: dts = " << sample.dts << std::endl;
-            StreamInfo const * audio_stream_info = (StreamInfo const *)sample.stream_info;
-            unsigned int sampling_frequency_index = 0;
-            unsigned int channel_configuration = 0;
-            boost::uint32_t frame_size = sample.size;
             aac_config_.to_adts_data(sample.size, adts_header_);
             sample.data.push_front(boost::asio::buffer(adts_header_));
             sample.size += adts_header_.size();
