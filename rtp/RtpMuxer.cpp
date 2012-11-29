@@ -83,16 +83,16 @@ namespace ppbox
             }
         }
 
-        void RtpMuxer::play_info(
-            PlayInfo & info) const
+        void RtpMuxer::stream_status(
+            StreamStatus & info) const
         {
-            std::string config = info.config;
-            MuxerBase::play_info(info);
+            std::string config = info.desc;
+            MuxerBase::stream_status(info);
             if (config.compare(0, 5, "ssrc=") == 0) {
                 boost::uint32_t index = framework::string::parse<boost::uint32_t>(config.substr(5));
                 if (index < rtp_transfers_.size()) {
                     RtpInfo const & rtp_info = rtp_transfers_[index]->rtp_info();
-                    info.config = "ssrc=" 
+                    info.desc = "ssrc=" 
                         + framework::string::Base16::encode(std::string((char const *)&rtp_info.ssrc, 4));
                 }
             } else {
@@ -110,9 +110,9 @@ namespace ppbox
                         os << ",";
                     }
                 }
-                info.config = os.str();
-                if (!info.config.empty()) {
-                    info.config.erase(--info.config.end(), info.config.end());
+                info.desc = os.str();
+                if (!info.desc.empty()) {
+                    info.desc.erase(--info.desc.end(), info.desc.end());
                 }
             }
         }

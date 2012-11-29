@@ -75,7 +75,7 @@ namespace ppbox
                 demuxer_ = NULL;
             } else {
                 read_flag_ = f_head;
-                seek_time_ = play_time_ = demuxer_->get_cur_time(ec);
+                seek_time_ = play_time_ = demuxer_->check_seek(ec);
                 if (ec == boost::asio::error::would_block) {
                     ec.clear();
                     read_flag_ = f_seek;
@@ -124,7 +124,7 @@ namespace ppbox
                         return true;
                     }
                 } else if (read_flag_ & f_seek) {
-                    boost::uint64_t time = demuxer_->get_cur_time(ec);
+                    boost::uint64_t time = demuxer_->check_seek(ec);
                     if (!ec) {
                         on_seek(time);
                         read_flag_ &= ~f_seek;
@@ -145,7 +145,7 @@ namespace ppbox
             demuxer_->reset(ec);
             if (!ec) {
                 read_flag_ |= f_head;
-                boost::uint64_t time = demuxer_->get_cur_time(ec);
+                boost::uint64_t time = demuxer_->check_seek(ec);
                 if (!ec) {
                     on_seek(time);
                 }
@@ -188,17 +188,11 @@ namespace ppbox
             info.format = format_;
         }
 
-        void MuxerBase::play_info(
-            PlayInfo & info) const
+        void MuxerBase::stream_status(
+            StreamStatus & status) const
         {
-            MediaInfo info1;
-            media_info(info1);
-            info.byte_range.beg = 0;
-            info.byte_range.pos = 0;
-            info.byte_range.end = info1.file_size;
-            info.time_range.beg = seek_time_;
-            info.time_range.pos = play_time_;
-            info.time_range.end = info1.type == MediaInfo::live ? 0 : info1.duration;
+            boost::system::error_code ec;
+            demuxer_->get_stream_status(status, ec);
         }
 
         bool MuxerBase::close(

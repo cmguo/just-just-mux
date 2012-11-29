@@ -58,8 +58,8 @@ namespace ppbox
             sample.ustime = 0;
             sample.dts = 0;
             sample.cts_delta = 0;
-            util::archive::ArchiveBuffer<char> file_header_buf(flv_file_header_buffer_, 13);
-            ppbox::avformat::FLVOArchive flv_file_archive(file_header_buf);
+            util::archive::ArchiveBuffer<boost::uint8_t> file_header_buf(flv_file_header_buffer_, 13);
+            ppbox::avformat::FlvOArchive flv_file_archive(file_header_buf);
             flv_file_archive << flv_header_;
             sample.data.push_back(boost::asio::buffer(
                 (boost::uint8_t *)&flv_file_header_buffer_, 13));
@@ -88,8 +88,8 @@ namespace ppbox
                 flv_tag_header_.Timestamp = framework::system::UInt24(0);
                 flv_tag_header_.TimestampExtended = 0;
                 flv_tag_header_.StreamID = framework::system::UInt24(0);
-                util::archive::ArchiveBuffer<char> buf(video_header_buffer_, 16);
-                ppbox::avformat::FLVOArchive flv_archive(buf);
+                util::archive::ArchiveBuffer<boost::uint8_t> buf(video_header_buffer_, 16);
+                ppbox::avformat::FlvOArchive flv_archive(buf);
                 flv_archive << flv_tag_header_;
 
                 if (stream_info.sub_type == VIDEO_TYPE_AVC1) {
@@ -121,8 +121,8 @@ namespace ppbox
                 flv_tag_header_.Timestamp = framework::system::UInt24(0);
                 flv_tag_header_.TimestampExtended = 0;
                 flv_tag_header_.StreamID = framework::system::UInt24(0);
-                util::archive::ArchiveBuffer<char> buf(audio_header_buffer_, 13);
-                ppbox::avformat::FLVOArchive flv_archive(buf);
+                util::archive::ArchiveBuffer<boost::uint8_t> buf(audio_header_buffer_, 13);
+                ppbox::avformat::FlvOArchive flv_archive(buf);
                 flv_archive << flv_tag_header_;
 
                 switch(stream_info.sub_type)

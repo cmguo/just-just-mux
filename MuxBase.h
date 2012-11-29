@@ -8,7 +8,7 @@
 #include <ppbox/demux/base/DemuxerBase.h>
 
 #include <ppbox/data/base/MediaInfo.h>
-#include <ppbox/data/base/PlayInfo.h>
+#include <ppbox/data/base/StreamStatus.h>
 
 namespace ppbox
 {
@@ -16,7 +16,7 @@ namespace ppbox
     {
 
         using ppbox::data::MediaInfo;
-        using ppbox::data::PlayInfo;
+        using ppbox::data::StreamStatus;
 
         using ppbox::avformat::Sample;
         using ppbox::avformat::StreamInfo;

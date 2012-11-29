@@ -37,9 +37,9 @@ namespace ppbox
             ppbox::avformat::FlvTagHeader flv_tag_header_;
             ppbox::avformat::FlvAudioTagHeader flv_audio_tag_header_;
             ppbox::avformat::FlvVideoTagHeader flv_video_tag_header_;
-            char audio_header_buffer_[13];
-            char video_header_buffer_[16];
-            char flv_file_header_buffer_[13];
+            boost::uint8_t audio_header_buffer_[13];
+            boost::uint8_t video_header_buffer_[16];
+            boost::uint8_t flv_file_header_buffer_[13];
             boost::uint32_t audio_header_size_;
             boost::uint32_t video_header_size_;
         };

@@ -46,8 +46,8 @@ namespace ppbox
 
             boost::asio::const_buffer tag_buffer()
             {
-                util::archive::ArchiveBuffer<char> buf(tag_header_, 16);
-                ppbox::avformat::FLVOArchive flv_archive(buf);
+                util::archive::ArchiveBuffer<boost::uint8_t> buf(tag_header_, 16);
+                ppbox::avformat::FlvOArchive flv_archive(buf);
                 flv_archive << flvtag_;
                 return boost::asio::buffer(boost::asio::buffer(tag_header_, 11));
             }
@@ -56,8 +56,8 @@ namespace ppbox
             boost::uint32_t previous_tag_size_;
 
         private:
-            ppbox::avformat::FlvTagHeader   flvtag_;
-            char tag_header_[16];
+            ppbox::avformat::FlvTagHeader flvtag_;
+            boost::uint8_t tag_header_[16];
         };
 
     } // namespace mux

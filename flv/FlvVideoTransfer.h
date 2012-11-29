@@ -26,7 +26,7 @@ namespace ppbox
 
         private:
             ppbox::avformat::FlvVideoTagHeader videotagheader_;
-            char video_tag_header_[16];
+            boost::uint8_t video_tag_header_[16];
         };
 
     } // namespace mux

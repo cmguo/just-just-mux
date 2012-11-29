@@ -41,15 +41,14 @@ namespace ppbox
             Sample & sample,
             boost::system::error_code & ec)
         {
-            if (!Filter::get_sample(sample, ec))
-                return false;
-            if (video_track_ == boost::uint32_t(-1) 
-                || (sample.itrack == video_track_
-                && (sample.flags & Sample::sync))) {
-                    detach_self();
-                    return true;
+            while (Filter::get_sample(sample, ec)) {
+                if (video_track_ == boost::uint32_t(-1) 
+                    || (sample.itrack == video_track_
+                    && (sample.flags & Sample::sync))) {
+                        detach_self();
+                        return true;
+                }
             }
-            ec = boost::asio::error::would_block; 
             return false;
         }
 

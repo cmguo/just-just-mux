@@ -37,8 +37,8 @@ namespace ppbox
 
             boost::uint32_t CompositionTime = sample.cts_delta * 1000 / sample.stream_info->time_scale;
             videotagheader_.CompositionTime = CompositionTime;
-            util::archive::ArchiveBuffer<char> buf(video_tag_header_, 16);
-            ppbox::avformat::FLVOArchive flv_archive(buf);
+            util::archive::ArchiveBuffer<boost::uint8_t> buf(video_tag_header_, 16);
+            ppbox::avformat::FlvOArchive flv_archive(buf);
             flv_archive << videotagheader_;
             boost::uint32_t data_length = sample.size;
             setTagSizeAndTimestamp(data_length+5, (boost::uint32_t)sample.time);
