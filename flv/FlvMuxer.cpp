@@ -2,11 +2,12 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/flv/FlvMuxer.h"
+#include "ppbox/mux/flv/FlvAudioTransfer.h"
+#include "ppbox/mux/flv/FlvVideoTransfer.h"
 #include "ppbox/mux/transfer/PackageJoinTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
-#include "ppbox/mux/flv/FlvAudioTransfer.h"
-#include "ppbox/mux/flv/FlvVideoTransfer.h"
+#include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 
 using namespace ppbox::avformat;
 
@@ -42,10 +43,18 @@ namespace ppbox
                     transfer = new PackageJoinTransfer();
                     transfers.push_back(transfer);
                 }
-                transfer = new FlvVideoTransfer(9);
+                FlvVideoTransfer * transfer = new FlvVideoTransfer(FlvTagType::VIDEO);
+                transfers_.push_back(transfer);
                 transfers.push_back(transfer);
             } else if (info.type == MEDIA_TYPE_AUDI) {
-                transfer = new FlvAudioTransfer(8);
+                if (info.sub_type == AUDIO_TYPE_MP4A) {
+                    if (info.format_type == StreamInfo::audio_aac_adts) {
+                        transfer = new MpegAudioAdtsDecodeTransfer();
+                        transfers.push_back(transfer);
+                    }
+                }
+                FlvAudioTransfer * transfer = new FlvAudioTransfer(FlvTagType::AUDIO);
+                transfers_.push_back(transfer);
                 transfers.push_back(transfer);
             }
         }

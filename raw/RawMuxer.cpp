@@ -6,7 +6,7 @@
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
-#include "ppbox/mux/transfer/AdtsAudioTransfer.h"
+#include "ppbox/mux/transfer/MpegAudioAdtsEncodeTransfer.h"
 
 using namespace ppbox::avformat;
 
@@ -50,7 +50,7 @@ namespace ppbox
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     if (audio_format_ == "adts") {
-                        transfer = new AdtsAudioTransfer();
+                        transfer = new MpegAudioAdtsEncodeTransfer();
                         transfers.push_back(transfer);
                     }
                 }

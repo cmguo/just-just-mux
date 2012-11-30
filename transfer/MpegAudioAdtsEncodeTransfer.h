@@ -12,13 +12,13 @@ namespace ppbox
     namespace mux
     {
 
-        class AdtsAudioTransfer
+        class MpegAudioAdtsEncodeTransfer
             : public Transfer
         {
         public:
-            AdtsAudioTransfer();
+            MpegAudioAdtsEncodeTransfer();
 
-            ~AdtsAudioTransfer();
+            ~MpegAudioAdtsEncodeTransfer();
 
         public:
             virtual void transfer(

@@ -78,7 +78,8 @@ namespace ppbox
             StreamInfo const & info, 
             Sample & sample)
         {
-            if (info.sub_type == VIDEO_TYPE_AVC1) {
+            sample.stream_info = &info;
+            if (info.sub_type == AUDIO_TYPE_MP4A) {
                 header_.AACPacketType = 0;
                 AacConfigHelper const & config = ((AacCodec *)info.codec)->config_helper();
                 config.to_data(config_data_);

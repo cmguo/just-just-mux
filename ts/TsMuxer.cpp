@@ -7,7 +7,7 @@
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
-#include "ppbox/mux/transfer/AdtsAudioTransfer.h"
+#include "ppbox/mux/transfer/MpegAudioAdtsEncodeTransfer.h"
 #include "ppbox/mux/transfer/AudioMergeTransfer.h"
 #include "ppbox/mux/ts/PesTransfer.h"
 
@@ -52,7 +52,7 @@ namespace ppbox
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     pmt_sec.add_stream(TsStreamType::iso_13818_7_audio);
-                    transfer = new AdtsAudioTransfer();
+                    transfer = new MpegAudioAdtsEncodeTransfer();
                     transfers.push_back(transfer);
                 } else if (info.sub_type == AUDIO_TYPE_MP1A) {
                     pmt_sec.add_stream(TsStreamType::iso_11172_audio);

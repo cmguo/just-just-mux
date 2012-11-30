@@ -51,6 +51,7 @@ namespace ppbox
             StreamInfo const & info, 
             Sample & sample)
         {
+            sample.stream_info = &info;
             if (info.sub_type == VIDEO_TYPE_AVC1) {
                 header_.AVCPacketType = 0;
                 AvcConfigHelper const & config = ((AvcCodec *)info.codec)->config_helper();
