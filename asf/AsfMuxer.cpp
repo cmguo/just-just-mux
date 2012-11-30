@@ -50,7 +50,6 @@ namespace ppbox
             boost::uint32_t index, 
             Sample & sample)
         {
-            sample.data.clear();
         }
 
         void AsfMuxer::file_header(
@@ -61,7 +60,6 @@ namespace ppbox
                 transfer_->data_header(data_buf_);
             }
 
-            sample.data.clear();
             sample.data.push_back(file_buf_.data());
             sample.data.push_back(stream_buf_.data());
             sample.data.push_back(data_buf_.data());

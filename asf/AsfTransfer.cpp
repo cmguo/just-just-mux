@@ -290,7 +290,7 @@ namespace ppbox
 
             head_buf_queue_.mark();
             boost::uint8_t * asf_buf = head_buf_queue_.alloc();
-            util::archive::ArchiveBuffer<boost::uint8_t> buf(asf_buf, PACKET_HEAD_LENGTH);
+            FormatBuffer buf(asf_buf, PACKET_HEAD_LENGTH);
             ASFOArchive oar(buf);
             oar << packet_head_;
             //填充到data_中
@@ -344,7 +344,7 @@ namespace ppbox
             payload_header.PayloadLength = payload_size;
 
             boost::uint8_t * asf_buf = head_buf_queue_.alloc();
-            util::archive::ArchiveBuffer<boost::uint8_t> buf(asf_buf, PAYLOAD_HEAD_LENGTH);
+            FormatBuffer buf(asf_buf, PAYLOAD_HEAD_LENGTH);
             ASFOArchive oar(buf);
             oar << payload_header;
             //填充到data_中

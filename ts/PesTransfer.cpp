@@ -17,11 +17,10 @@ namespace ppbox
     {
 
         PesTransfer::PesTransfer(
-            boost::uint32_t index, 
-            bool video)
-            : TsTransfer(TsPid::stream_base + (boost::uint16_t)index)
-            , stream_id_((video ? TsStreamId::video_base : TsStreamId::audio_base) + (boost::uint16_t)index)
-            , with_dts_(video)
+            boost::uint32_t index)
+            : TsTransfer(TsPid::stream_base + (boost::uint16_t)index, index == 0)
+            , stream_id_(0)
+            , with_dts_(false)
         {
         }
 
@@ -30,11 +29,22 @@ namespace ppbox
         }
 
         void PesTransfer::transfer(
+            StreamInfo & info)
+        {
+            if (info.type == MEDIA_TYPE_VIDE) {
+                stream_id_ = TsStreamId::video_base + (boost::uint16_t)info.index;
+                with_dts_ = true;
+            } else {
+                stream_id_ = TsStreamId::audio_base + (boost::uint16_t)info.index;
+            }
+        }
+
+        void PesTransfer::transfer(
             Sample & sample)
         {
             TsTransfer::transfer_time(sample);
 
-            util::archive::ArchiveBuffer<boost::uint8_t> buf(pes_heaher_buffer_, sizeof(pes_heaher_buffer_));
+            FormatBuffer buf(pes_heaher_buffer_, sizeof(pes_heaher_buffer_));
             TsOArchive oa(buf);
             if (with_dts_) {
                 PesPacket pes_packet(stream_id_, sample.size, sample.dts + sample.cts_delta, sample.dts);

@@ -15,10 +15,11 @@ namespace ppbox
     {
 
         TsTransfer::TsTransfer(
-            boost::uint16_t pid)
+            boost::uint16_t pid, 
+            bool with_pcr)
             : pid_(pid)
             , continuity_counter_(0)
-            , with_pcr_(false)
+            , with_pcr_(with_pcr)
             , time_adjust_(0)
         {
         }
@@ -32,7 +33,6 @@ namespace ppbox
         {
             if (info.type == MEDIA_TYPE_VIDE) {
                 scale_.reset(info.time_scale, TsPacket::TIME_SCALE);
-                with_pcr_ = true;
             } else {
                 if (info.time_scale < info.audio_format.sample_rate) {
                     scale_.reset(info.audio_format.sample_rate, TsPacket::TIME_SCALE);
@@ -84,7 +84,7 @@ namespace ppbox
 
             if (ts_head_pad_size > header_buffer_.size())
                 header_buffer_.resize(ts_head_pad_size);
-            util::archive::ArchiveBuffer<boost::uint8_t> buf(&header_buffer_[0], header_buffer_.size());
+            FormatBuffer buf(&header_buffer_[0], header_buffer_.size());
             TsOArchive oa(buf);
 
             while (frame_size) {

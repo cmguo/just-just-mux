@@ -83,13 +83,11 @@ namespace ppbox
             boost::uint32_t index, 
             ppbox::demux::Sample & sample)
         {
-            sample.data.clear();
         }
 
         void MkvMuxer::file_header(
             ppbox::demux::Sample & sample)
         {
-            sample.data.clear();
             if(ebml_buf_.size() != 0) {
                 ebml_buf_.reset();
                 segment_buf_.reset();

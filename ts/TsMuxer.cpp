@@ -48,20 +48,18 @@ namespace ppbox
                     transfer = new PtsComputeTransfer();
                     transfers.push_back(transfer);
                 }
-                pmt_sec.add_stream(true, TsStreamType::iso_13818_video, info.index);
-                transfer = new PesTransfer(info.index, true);
-                transfers.push_back(transfer);
+                pmt_sec.add_stream(TsStreamType::iso_13818_video);
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
-                    pmt_sec.add_stream(false, TsStreamType::iso_13818_7_audio, info.index);
+                    pmt_sec.add_stream(TsStreamType::iso_13818_7_audio);
                     transfer = new AdtsAudioTransfer();
                     transfers.push_back(transfer);
                 } else if (info.sub_type == AUDIO_TYPE_MP1A) {
-                    pmt_sec.add_stream(false, TsStreamType::iso_11172_audio, info.index);
+                    pmt_sec.add_stream(TsStreamType::iso_11172_audio);
                 }
-                transfer = new PesTransfer(info.index, false);
-                transfers.push_back(transfer);
             }
+            transfer = new PesTransfer(info.index);
+            transfers.push_back(transfer);
         }
 
         void TsMuxer::file_header(
@@ -69,13 +67,12 @@ namespace ppbox
         {
             pmt_.complete();
 
-            util::archive::ArchiveBuffer<boost::uint8_t> buf(header_buffer_, sizeof(header_buffer_));
+            FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
             TsOArchive oa(buf);
             oa << pat_;
             oa << pmt_;
             assert(buf.size() == TsPacket::PACKET_SIZE * 2);
 
-            sample.data.clear();
             sample.data.push_back(buf.data());
         }
 
@@ -83,8 +80,6 @@ namespace ppbox
             boost::uint32_t index, 
             Sample & sample)
         {
-            sample.size = 0;
-            sample.data.clear();
         }
 
     } // namespace mux

@@ -12,6 +12,8 @@ namespace ppbox
     namespace mux
     {
 
+        class FlvTransfer;
+
         class FlvMuxer
             : public MuxerBase
         {
@@ -33,15 +35,8 @@ namespace ppbox
                 Sample & tag);
 
         private:
-            ppbox::avformat::FlvHeader flv_header_;
-            ppbox::avformat::FlvTagHeader flv_tag_header_;
-            ppbox::avformat::FlvAudioTagHeader flv_audio_tag_header_;
-            ppbox::avformat::FlvVideoTagHeader flv_video_tag_header_;
-            boost::uint8_t audio_header_buffer_[13];
-            boost::uint8_t video_header_buffer_[16];
-            boost::uint8_t flv_file_header_buffer_[13];
-            boost::uint32_t audio_header_size_;
-            boost::uint32_t video_header_size_;
+            boost::uint8_t header_buffer_[16];
+            std::vector<FlvTransfer *> transfers_;
         };
 
         PPBOX_REGISTER_MUXER("flv", FlvMuxer);

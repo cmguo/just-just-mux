@@ -23,41 +23,23 @@ namespace ppbox
         {
         public:
             FlvTransfer(
-                boost::uint8_t type)
-                : previous_tag_size_(0)
-            {
-                flvtag_.Type = type;
-            }
+                boost::uint8_t type);
 
-            virtual ~FlvTransfer()
-            {
-            }
+            virtual ~FlvTransfer();
 
         public:
-            void setTagSizeAndTimestamp(
-                boost::uint32_t size, 
-                boost::uint32_t timestamp)
-            {
-                flvtag_.DataSize = framework::system::UInt24(size);
-                flvtag_.Timestamp = framework::system::UInt24(timestamp);
-                flvtag_.TimestampExtended   = 0x00;
-                flvtag_.StreamID = 0x00;
-            }
+            virtual void transfer(
+                Sample & sample);
 
-            boost::asio::const_buffer tag_buffer()
-            {
-                util::archive::ArchiveBuffer<boost::uint8_t> buf(tag_header_, 16);
-                ppbox::avformat::FlvOArchive flv_archive(buf);
-                flv_archive << flvtag_;
-                return boost::asio::buffer(boost::asio::buffer(tag_header_, 11));
-            }
-
-        protected:
-            boost::uint32_t previous_tag_size_;
+        public:
+            virtual void stream_header(
+                StreamInfo const & info, 
+                Sample & sample) = 0;
 
         private:
-            ppbox::avformat::FlvTagHeader flvtag_;
-            boost::uint8_t tag_header_[16];
+            ppbox::avformat::FlvTagHeader header_;
+            boost::uint8_t header_buffer_[16];
+            boost::uint32_t previous_tag_size_;
         };
 
     } // namespace mux

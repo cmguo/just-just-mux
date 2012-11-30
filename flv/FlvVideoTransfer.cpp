@@ -4,6 +4,7 @@
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
 #include <ppbox/avformat/flv/FlvFormat.h>
+#include <ppbox/avformat/codec/avc/AvcCodec.h>
 using namespace ppbox::avformat;
 
 using namespace framework::system;
@@ -22,34 +23,45 @@ namespace ppbox
         void FlvVideoTransfer::transfer(
             StreamInfo & info)
         {
-            videotagheader_.CodecID = FlvVideoCodec::H264;
-            videotagheader_.AVCPacketType = 1;
+            header_.CodecID = FlvVideoCodec::H264;
+            header_.AVCPacketType = 1;
         }
 
         void FlvVideoTransfer::transfer(
             Sample & sample)
         {
             if(sample.flags & Sample::sync) {
-                videotagheader_.FrameType = 1;
+                header_.FrameType = 1;
             } else {
-                videotagheader_.FrameType = 2;
+                header_.FrameType = 2;
             }
-
             boost::uint32_t CompositionTime = sample.cts_delta * 1000 / sample.stream_info->time_scale;
-            videotagheader_.CompositionTime = CompositionTime;
-            util::archive::ArchiveBuffer<boost::uint8_t> buf(video_tag_header_, 16);
-            ppbox::avformat::FlvOArchive flv_archive(buf);
-            flv_archive << videotagheader_;
-            boost::uint32_t data_length = sample.size;
-            setTagSizeAndTimestamp(data_length+5, (boost::uint32_t)sample.time);
+            header_.CompositionTime = CompositionTime;
 
-            sample.data.push_front(boost::asio::buffer(video_tag_header_, 5));
-            sample.data.push_front(tag_buffer());
+            FormatBuffer buf(header_buffer_, 16);
+            FlvOArchive flv_archive(buf);
+            flv_archive << header_;
+            sample.data.push_front(buf.data());
+            sample.size += buf.size();
 
-            previous_tag_size_ = data_length + 5 + 11;
-            previous_tag_size_ = BytesOrder::host_to_big_endian_long(previous_tag_size_);
-            sample.data.push_back(boost::asio::buffer((boost::uint8_t*)&previous_tag_size_, 4));
-            sample.size += 20;
+            FlvTransfer::transfer(sample);
+        }
+
+        void FlvVideoTransfer::stream_header(
+            StreamInfo const & info, 
+            Sample & sample)
+        {
+            if (info.sub_type == VIDEO_TYPE_AVC1) {
+                header_.AVCPacketType = 0;
+                AvcConfigHelper const & config = ((AvcCodec *)info.codec)->config_helper();
+                config.to_data(config_data_);
+                sample.data.push_back(boost::asio::buffer(config_data_));
+                sample.size += config_data_.size();
+                transfer(sample);
+                header_.AVCPacketType = 1; // restore
+            } else {
+                assert(false);
+            }
         }
 
     } // namespace mux

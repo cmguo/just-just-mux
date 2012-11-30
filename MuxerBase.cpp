@@ -102,8 +102,18 @@ namespace ppbox
         {
             if (read_flag_) {
                 if (read_flag_ & f_head) {
+                    sample.itrack = (boost::uint32_t)-1;
+                    sample.time = 0;
+                    sample.ustime = 0;
+                    sample.dts = 0;
+                    sample.us_delta = 0;
+                    sample.cts_delta = 0;
+                    sample.duration = 0;
+                    sample.size = 0;
+                    sample.stream_info = NULL;
+                    sample.blocks.clear();
+                    sample.data.clear();
                     do {
-                        sample.data.clear();
                         if (head_step_ == 0) {
                             file_header(sample);
                             ++head_step_;

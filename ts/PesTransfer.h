@@ -15,12 +15,14 @@ namespace ppbox
         {
         public:
             PesTransfer(
-                boost::uint32_t index, 
-                bool video);
+                boost::uint32_t index);
 
             ~PesTransfer();
 
         private:
+            virtual void transfer(
+                StreamInfo & info);
+
             virtual void transfer(
                 Sample & sample);
 

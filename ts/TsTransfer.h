@@ -17,7 +17,8 @@ namespace ppbox
         {
         public:
             TsTransfer(
-                boost::uint16_t pid);
+                boost::uint16_t pid, 
+                bool with_pcr);
 
             ~TsTransfer();
 

@@ -24,9 +24,14 @@ namespace ppbox
             virtual void transfer(
                 Sample & sample);
 
-        private:
-            ppbox::avformat::FlvAudioTagHeader audiotagheader_;
+        public:
+            virtual void stream_header(
+                StreamInfo const & info, 
+                Sample & sample);
 
+        private:
+            ppbox::avformat::FlvAudioTagHeader header_;
+            std::vector<boost::uint8_t> config_data_;
         };
 
     } // namespace mux

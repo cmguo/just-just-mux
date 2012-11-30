@@ -90,8 +90,8 @@ namespace ppbox
 
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             // add two sps pps rtp packet
-            if (sample.idesc != sample_description_index_) {
-                sample_description_index_ = sample.idesc;
+            if (0 != sample_description_index_) {
+                sample_description_index_ = 0;
                 AvcConfig const & avc_config = ((AvcCodec const *)media.codec)->config();
 
                 for (size_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); ++i) {

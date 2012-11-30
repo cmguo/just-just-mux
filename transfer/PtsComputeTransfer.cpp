@@ -4,13 +4,13 @@
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/detail/BitsReader.h"
 
-#include <ppbox/avformat/BitsIStream.h>
-#include <ppbox/avformat/BitsOStream.h>
-#include <ppbox/avformat/BitsBuffer.h>
+#include <ppbox/avformat/stream/BitsIStream.h>
+#include <ppbox/avformat/stream/BitsOStream.h>
+#include <ppbox/avformat/stream/FormatBuffer.h>
+#include <ppbox/avformat/stream/BitsBuffer.h>
 #include <ppbox/avformat/codec/avc/AvcSliceType.h>
 using namespace ppbox::avformat;
 
-#include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/CycleBuffers.h>
 
 namespace ppbox
