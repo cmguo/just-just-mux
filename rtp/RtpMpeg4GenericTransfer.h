@@ -1,7 +1,7 @@
-// RtpEsAudioTransfer.h
+// RtpMpeg4GenericTransfer.h
 
-#ifndef _PPBOX_MUX_RTP_RTP_ES_AUDIO_TRANSFER_H_
-#define _PPBOX_MUX_RTP_RTP_ES_AUDIO_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_MPEG4_GENERIC_TRANSFER_H_
+#define _PPBOX_MUX_RTP_RTP_MPEG4_GENERIC_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpTransfer.h"
 
@@ -10,14 +10,13 @@ namespace ppbox
     namespace mux
     {
 
-        class RtpEsAudioTransfer
+        class RtpMpeg4GenericTransfer
             : public RtpTransfer
         {
         public:
-            RtpEsAudioTransfer(
-                MuxerBase & muxer);
+            RtpMpeg4GenericTransfer();
 
-            ~RtpEsAudioTransfer();
+            ~RtpMpeg4GenericTransfer();
 
         public:
             virtual void transfer(
@@ -26,12 +25,8 @@ namespace ppbox
             virtual void transfer(
                 Sample & sample);
 
-            virtual void on_seek(
-                boost::uint32_t time);
-
         private:
             boost::uint8_t index_;
-            boost::uint8_t time_adjust_;
             boost::uint8_t au_header_section_[4];
             std::vector<boost::uint8_t> packat_header_;
         };
@@ -39,4 +34,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_RTP_ES_AUDIO_TRANSFER_H_
+#endif // _PPBOX_MUX_RTP_RTP_MPEG4_GENERIC_TRANSFER_H_

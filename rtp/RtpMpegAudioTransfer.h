@@ -1,7 +1,7 @@
-// RtpAudioMpegTransfer.h
+// RtpMpegAudioTransfer.h
 
-#ifndef _PPBOX_MUX_RTP_RTP_AUDIO_MPEG_TRANSFER_H_
-#define _PPBOX_MUX_RTP_RTP_AUDIO_MPEG_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_MPEG_AUDIO_TRANSFER_H_
+#define _PPBOX_MUX_RTP_RTP_MPEG_AUDIO_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpTransfer.h"
 
@@ -10,14 +10,13 @@ namespace ppbox
     namespace mux
     {
 
-        class RtpAudioMpegTransfer
+        class RtpMpegAudioTransfer
             : public RtpTransfer
         {
         public:
-            RtpAudioMpegTransfer(
-                MuxerBase & muxer);
+            RtpMpegAudioTransfer();
 
-            ~RtpAudioMpegTransfer();
+            ~RtpMpegAudioTransfer();
 
         public:
             virtual void transfer(
@@ -33,4 +32,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_RTP_AUDIO_MPEG_TRANSFER_H_
+#endif // _PPBOX_MUX_RTP_RTP_MPEG_AUDIO_TRANSFER_H_

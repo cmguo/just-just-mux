@@ -1,7 +1,7 @@
-// RtpEsMux.h
+// RtpRawMuxer.h
 
-#ifndef _PPBOX_MUX_RTP_RTP_ES_MUXER_H_
-#define _PPBOX_MUX_RTP_RTP_ES_MUXER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_RAW_MUXER_H_
+#define _PPBOX_MUX_RTP_RTP_RAW_MUXER_H_
 
 #include "ppbox/mux/rtp/RtpMuxer.h"
 
@@ -10,13 +10,13 @@ namespace ppbox
     namespace mux
     {
 
-        class RtpEsMuxer
+        class RtpRawMuxer
             : public RtpMuxer
         {
         public:
-            RtpEsMuxer();
+            RtpRawMuxer();
 
-            ~RtpEsMuxer();
+            ~RtpRawMuxer();
 
         public:
             void add_stream(
@@ -24,9 +24,9 @@ namespace ppbox
                 std::vector<Transfer *> & transfers);
         };
 
-        PPBOX_REGISTER_MUXER("rtp-es", RtpEsMuxer);
+        PPBOX_REGISTER_MUXER("rtp-raw", RtpRawMuxer);
 
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_RTP_ES_MUXER_H_
+#endif // _PPBOX_MUX_RTP_RTP_RAW_MUXER_H_

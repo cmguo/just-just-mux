@@ -8,16 +8,15 @@
 #include <ppbox/avformat/ts/TsPacket.h>
 using namespace ppbox::avformat;
 
-const boost::uint32_t TS_PACKETS_PER_RTP_PACKET       = 7;
-
 namespace ppbox
 {
     namespace mux
     {
 
-        RtpTsTransfer::RtpTsTransfer(
-            MuxerBase & muxer)
-            : RtpTransfer(muxer, "RtpTs", 33)
+        static boost::uint32_t const TS_PACKETS_PER_RTP_PACKET = 7;
+
+        RtpTsTransfer::RtpTsTransfer()
+            : RtpTransfer("RtpTs", TsPacket::PACKET_SIZE, 33)
         {
         }
 
@@ -28,16 +27,19 @@ namespace ppbox
         void RtpTsTransfer::transfer(
             StreamInfo & info)
         {
+            RtpTransfer::transfer(info);
+
             rtp_info_.sdp = "m=video 0 RTP/AVP 33\r\n";
             rtp_info_.sdp += "a=rtpmap:33 MP2T/90000\r\n";
             rtp_info_.sdp += "a=control:track-1\r\n";
-
-            scale_.reset(90000, 90000);
         }
 
         void RtpTsTransfer::transfer(
             Sample & sample)
         {
+            // Don't need adjust time scale, asf transfer already done it
+            //RtpTransfer::transfer(sample);
+
             RtpTransfer::begin(sample);
             std::vector<size_t> const & off_segs = 
                 *(std::vector<size_t> const *)sample.context;

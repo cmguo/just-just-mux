@@ -1,7 +1,7 @@
-// RtpEsVideoTransfer.h
+// RtpH264Transfer.h
 
-#ifndef _PPBOX_MUX_RTP_RTP_ES_VIDEO_TRANSFER_H_
-#define _PPBOX_MUX_RTP_RTP_ES_VIDEO_TRANSFER_H_
+#ifndef _PPBOX_MUX_RTP_RTP_H264_TRANSFER_H_
+#define _PPBOX_MUX_RTP_RTP_H264_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpTransfer.h"
 
@@ -10,14 +10,17 @@ namespace ppbox
     namespace mux
     {
 
-        class RtpEsVideoTransfer
+        class RtpH264Transfer
             : public RtpTransfer
         {
         public:
-            RtpEsVideoTransfer(
-                MuxerBase & muxer);
+            RtpH264Transfer();
 
-            ~RtpEsVideoTransfer();
+            ~RtpH264Transfer();
+
+        public:
+            virtual void config(
+                framework::configure::Config & conf);
 
         public:
             virtual void transfer(
@@ -36,4 +39,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_RTP_ES_VIDEO_TRANSFER_H_
+#endif // _PPBOX_MUX_RTP_RTP_H264_TRANSFER_H_

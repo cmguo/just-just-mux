@@ -4,7 +4,7 @@
 #define _PPBOX_MUX_RTP_RTP_TRANSFER_H_
 
 #include "ppbox/mux/rtp/RtpPacket.h"
-#include "ppbox/mux/Transfer.h"
+#include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
 #include <framework/system/BytesOrder.h>
 #include <framework/system/ScaleTransform.h>
@@ -15,27 +15,31 @@ namespace ppbox
     {
 
         class RtpTransfer
-            : public Transfer
+            : public TimeScaleTransfer
         {
         public:
             RtpTransfer(
-                MuxerBase & muxer, 
-                std::string const & name, 
+                char const * const name, 
+                boost::uint32_t time_scale, 
                 boost::uint8_t type);
 
             virtual ~RtpTransfer();
 
         public:
-            RtpInfo const & rtp_info() const
-            {
-                return rtp_info_;
-            }
+            virtual void config(
+                framework::configure::Config & conf);
 
         public:
             virtual void on_seek(
                 boost::uint64_t time);
 
             virtual void setup();
+
+        public:
+            RtpInfo const & rtp_info() const
+            {
+                return rtp_info_;
+            }
 
         protected:
             void begin(
@@ -48,10 +52,10 @@ namespace ppbox
                 Sample & sample);
 
         protected:
+            char const * const name_;
             RtpHead rtp_head_;
             RtpInfo rtp_info_;
             RtpSplitContent packets_;
-            framework::system::ScaleTransform scale_; 
         };
 
     } // namespace mux

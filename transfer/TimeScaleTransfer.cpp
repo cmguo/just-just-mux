@@ -28,11 +28,17 @@ namespace ppbox
                 scale_.reset(info.time_scale, scale_.scale_out());
             } else {
                 if (info.time_scale < info.audio_format.sample_rate) {
+                    if (scale_.scale_out() == 0) {
+                        scale_.reset(1, info.audio_format.sample_rate);
+                    }
                     scale_.reset(info.audio_format.sample_rate, scale_.scale_out());
                     time_adjust_ = 1;
                      // TO DO:
                     sample_per_frame_ = 1024;
                 } else {
+                    if (scale_.scale_out() == 0) {
+                        scale_.reset(1, info.time_scale);
+                    }
                     scale_.reset(info.time_scale, scale_.scale_out());
                 }
             }
@@ -59,7 +65,7 @@ namespace ppbox
         }
 
         void TimeScaleTransfer::on_seek(
-            boost::uint32_t time)
+            boost::uint64_t time)
         {
             if (time_adjust_ == 2)
                 time_adjust_ = 1;

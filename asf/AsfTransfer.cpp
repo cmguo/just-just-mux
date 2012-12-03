@@ -22,8 +22,7 @@ namespace ppbox
         size_t const PACKET_HEAD_LENGTH = 14;
         size_t const PAYLOAD_HEAD_LENGTH = 17;
 
-        AsfTransfer::AsfTransfer(
-            MuxerBase & muxer)
+        AsfTransfer::AsfTransfer()
             : single_payload_(false)
             , packet_length_(4096)
             , max_packet_length_(4096)
@@ -31,7 +30,18 @@ namespace ppbox
             , packet_head_(max_packet_length_)
             , packet_left_(0)
         {
-            muxer.config().register_module("Asf")
+        }
+
+        AsfTransfer::~AsfTransfer()
+        {
+            delete [] data_buf_[0];
+            delete [] data_buf_[1];
+        }
+
+        void AsfTransfer::config(
+            framework::configure::Config & conf)
+        {
+            conf.register_module("Asf")
                 << CONFIG_PARAM_NAME_RDWR("packet_length", packet_length_)
                 << CONFIG_PARAM_NAME_RDWR("single_payload", single_payload_);
 
@@ -46,12 +56,6 @@ namespace ppbox
             Sample sample;
             sample.time = 0;
             add_packet(sample, false);
-        }
-
-        AsfTransfer::~AsfTransfer()
-        {
-            delete [] data_buf_[0];
-            delete [] data_buf_[1];
         }
 
         void AsfTransfer::transfer(

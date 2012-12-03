@@ -14,8 +14,7 @@ namespace ppbox
             : public RtpTransfer
         {
         public:
-            RtpTsTransfer(
-                MuxerBase & muxer);
+            RtpTsTransfer();
 
             ~RtpTsTransfer();
 

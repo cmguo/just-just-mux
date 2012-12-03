@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 #define _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 
-#include "ppbox/mux/transfer/Transfer.h"
+#include "ppbox/mux/Transfer.h"
 
 #include <ppbox/avformat/mkv/MkvObjectType.h>
 

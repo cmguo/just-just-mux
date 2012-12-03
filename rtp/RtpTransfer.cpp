@@ -10,9 +10,11 @@ namespace ppbox
     {
 
         RtpTransfer::RtpTransfer(
-            MuxerBase & muxer, 
-            std::string const & name, 
+            char const * const name, 
+            boost::uint32_t time_scale, 
             boost::uint8_t type)
+            : TimeScaleTransfer(time_scale)
+            , name_(name)
         {
             static size_t g_ssrc = 0;
             if (g_ssrc == 0) {
@@ -31,14 +33,19 @@ namespace ppbox
             rtp_info_.sequence = rtp_head_.sequence;
             rtp_info_.setup = false;
 
-            muxer.config().register_module(name)
-                << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
-                << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
-                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc);
         }
 
         RtpTransfer::~RtpTransfer()
         {
+        }
+
+        void RtpTransfer::config(
+            framework::configure::Config & conf)
+        {
+            conf.register_module(name_)
+                << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
+                << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
+                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc);
         }
 
         void RtpTransfer::setup()
@@ -60,6 +67,8 @@ namespace ppbox
             // std::cout << "rtp_head_.timestamp = " << rtp_head_.timestamp << std::endl;
             rtp_info_.sequence = rtp_head_.sequence;
             rtp_info_.seek_time = (boost::uint32_t)time;
+
+            TimeScaleTransfer::on_seek(time);
         }
 
         void RtpTransfer::begin(

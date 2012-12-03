@@ -1,46 +1,49 @@
-// RtpAudioMpegTransfer.cpp
+// RtpMpegAudioTransfer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerBase.h"
-#include "ppbox/mux/rtp/RtpAudioMpegTransfer.h"
+#include "ppbox/mux/rtp/RtpMpegAudioTransfer.h"
 
 namespace ppbox
 {
     namespace mux
     {
 
-        RtpAudioMpegTransfer::RtpAudioMpegTransfer(
-            MuxerBase & muxer)
-            : RtpTransfer(muxer, "RtpAudioMpegTransfer", 97)
+        static boost::uint32_t const TIME_SCALE = 90000;
+
+        RtpMpegAudioTransfer::RtpMpegAudioTransfer()
+            : RtpTransfer("RtpAudioMpegTransfer", TIME_SCALE, 97)
         {
             header_[0] = 0;
             header_[1] = 0;
         }
 
-        RtpAudioMpegTransfer::~RtpAudioMpegTransfer()
+        RtpMpegAudioTransfer::~RtpMpegAudioTransfer()
         {
         }
 
-        void RtpAudioMpegTransfer::transfer(
-            StreamInfo & media)
+        void RtpMpegAudioTransfer::transfer(
+            StreamInfo & info)
         {
             using namespace framework::string;
 
+            RtpTransfer::transfer(info);
+
             std::string map_id_str = format(rtp_head_.mpt);
             rtp_info_.sdp = "m=audio 0 RTP/AVP " + map_id_str + "\r\n";
-            rtp_info_.sdp += "a=rtpmap:" + map_id_str + " mpa/90000" 
-                + "/" + format(media.audio_format.channel_count)
+            rtp_info_.sdp += "a=rtpmap:" + map_id_str + " mpa/" + format(TIME_SCALE) 
+                + "/" + format(info.audio_format.channel_count)
                 + "\r\n";
-            rtp_info_.sdp += "a=control:track" + format(media.index) + "\r\n";
+            rtp_info_.sdp += "a=control:track" + format(info.index) + "\r\n";
 
-            rtp_info_.stream_index = media.index;
-
-            scale_.reset(media.time_scale, 90000);
+            rtp_info_.stream_index = info.index;
         }
 
-        void RtpAudioMpegTransfer::transfer(
+        void RtpMpegAudioTransfer::transfer(
             Sample & sample)
         {
+            RtpTransfer::transfer(sample);
+
             RtpTransfer::begin(sample);
             RtpPacket packet(scale_.transfer(sample.dts), true);
             packet.size = sample.size + 4;

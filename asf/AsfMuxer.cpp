@@ -39,7 +39,7 @@ namespace ppbox
                  }
              }
              if (transfer_ == NULL)
-                 transfer_ = new AsfTransfer(*this);
+                 transfer_ = new AsfTransfer;
              transfer=  new MergeTransfer(transfer_);
              transfers.push_back(transfer);
 

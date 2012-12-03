@@ -249,6 +249,7 @@ namespace ppbox
                 add_stream(stream, transfers_[i]);
                 streams_.push_back(stream);
                 for(boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
+                    transfers_[i][j]->config(config_);
                     transfers_[i][j]->transfer(stream);
                 }
             }

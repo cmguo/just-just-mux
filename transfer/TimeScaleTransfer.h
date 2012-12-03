@@ -29,9 +29,9 @@ namespace ppbox
                 Sample & sample);
 
             virtual void on_seek(
-                boost::uint32_t time);
+                boost::uint64_t time);
 
-        private:
+        protected:
             boost::uint8_t time_adjust_;
             boost::uint32_t sample_per_frame_;
             framework::system::ScaleTransform scale_;

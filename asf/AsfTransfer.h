@@ -21,10 +21,13 @@ namespace ppbox
             : public Transfer
         {
         public:
-            AsfTransfer(
-                MuxerBase & muxer);
+            AsfTransfer();
 
             ~AsfTransfer();
+
+        public:
+            virtual void config(
+                framework::configure::Config & conf);
 
         public:
             virtual void transfer(

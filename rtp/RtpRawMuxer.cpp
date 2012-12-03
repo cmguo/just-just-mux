@@ -1,14 +1,14 @@
-// RtpEsMuxer.cpp
+// RtpRawMuxer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/rtp/RtpEsMuxer.h"
+#include "ppbox/mux/rtp/RtpRawMuxer.h"
 #include "ppbox/mux/transfer/PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
-#include "ppbox/mux/rtp/RtpEsAudioTransfer.h"
-#include "ppbox/mux/rtp/RtpAudioMpegTransfer.h"
-#include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/ParseH264Transfer.h"
+#include "ppbox/mux/rtp/RtpMpeg4GenericTransfer.h"
+#include "ppbox/mux/rtp/RtpMpegAudioTransfer.h"
+#include "ppbox/mux/rtp/RtpH264Transfer.h"
 
 using namespace ppbox::demux;
 using namespace ppbox::avformat;
@@ -18,15 +18,15 @@ namespace ppbox
     namespace mux
     {
 
-        RtpEsMuxer::RtpEsMuxer()
+        RtpRawMuxer::RtpRawMuxer()
         {
         }
 
-        RtpEsMuxer::~RtpEsMuxer()
+        RtpRawMuxer::~RtpRawMuxer()
         {
         }
 
-        void RtpEsMuxer::add_stream(
+        void RtpRawMuxer::add_stream(
             StreamInfo & info, 
             std::vector<Transfer *> & transfers)
         {
@@ -43,15 +43,15 @@ namespace ppbox
                     transfer = new PtsComputeTransfer();
                     transfers.push_back(transfer);
                 }
-                RtpTransfer * rtp_transfer = new RtpEsVideoTransfer(*this);
+                RtpTransfer * rtp_transfer = new RtpH264Transfer;
                 transfers.push_back(rtp_transfer);
                 add_rtp_transfer(rtp_transfer);
             } else if (MEDIA_TYPE_AUDI == info.type){
                 RtpTransfer * rtp_transfer = NULL;
                 if (info.sub_type == AUDIO_TYPE_MP1A) {
-                    rtp_transfer = new RtpAudioMpegTransfer(*this);
+                    rtp_transfer = new RtpMpegAudioTransfer;
                 } else {
-                    rtp_transfer = new RtpEsAudioTransfer(*this);
+                    rtp_transfer = new RtpMpeg4GenericTransfer;
                 }
                 transfers.push_back(rtp_transfer);
                 add_rtp_transfer(rtp_transfer);

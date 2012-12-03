@@ -1,15 +1,13 @@
-// RtpEsVideoTransfer.cpp
+// RtpH264Transfer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerBase.h"
-#include "ppbox/mux/rtp/RtpEsVideoTransfer.h"
+#include "ppbox/mux/rtp/RtpH264Transfer.h"
 #include "ppbox/mux/detail/BitsReader.h" // for Nalu
 
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
 #include <ppbox/avformat/codec/avc/AvcConfig.h>
 using namespace ppbox::avformat;
-
-#include <util/buffers/BufferCopy.h>
 
 #include <framework/string/Base16.h>
 #include <framework/string/Base64.h>
@@ -19,22 +17,29 @@ namespace ppbox
     namespace mux
     {
 
-        RtpEsVideoTransfer::RtpEsVideoTransfer(
-            MuxerBase & muxer)
-            : RtpTransfer(muxer, "RtpESVideo", 96)
+        static boost::uint32_t const TIME_SCALE = 90000;
+
+        RtpH264Transfer::RtpH264Transfer()
+            : RtpTransfer("RtpH264", TIME_SCALE, 96)
             , mtu_size_(1436)
             , sample_description_index_(boost::uint32_t(-1))
             , use_dts_(0)
         {
-            muxer.config().register_module("RtpESVideo")
-                << CONFIG_PARAM_NAME_RDWR("usedts", use_dts_);
         }
 
-        RtpEsVideoTransfer::~RtpEsVideoTransfer()
+        RtpH264Transfer::~RtpH264Transfer()
         {
         }
 
-        void RtpEsVideoTransfer::transfer(
+        void RtpH264Transfer::config(
+            framework::configure::Config & conf)
+        {
+            RtpTransfer::config(conf);
+            conf.register_module("RtpH264")
+                << CONFIG_PARAM_NAME_RDWR("usedts", use_dts_);
+        }
+
+        void RtpH264Transfer::transfer(
             StreamInfo & info)
         {
             using namespace framework::string;
@@ -52,7 +57,7 @@ namespace ppbox
             std::string pps = Base64::encode(&pps_data.front(), pps_data.size());
 
             rtp_info_.sdp = "m=video 0 RTP/AVP " + map_id_str + "\r\n";
-            rtp_info_.sdp += "a=rtpmap:" + map_id_str + " H264/90000\r\n";
+            rtp_info_.sdp += "a=rtpmap:" + map_id_str + " H264/" + format(TIME_SCALE) + "\r\n";
             rtp_info_.sdp += "a=framesize:" + map_id_str + " " + format(info.video_format.width)
                 + "-" + format(info.video_format.height) + "\r\n";
             rtp_info_.sdp += "a=cliprect:0,0," 
@@ -68,7 +73,7 @@ namespace ppbox
             scale_.reset(info.time_scale, 90000);
         }
 
-        void RtpEsVideoTransfer::transfer(
+        void RtpH264Transfer::transfer(
             Sample & sample)
         {
             StreamInfo const & media = *(StreamInfo const *)sample.stream_info;

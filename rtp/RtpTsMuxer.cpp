@@ -33,7 +33,7 @@ namespace ppbox
         {
             RtpMuxer::add_stream(info, transfers);
             if (rtp_ts_transfer_ == NULL) {
-                rtp_ts_transfer_ = new RtpTsTransfer(*this);
+                rtp_ts_transfer_ = new RtpTsTransfer;
                 add_rtp_transfer(rtp_ts_transfer_);
             }
             Transfer * transfer = new MergeTransfer(rtp_ts_transfer_);

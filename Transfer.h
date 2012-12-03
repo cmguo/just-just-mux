@@ -21,6 +21,13 @@ namespace ppbox
             {
             }
 
+        public:
+            virtual void config(
+                framework::configure::Config & conf)
+            {
+            }
+
+        public:
             virtual void transfer(
                 StreamInfo & info)
             {
