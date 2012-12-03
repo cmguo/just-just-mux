@@ -1,4 +1,4 @@
-// M3U8Mux.cpp
+// RawMuxer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/raw/RawMuxer.h"
@@ -7,6 +7,7 @@
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsEncodeTransfer.h"
+#include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
 using namespace ppbox::avformat;
 
@@ -16,10 +17,17 @@ namespace ppbox
     {
 
         RawMuxer::RawMuxer()
+            : time_scale_(0)
+            , video_time_scale_(0)
+            , audio_time_scale_(0)
         {
             config().register_module("RawMuxer")
                 << CONFIG_PARAM_NAME_RDWR("video_format", video_format_)
-                << CONFIG_PARAM_NAME_RDWR("audio_format", audio_format_);
+                << CONFIG_PARAM_NAME_RDWR("audio_format", audio_format_)
+                << CONFIG_PARAM_NAME_RDWR("time_scale", time_scale_)
+                << CONFIG_PARAM_NAME_RDWR("video_time_scale", video_time_scale_)
+                << CONFIG_PARAM_NAME_RDWR("audio_time_scale", audio_time_scale_)
+                ;
         }
 
         RawMuxer::~RawMuxer()
@@ -47,6 +55,10 @@ namespace ppbox
                         transfers.push_back(transfer);
                     }
                 }
+                if (time_scale_ || video_time_scale_) {
+                    transfer = new TimeScaleTransfer(time_scale_ ? time_scale_ : video_time_scale_);
+                    transfers.push_back(transfer);
+                }
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     if (audio_format_ == "adts") {
@@ -54,6 +66,10 @@ namespace ppbox
                         transfers.push_back(transfer);
                     }
                 }
+            }
+            if (time_scale_ || audio_time_scale_) {
+                transfer = new TimeScaleTransfer(time_scale_ ? time_scale_ : audio_time_scale_);
+                transfers.push_back(transfer);
             }
         }
 

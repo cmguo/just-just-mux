@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_TS_TS_TRANSFER_H_
 #define _PPBOX_MUX_TS_TS_TRANSFER_H_
 
-#include "ppbox/mux/Transfer.h"
+#include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
 #include <framework/system/ScaleTransform.h>
 
@@ -13,7 +13,7 @@ namespace ppbox
     {
 
         class TsTransfer
-            : public Transfer
+            : public TimeScaleTransfer
         {
         public:
             TsTransfer(
@@ -24,16 +24,7 @@ namespace ppbox
 
         public:
             virtual void transfer(
-                StreamInfo & info);
-
-            virtual void transfer_time(
                 Sample & sample);
-
-            virtual void transfer(
-                Sample & sample);
-
-            virtual void on_seek(
-                boost::uint32_t time);
 
         private:
             template <typename ConstBuffers>
@@ -55,8 +46,6 @@ namespace ppbox
             boost::uint16_t pid_;
             boost::uint8_t continuity_counter_;
             bool with_pcr_;
-            boost::uint8_t time_adjust_;
-            framework::system::ScaleTransform scale_;
             // buffer
             std::vector<boost::uint8_t> header_buffer_;
             std::deque<boost::asio::const_buffer> ts_buffers_;

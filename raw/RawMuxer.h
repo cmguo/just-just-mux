@@ -34,6 +34,9 @@ namespace ppbox
         private:
             std::string video_format_;
             std::string audio_format_;
+            boost::uint32_t time_scale_;
+            boost::uint32_t video_time_scale_;
+            boost::uint32_t audio_time_scale_;
         };
 
         PPBOX_REGISTER_MUXER("raw", RawMuxer);

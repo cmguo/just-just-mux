@@ -17,50 +17,15 @@ namespace ppbox
         TsTransfer::TsTransfer(
             boost::uint16_t pid, 
             bool with_pcr)
-            : pid_(pid)
+            : TimeScaleTransfer(TsPacket::TIME_SCALE)
+            , pid_(pid)
             , continuity_counter_(0)
             , with_pcr_(with_pcr)
-            , time_adjust_(0)
         {
         }
 
         TsTransfer::~TsTransfer()
         {
-        }
-
-        void TsTransfer::transfer(
-            StreamInfo & info)
-        {
-            if (info.type == MEDIA_TYPE_VIDE) {
-                scale_.reset(info.time_scale, TsPacket::TIME_SCALE);
-            } else {
-                if (info.time_scale < info.audio_format.sample_rate) {
-                    scale_.reset(info.audio_format.sample_rate, TsPacket::TIME_SCALE);
-                    time_adjust_ = 1;
-                } else {
-                    scale_.reset(info.time_scale, TsPacket::TIME_SCALE);
-                }
-            }
-        }
-
-        void TsTransfer::transfer_time(
-            Sample & sample)
-        {
-            StreamInfo const & media = 
-                *(StreamInfo const *)sample.stream_info;
-            //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
-            if (time_adjust_ == 0) {
-                sample.dts = scale_.transfer(sample.dts);
-                boost::uint64_t cts = scale_.inc(sample.cts_delta);
-                sample.cts_delta = (boost::uint32_t)(cts - sample.dts);
-            } else if (time_adjust_ == 1) {
-                sample.dts = scale_.static_transfer(media.time_scale, TsPacket::TIME_SCALE, sample.dts);
-                scale_.set(sample.dts);
-                time_adjust_ = 2;
-            } else {
-                sample.dts = scale_.inc(1024);
-            }
-            //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
         }
 
         void TsTransfer::transfer(
@@ -118,13 +83,6 @@ namespace ppbox
             sample.data.assign(ts_buffers_.begin(), ts_buffers_.end());
             sample.size = ts_total_size;
             sample.context = &off_segs_;
-        }
-
-        void TsTransfer::on_seek(
-            boost::uint32_t time)
-        {
-            if (time_adjust_ == 2)
-                time_adjust_ = 1;
         }
 
     } // namespace mux

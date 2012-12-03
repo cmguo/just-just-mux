@@ -42,7 +42,7 @@ namespace ppbox
         void PesTransfer::transfer(
             Sample & sample)
         {
-            TsTransfer::transfer_time(sample);
+            TimeScaleTransfer::transfer(sample);
 
             FormatBuffer buf(pes_heaher_buffer_, sizeof(pes_heaher_buffer_));
             TsOArchive oa(buf);
