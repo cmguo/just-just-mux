@@ -23,6 +23,8 @@ namespace ppbox
             ~TsTransfer();
 
         public:
+            using TimeScaleTransfer::transfer;
+
             virtual void transfer(
                 Sample & sample);
 

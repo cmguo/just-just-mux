@@ -31,6 +31,8 @@ namespace ppbox
         void PesTransfer::transfer(
             StreamInfo & info)
         {
+            TsTransfer::transfer(info);
+
             if (info.type == MEDIA_TYPE_VIDE) {
                 stream_id_ = TsStreamId::video_base + (boost::uint16_t)info.index;
                 with_dts_ = true;
@@ -55,6 +57,7 @@ namespace ppbox
             }
             sample.size += buf.size();
             sample.data.push_front(buf.data());
+
             TsTransfer::transfer(sample);
         }
 
