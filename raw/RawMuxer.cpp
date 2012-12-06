@@ -66,10 +66,10 @@ namespace ppbox
                         transfers.push_back(transfer);
                     }
                 }
-            }
-            if (time_scale_ || audio_time_scale_) {
-                transfer = new TimeScaleTransfer(time_scale_ ? time_scale_ : audio_time_scale_);
-                transfers.push_back(transfer);
+                if (time_scale_ || audio_time_scale_) {
+                    transfer = new TimeScaleTransfer(time_scale_ ? time_scale_ : audio_time_scale_);
+                    transfers.push_back(transfer);
+                }
             }
         }
 
