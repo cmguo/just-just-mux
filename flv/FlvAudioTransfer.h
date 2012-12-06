@@ -14,8 +14,7 @@ namespace ppbox
             : public FlvTransfer
         {
         public:
-            FlvAudioTransfer(
-                boost::uint8_t type);
+            FlvAudioTransfer();
 
         public:
             virtual void transfer(
@@ -31,6 +30,7 @@ namespace ppbox
 
         private:
             ppbox::avformat::FlvAudioTagHeader header_;
+            boost::uint8_t header_buffer_[16];
             std::vector<boost::uint8_t> config_data_;
         };
 

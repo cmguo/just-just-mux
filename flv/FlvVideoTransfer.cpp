@@ -14,9 +14,8 @@ namespace ppbox
     namespace mux
     {
 
-        FlvVideoTransfer::FlvVideoTransfer(
-            boost::uint8_t type)
-            : FlvTransfer(type)
+        FlvVideoTransfer::FlvVideoTransfer()
+            : FlvTransfer(FlvTagType::VIDEO)
         {
         }
 
@@ -38,7 +37,7 @@ namespace ppbox
             boost::uint32_t CompositionTime = sample.cts_delta * 1000 / sample.stream_info->time_scale;
             header_.CompositionTime = CompositionTime;
 
-            FormatBuffer buf(header_buffer_, 16);
+            FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
             FlvOArchive flv_archive(buf);
             flv_archive << header_;
             sample.data.push_front(buf.data());

@@ -14,8 +14,7 @@ namespace ppbox
             : public FlvTransfer
         {
         public:
-            FlvVideoTransfer(
-                boost::uint8_t type);
+            FlvVideoTransfer();
 
         public:
             virtual void transfer(

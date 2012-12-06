@@ -32,7 +32,7 @@ namespace ppbox
             header_.TimestampExtended   = (boost::uint8_t)(sample.time >> 24);
             header_.StreamID = 0x00;
 
-            FormatBuffer buf(header_buffer_, 16);
+            FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
             FlvOArchive flv_archive(buf);
             flv_archive << header_;
             sample.data.push_front(buf.data());

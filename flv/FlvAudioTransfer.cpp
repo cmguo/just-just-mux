@@ -14,9 +14,8 @@ namespace ppbox
     namespace mux
     {
 
-        FlvAudioTransfer::FlvAudioTransfer(
-            boost::uint8_t type)
-            : FlvTransfer(type)
+        FlvAudioTransfer::FlvAudioTransfer()
+            : FlvTransfer(FlvTagType::AUDIO)
         {
         }
 
@@ -69,8 +68,12 @@ namespace ppbox
         void FlvAudioTransfer::transfer(
             Sample & sample)
         {
-            sample.data.push_front(boost::asio::buffer((boost::uint8_t*)&header_, 2));
-            sample.size += 2;
+            FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
+            FlvOArchive flv_archive(buf);
+            flv_archive << header_;
+            sample.data.push_front(buf.data());
+            sample.size += buf.size();
+
             FlvTransfer::transfer(sample);
         }
 

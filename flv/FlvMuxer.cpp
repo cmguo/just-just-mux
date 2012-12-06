@@ -43,9 +43,10 @@ namespace ppbox
                     transfer = new PackageJoinTransfer();
                     transfers.push_back(transfer);
                 }
-                FlvVideoTransfer * transfer = new FlvVideoTransfer(FlvTagType::VIDEO);
+                FlvVideoTransfer * transfer = new FlvVideoTransfer;
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);
+                flv_header_.TypeFlagsVideo = 1;
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     if (info.format_type == StreamInfo::audio_aac_adts) {
@@ -53,17 +54,16 @@ namespace ppbox
                         transfers.push_back(transfer);
                     }
                 }
-                FlvAudioTransfer * transfer = new FlvAudioTransfer(FlvTagType::AUDIO);
+                FlvAudioTransfer * transfer = new FlvAudioTransfer;
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);
+                flv_header_.TypeFlagsAudio = 1;
             }
         }
 
         void FlvMuxer::file_header(
             Sample & sample)
         {
-            FlvHeader flv_header_;
-
             FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
             ppbox::avformat::FlvOArchive archive(buf);
             archive << flv_header_;

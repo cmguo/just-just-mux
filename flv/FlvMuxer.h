@@ -35,6 +35,7 @@ namespace ppbox
                 Sample & tag);
 
         private:
+            ppbox::avformat::FlvHeader flv_header_;
             boost::uint8_t header_buffer_[16];
             std::vector<FlvTransfer *> transfers_;
         };
