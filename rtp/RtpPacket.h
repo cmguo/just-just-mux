@@ -27,9 +27,10 @@ namespace ppbox
         {
         public:
             RtpPacket(
+                bool mark, 
                 boost::uint64_t time,
-                bool mark)
-                : size(0)
+                boost::uint32_t size)
+                : size(size + 4)
             {
                 timestamp = (boost::uint32_t)time;
                 mpt = mark ? 0x80 : 0;
@@ -67,6 +68,7 @@ namespace ppbox
         struct RtpSplitContent
             : std::vector<RtpPacket>
         {
+            boost::uint64_t total_size;
             boost::uint64_t ustime; // cts
         };
 

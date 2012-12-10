@@ -59,8 +59,7 @@ namespace ppbox
             au_header_section_[3] = (boost::uint8_t)((sample.size << 3) /*| (index_++ & 0x07)*/);
 
             RtpTransfer::begin(sample);
-            RtpPacket packet(sample.dts, true);
-            packet.size = sample.size + 4;
+            RtpPacket packet(true, sample.dts, sample.size);
             packet.push_buffers(boost::asio::buffer(au_header_section_, 4));
             packet.push_buffers(sample.data);
             push_packet(packet);

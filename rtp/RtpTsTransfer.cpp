@@ -37,7 +37,7 @@ namespace ppbox
         void RtpTsTransfer::transfer(
             Sample & sample)
         {
-            // Don't need adjust time scale, asf transfer already done it
+            // Don't need adjust time scale, ts transfer already done it
             //RtpTransfer::transfer(sample);
 
             RtpTransfer::begin(sample);
@@ -49,16 +49,14 @@ namespace ppbox
             for (; i + 1 < off_segs.size(); i += TS_PACKETS_PER_RTP_PACKET) {
                 // i + 1，这里+1是为了保证至少有一个RTP在后面生成，因为需要mark置为true
                 buf_end = sample.data.begin() + off_segs[i];
-                RtpPacket p(sample.dts + sample.cts_delta, false);
-                p.size = TS_PACKETS_PER_RTP_PACKET * TsPacket::PACKET_SIZE;
+                RtpPacket p(false, sample.dts + sample.cts_delta, TS_PACKETS_PER_RTP_PACKET * TsPacket::PACKET_SIZE);
                 p.push_buffers(buf_beg, buf_end);
                 push_packet(p);
                 buf_beg = buf_end;
             }
             i -= TS_PACKETS_PER_RTP_PACKET;
             buf_end = sample.data.end();
-            RtpPacket p(sample.dts + sample.cts_delta, true);
-            p.size = (off_segs.size() - i) * TsPacket::PACKET_SIZE;
+            RtpPacket p(true, sample.dts + sample.cts_delta, (off_segs.size() - i) * TsPacket::PACKET_SIZE);
             p.push_buffers(buf_beg, buf_end);
             push_packet(p);
             RtpTransfer::finish(sample);
@@ -70,7 +68,7 @@ namespace ppbox
             //RtpTransfer::begin(sample);
             packets_.clear();
             packets_.ustime = 0;
-            RtpPacket p(rtp_info_.timestamp, true);
+            RtpPacket p(true, rtp_info_.timestamp, sample.size);
             p.push_buffers(sample.data);
             push_packet(p);
             RtpTransfer::finish(sample);

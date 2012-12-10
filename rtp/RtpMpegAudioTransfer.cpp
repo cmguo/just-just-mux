@@ -45,8 +45,7 @@ namespace ppbox
             RtpTransfer::transfer(sample);
 
             RtpTransfer::begin(sample);
-            RtpPacket packet(scale_.transfer(sample.dts), true);
-            packet.size = sample.size + 4;
+            RtpPacket packet(true, scale_.transfer(sample.dts), sample.size);
             packet.push_buffers(boost::asio::buffer(header_, 4));
             packet.push_buffers(sample.data);
             push_packet(packet);

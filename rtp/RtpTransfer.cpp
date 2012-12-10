@@ -87,15 +87,15 @@ namespace ppbox
             packet.timestamp = framework::system::BytesOrder::host_to_big_endian(
                 rtp_head_.timestamp + packet.timestamp);
             packet.ssrc = rtp_head_.ssrc;
+            packets_.total_size += packet.size;
             packets_.push_back(packet);
         }
 
         void RtpTransfer::finish(
             Sample & sample)
         {
-            sample.size = packets_.size();
-            sample.data.clear();
-            sample.data.push_back(boost::asio::const_buffer(&packets_[0], sample.size));
+            sample.size = packets_.total_size;
+            sample.context = &packets_;
         }
 
     } // namespace mux
