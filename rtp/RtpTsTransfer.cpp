@@ -16,7 +16,7 @@ namespace ppbox
         static boost::uint32_t const TS_PACKETS_PER_RTP_PACKET = 7;
 
         RtpTsTransfer::RtpTsTransfer()
-            : RtpTransfer("RtpTs", TsPacket::PACKET_SIZE, 33)
+            : RtpTransfer("RtpTs", 33, TsPacket::TIME_SCALE)
         {
         }
 

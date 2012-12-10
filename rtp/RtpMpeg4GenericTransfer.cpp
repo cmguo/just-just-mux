@@ -12,7 +12,7 @@ namespace ppbox
     {
 
         RtpMpeg4GenericTransfer::RtpMpeg4GenericTransfer()
-            : RtpTransfer("RtpMpeg4Generic", 0, 97)
+            : RtpTransfer("RtpMpeg4Generic", 97)
             , index_(0)
         {
             au_header_section_[0] = 0;

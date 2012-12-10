@@ -18,7 +18,7 @@ namespace ppbox
     {
 
         RtpAsfTransfer::RtpAsfTransfer()
-            : RtpTransfer("RtpAsf", 1000, 96)
+            : RtpTransfer("RtpAsf", 96, 1000)
         {
             header_[0][0] = 0x40; // S = 0, L = 1, R = 0, D = 0. I = 0
             header_[0][1] = header_[0][2] = header_[0][3] = 0; // Length = 0

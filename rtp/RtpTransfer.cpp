@@ -11,8 +11,8 @@ namespace ppbox
 
         RtpTransfer::RtpTransfer(
             char const * const name, 
-            boost::uint32_t time_scale, 
-            boost::uint8_t type)
+            boost::uint8_t type, 
+            boost::uint32_t time_scale)
             : TimeScaleTransfer(time_scale)
             , name_(name)
         {

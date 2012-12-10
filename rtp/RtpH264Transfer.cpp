@@ -20,7 +20,7 @@ namespace ppbox
         static boost::uint32_t const TIME_SCALE = 90000;
 
         RtpH264Transfer::RtpH264Transfer()
-            : RtpTransfer("RtpH264", TIME_SCALE, 96)
+            : RtpTransfer("RtpH264", 96, TIME_SCALE)
             , mtu_size_(1436)
             , sample_description_index_(boost::uint32_t(-1))
             , use_dts_(0)

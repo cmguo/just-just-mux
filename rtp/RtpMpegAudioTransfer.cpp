@@ -12,7 +12,7 @@ namespace ppbox
         static boost::uint32_t const TIME_SCALE = 90000;
 
         RtpMpegAudioTransfer::RtpMpegAudioTransfer()
-            : RtpTransfer("RtpAudioMpegTransfer", TIME_SCALE, 97)
+            : RtpTransfer("RtpAudioMpegTransfer", 97, TIME_SCALE)
         {
             header_[0] = 0;
             header_[1] = 0;

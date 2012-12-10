@@ -20,8 +20,8 @@ namespace ppbox
         public:
             RtpTransfer(
                 char const * const name, 
-                boost::uint32_t time_scale, 
-                boost::uint8_t type);
+                boost::uint8_t type, 
+                boost::uint32_t time_scale = 1);
 
             virtual ~RtpTransfer();
 
