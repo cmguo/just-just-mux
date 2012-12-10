@@ -198,6 +198,12 @@ namespace ppbox
             info.format = format_;
         }
 
+        void MuxerBase::stream_info(
+            std::vector<StreamInfo> & streams) const
+        {
+            streams = streams_;
+        }
+
         void MuxerBase::stream_status(
             StreamStatus & status) const
         {

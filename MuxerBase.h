@@ -65,6 +65,9 @@ namespace ppbox
             virtual void media_info(
                 MediaInfo & info) const;
 
+            virtual void stream_info(
+                std::vector<StreamInfo> & streams) const;
+
             virtual void stream_status(
                 StreamStatus & info) const;
 

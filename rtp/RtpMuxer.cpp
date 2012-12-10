@@ -3,8 +3,10 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/rtp/RtpMuxer.h"
 #include "ppbox/mux/rtp/RtpTransfer.h"
+#include "ppbox/mux/rtp/RtpStreamDesc.h"
 
 #include <framework/string/Base16.h>
+#include <framework/string/Format.h>
 using namespace boost::system;
 
 namespace ppbox
@@ -83,39 +85,24 @@ namespace ppbox
             }
         }
 
-        void RtpMuxer::stream_status(
-            StreamStatus & info) const
+        void RtpMuxer::stream_info(
+            std::vector<StreamInfo> & streams) const
         {
-            std::string config = info.desc;
-            MuxerBase::stream_status(info);
-            if (config.compare(0, 5, "ssrc=") == 0) {
-                boost::uint32_t index = framework::string::parse<boost::uint32_t>(config.substr(5));
-                if (index < rtp_transfers_.size()) {
-                    RtpInfo const & rtp_info = rtp_transfers_[index]->rtp_info();
-                    info.desc = "ssrc=" 
-                        + framework::string::Base16::encode(std::string((char const *)&rtp_info.ssrc, 4));
-                }
-            } else {
+            MuxerBase::stream_info(streams);
+            for(boost::uint32_t i = 0; i < rtp_transfers_.size(); ++i) {
+                RtpInfo const & rtp_info = rtp_transfers_[i]->rtp_info();
+                RtpStreamDesc desc;
+                desc.stream = "track" + framework::string::format(rtp_info.stream_index);
+                desc.ssrc = rtp_info.ssrc;
+                desc.setup = rtp_info.setup;
+                desc.sdp_info = rtp_info.sdp;
                 std::ostringstream os;
-                if (config[config.size()-1] != '/') {
-                    config.append("/");
-                }
-                for(boost::uint32_t i = 0; i < rtp_transfers_.size(); ++i) {
-                    RtpInfo const & rtp_info = rtp_transfers_[i]->rtp_info();
-                    if (rtp_info.setup) {
-                        os << "url=" << config;
-                        os << "track" << (boost::int32_t)rtp_info.stream_index;
-                        os << ";seq=" << rtp_info.sequence;
-                        os << ";rtptime=" << rtp_info.timestamp;
-                        os << ",";
-                    }
-                }
-                info.desc = os.str();
-                if (!info.desc.empty()) {
-                    info.desc.erase(--info.desc.end(), info.desc.end());
-                }
+                os << "seq=" << rtp_info.sequence;
+                os << ";rtptime=" << rtp_info.timestamp;
+                desc.rtp_info = os.str();
+                desc.to_data(streams[i].format_data);
             }
         }
- 
+
     } // namespace mux
 } // namespace ppbox
