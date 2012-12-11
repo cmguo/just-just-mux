@@ -39,8 +39,8 @@ namespace ppbox
 
         public:
             MuxerBase * open(
-                ppbox::demux::DemuxerBase * demuxer,
-                std::string const & format,
+                ppbox::demux::DemuxerBase * demuxer, 
+                framework::string::Url const & config, 
                 boost::system::error_code & ec);
 
             bool close(

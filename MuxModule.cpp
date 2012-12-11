@@ -41,10 +41,10 @@ namespace ppbox
 
         MuxerBase * MuxModule::open(
             ppbox::demux::DemuxerBase * demuxer,
-            std::string const & format,
+            framework::string::Url const & config, 
             boost::system::error_code & ec)
         {
-            MuxerBase * muxer = MuxerBase::create(format);
+            MuxerBase * muxer = MuxerBase::create(config);
             if (muxer == NULL) {
                 ec = error::format_not_support;
             } else {
