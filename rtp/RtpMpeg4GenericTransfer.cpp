@@ -53,16 +53,18 @@ namespace ppbox
         void RtpMpeg4GenericTransfer::transfer(
             Sample & sample)
         {
-            RtpTransfer::transfer(sample);
+            RtpTransfer::transfer(sample); // call TimeScaleTransfer::transfer
 
             au_header_section_[2] =  (boost::uint8_t)(sample.size >> 5);
             au_header_section_[3] = (boost::uint8_t)((sample.size << 3) /*| (index_++ & 0x07)*/);
 
             RtpTransfer::begin(sample);
-            RtpPacket packet(true, sample.dts, sample.size);
-            packet.push_buffers(boost::asio::buffer(au_header_section_, 4));
-            packet.push_buffers(sample.data);
-            push_packet(packet);
+
+            begin_packet(true, sample.dts, 4 + sample.size);
+            push_buffers(boost::asio::buffer(au_header_section_, 4));
+            push_buffers(sample.data);
+            finish_packet();
+
             RtpTransfer::finish(sample);
         }
 

@@ -45,17 +45,38 @@ namespace ppbox
             void begin(
                 Sample & sample);
 
-            void push_packet(
-                RtpPacket & packet);
-
             void finish(
                 Sample & sample);
+
+            void begin_packet(
+                bool mark, 
+                boost::uint64_t time,
+                boost::uint32_t size);
+
+            template <typename ConstBuffers>
+            void push_buffers(
+                ConstBuffers const & buffers1)
+            {
+                buffers_.insert(buffers_.end(), buffers1.begin(), buffers1.end());
+            }
+
+            template <typename ConstBuffersIterator>
+            void push_buffers(
+                ConstBuffersIterator const & beg, 
+                ConstBuffersIterator const & end)
+            {
+                buffers_.insert(buffers_.end(), beg, end);
+            }
+
+            void finish_packet();
 
         protected:
             char const * const name_;
             RtpHead rtp_head_;
             RtpInfo rtp_info_;
-            RtpSplitContent packets_;
+            std::vector<RtpPacket> packets_;
+            size_t total_size_;
+            std::deque<boost::asio::const_buffer> buffers_;
         };
 
     } // namespace mux

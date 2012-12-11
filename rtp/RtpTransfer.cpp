@@ -75,26 +75,46 @@ namespace ppbox
             Sample & sample)
         {
             packets_.clear();
-            packets_.ustime = sample.ustime + sample.cts_delta * 1000000 / sample.stream_info->time_scale;
+            total_size_ = 0;
+            buffers_.clear();
         }
 
-        void RtpTransfer::push_packet(
-            RtpPacket & packet)
+        void RtpTransfer::begin_packet(
+            bool mark, 
+            boost::uint64_t time,
+            boost::uint32_t size)
         {
+            RtpPacket packet;
             packet.vpxcc = rtp_head_.vpxcc;
-            packet.mpt |= rtp_head_.mpt;
+            packet.mpt = (mark ? 0x80 : 0) | rtp_head_.mpt;
             packet.sequence = framework::system::BytesOrder::host_to_big_endian(rtp_head_.sequence++);
-            packet.timestamp = framework::system::BytesOrder::host_to_big_endian(
-                rtp_head_.timestamp + packet.timestamp);
+            packet.timestamp = framework::system::BytesOrder::host_to_big_endian(rtp_head_.timestamp + (boost::uint32_t)time);
             packet.ssrc = rtp_head_.ssrc;
-            packets_.total_size += packet.size;
+
+            packet.size = size;
+            packet.buf_beg = buffers_.size();
+            total_size_ += (sizeof(RtpHead) + size);
+
             packets_.push_back(packet);
+            buffers_.push_back(boost::asio::buffer(&packets_.back(), sizeof(RtpHead))); // 后面可能还要重新调整
+        }
+
+        void RtpTransfer::finish_packet()
+        {
+            RtpPacket & packet = packets_.back();
+            packet.buf_end = buffers_.size();
         }
 
         void RtpTransfer::finish(
             Sample & sample)
         {
-            sample.size = packets_.total_size;
+            if (boost::asio::buffer_cast<void const *>(buffers_.front()) != &packets_.front()) {
+                for (size_t i = 0; i < packets_.size(); ++i) {
+                    buffers_[packets_[i].buf_beg] = boost::asio::buffer(&packets_[i], sizeof(RtpHead));
+                }
+            }
+            sample.size = total_size_;
+            sample.data.swap(buffers_);
             sample.context = &packets_;
         }
 

@@ -49,28 +49,26 @@ namespace ppbox
             for (; i + 1 < off_segs.size(); i += TS_PACKETS_PER_RTP_PACKET) {
                 // i + 1，这里+1是为了保证至少有一个RTP在后面生成，因为需要mark置为true
                 buf_end = sample.data.begin() + off_segs[i];
-                RtpPacket p(false, sample.dts + sample.cts_delta, TS_PACKETS_PER_RTP_PACKET * TsPacket::PACKET_SIZE);
-                p.push_buffers(buf_beg, buf_end);
-                push_packet(p);
+                begin_packet(false, sample.dts + sample.cts_delta, TS_PACKETS_PER_RTP_PACKET * TsPacket::PACKET_SIZE);
+                push_buffers(buf_beg, buf_end);
+                finish_packet();
                 buf_beg = buf_end;
             }
             i -= TS_PACKETS_PER_RTP_PACKET;
             buf_end = sample.data.end();
-            RtpPacket p(true, sample.dts + sample.cts_delta, (off_segs.size() - i) * TsPacket::PACKET_SIZE);
-            p.push_buffers(buf_beg, buf_end);
-            push_packet(p);
+            begin_packet(true, sample.dts + sample.cts_delta, (off_segs.size() - i) * TsPacket::PACKET_SIZE);
+            push_buffers(buf_beg, buf_end);
+            finish_packet();
             RtpTransfer::finish(sample);
         }
 
         void RtpTsTransfer::header_rtp_packet(
             Sample & sample)
         {
-            //RtpTransfer::begin(sample);
-            packets_.clear();
-            packets_.ustime = 0;
-            RtpPacket p(true, rtp_info_.timestamp, sample.size);
-            p.push_buffers(sample.data);
-            push_packet(p);
+            RtpTransfer::begin(sample);
+            begin_packet(true, rtp_info_.timestamp, sample.size);
+            push_buffers(sample.data);
+            finish_packet();
             RtpTransfer::finish(sample);
         }
 

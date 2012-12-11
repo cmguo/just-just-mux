@@ -66,10 +66,10 @@ namespace ppbox
             std::deque<boost::asio::const_buffer>::const_iterator buf_end = sample.data.end();
             for (size_t i = 0; i + 1 < packets.size(); ++i) { // i + 1, off_segs里面多记录了一个不完整packet的开始位置
                 buf_end = sample.data.begin() + packets[i + 1].off_seg; // 最高位是关键帧标志
-                RtpPacket p(true, sample.time, 1024);
-                p.push_buffers(boost::asio::buffer(header_[packets[i].key_frame >> 31], 4));
-                p.push_buffers(buf_beg, buf_end);
-                push_packet(p);
+                begin_packet(true, sample.time, 4 + 1024);
+                push_buffers(boost::asio::buffer(header_[packets[i].key_frame >> 31], 4));
+                push_buffers(buf_beg, buf_end);
+                finish_packet();
                 buf_beg = buf_end;
             }
             RtpTransfer::finish(sample);
