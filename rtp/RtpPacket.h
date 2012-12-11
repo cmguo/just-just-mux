@@ -3,14 +3,10 @@
 #ifndef _PPBOX_MUX_RTP_RTP_PACKET_H_
 #define _PPBOX_MUX_RTP_RTP_PACKET_H_
 
-#include "ppbox/mux/Transfer.h"
-
 namespace ppbox
 {
     namespace mux
     {
-
-        class RtpTransfer;
 
         struct RtpHead
         {

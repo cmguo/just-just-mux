@@ -48,6 +48,7 @@ namespace ppbox
             void finish(
                 Sample & sample);
 
+        protected:
             void begin_packet(
                 bool mark, 
                 boost::uint64_t time,
@@ -71,12 +72,23 @@ namespace ppbox
             void finish_packet();
 
         protected:
+            void push_rtcp_packet(
+                Sample & sample);
+
+        protected:
             char const * const name_;
             RtpHead rtp_head_;
             RtpInfo rtp_info_;
             std::vector<RtpPacket> packets_;
             size_t total_size_;
             std::deque<boost::asio::const_buffer> buffers_;
+            // for rtcp
+            boost::uint32_t rtcp_interval_;
+            boost::uint32_t num_pkt_;
+            boost::uint32_t num_byte_;
+            boost::uint32_t next_time_;
+            boost::posix_time::time_duration time_start_from_1900_;
+            boost::uint8_t rtcp_buffer_[64];
         };
 
     } // namespace mux

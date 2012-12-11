@@ -3,6 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpTransfer.h"
+#include "ppbox/mux/rtp/RtcpPacket.h"
 
 namespace ppbox
 {
@@ -15,6 +16,11 @@ namespace ppbox
             boost::uint32_t time_scale)
             : TimeScaleTransfer(time_scale)
             , name_(name)
+            , total_size_(0)
+            , rtcp_interval_(3000)
+            , num_pkt_(0)
+            , num_byte_(0)
+            , next_time_(0)
         {
             static size_t g_ssrc = 0;
             if (g_ssrc == 0) {
@@ -45,7 +51,8 @@ namespace ppbox
             conf.register_module(name_)
                 << CONFIG_PARAM_NAME_RDWR("sequence", rtp_head_.sequence)
                 << CONFIG_PARAM_NAME_RDWR("timestamp", rtp_head_.timestamp)
-                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc);
+                << CONFIG_PARAM_NAME_RDWR("ssrc", rtp_head_.ssrc)
+                << CONFIG_PARAM_NAME_RDWR("rtcp_interval", rtcp_interval_);
         }
 
         void RtpTransfer::setup()
@@ -56,17 +63,21 @@ namespace ppbox
         void RtpTransfer::on_seek(
             boost::uint64_t time)
         {
-            if (packets_.empty())
-                return;
-            boost::uint32_t last_timestamp = 
-                framework::system::BytesOrder::host_to_big_endian(packets_[0].timestamp);
-            // std::cout << "last_timestamp = " << last_timestamp << std::endl;
-            rtp_info_.timestamp = last_timestamp + (boost::uint32_t)scale_.scale_out() * 8; // add 8 seconds to keep distance from timestamp before
-            // std::cout << "rtp_info_.timestamp = " << rtp_info_.timestamp << std::endl;
+            if (!packets_.empty()) {
+                boost::uint32_t last_timestamp = 
+                    framework::system::BytesOrder::host_to_big_endian(packets_[0].timestamp);
+                // add 8 seconds to keep distance from timestamp before
+                rtp_info_.timestamp = last_timestamp + (boost::uint32_t)scale_.scale_out() * 8;
+            }
             rtp_head_.timestamp = rtp_info_.timestamp - (boost::uint32_t)scale_.static_transfer(1000, scale_.scale_out(), time);
-            // std::cout << "rtp_head_.timestamp = " << rtp_head_.timestamp << std::endl;
             rtp_info_.sequence = rtp_head_.sequence;
             rtp_info_.seek_time = (boost::uint32_t)time;
+
+            boost::posix_time::ptime t1900(boost::gregorian::date(1900, 1, 1));
+            time_start_from_1900_ = boost::posix_time::microsec_clock::universal_time() - boost::posix_time::milliseconds(time) - t1900;
+            if (rtcp_interval_) {
+                next_time_ = time;
+            }
 
             TimeScaleTransfer::on_seek(time);
         }
@@ -74,9 +85,18 @@ namespace ppbox
         void RtpTransfer::begin(
             Sample & sample)
         {
+            num_pkt_ += packets_.size();
+            num_byte_ += total_size_;
+
             packets_.clear();
             total_size_ = 0;
             buffers_.clear();
+
+            if (rtcp_interval_ && sample.time >= next_time_) {
+                push_rtcp_packet(sample);
+                next_time_ += rtcp_interval_;
+                --num_pkt_;
+            }
         }
 
         void RtpTransfer::begin_packet(
@@ -116,6 +136,51 @@ namespace ppbox
             sample.size = total_size_;
             sample.data.swap(buffers_);
             sample.context = &packets_;
+        }
+
+        void RtpTransfer::push_rtcp_packet(
+            Sample & sample)
+        {
+            size_t length = sizeof(RtcpHead) + sizeof(RtcpSR) 
+                + sizeof(RtcpHead) + sizeof(boost::uint32_t) + sizeof(RtcpSDESItem);
+
+            RtcpHead * head = (RtcpHead *)rtcp_buffer_;
+            head->pre = 0x80; // ver = 2, pad = 0, sc = 0
+            head->type = 200;
+            head->length = framework::system::BytesOrder::host_to_big_endian(boost::uint16_t(6));
+
+            RtcpSR * sr = (RtcpSR *)(head + 1);
+            sr->ssrc = rtp_head_.ssrc;
+            boost::posix_time::ptime t1900(boost::gregorian::date(1900, 1, 1));
+            boost::posix_time::time_duration time_since_1900 = time_start_from_1900_ + boost::posix_time::milliseconds(sample.time);
+            boost::uint32_t ntp_sec = time_since_1900.total_seconds();
+            boost::uint32_t ntp_frac = (time_since_1900 - boost::posix_time::seconds(ntp_sec)).total_microseconds();
+            ntp_frac = (boost::uint32_t)((boost::uint64_t)ntp_frac << 32 / 1000000);
+            sr->ntph = framework::system::BytesOrder::host_to_big_endian(ntp_sec);
+            sr->ntpl = framework::system::BytesOrder::host_to_big_endian(ntp_frac);
+            sr->timestamp = framework::system::BytesOrder::host_to_big_endian(rtp_head_.timestamp);
+            sr->packet = framework::system::BytesOrder::host_to_big_endian(num_pkt_);
+            sr->octet = framework::system::BytesOrder::host_to_big_endian((boost::uint32_t)num_byte_);
+
+            head = (RtcpHead *)(sr + 1);
+            head->pre = 0x81; // ver = 2, pad = 0, sc = 1
+            head->type = 202;
+            head->length = framework::system::BytesOrder::host_to_big_endian(boost::uint16_t(5));
+
+            boost::uint32_t * identifier = (boost::uint32_t *)(head + 1);
+            *identifier = rtp_head_.ssrc;
+
+            RtcpSDESItem * sdes = (RtcpSDESItem *)(identifier + 1);
+            sdes->type = 1;
+            sdes->len = 13;
+            strcpy((char *)sdes->data, "PPBOX12345678");
+
+            RtpPacket packet;
+            packet.size = 0;
+            packet.buf_beg = buffers_.size();
+            buffers_.push_back(boost::asio::buffer(rtcp_buffer_, length));
+            packet.buf_end = buffers_.size();
+            packets_.push_back(packet);
         }
 
     } // namespace mux
