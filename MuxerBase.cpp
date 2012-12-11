@@ -200,6 +200,7 @@ namespace ppbox
         {
             boost::system::error_code ec;
             demuxer_->get_stream_status(status, ec);
+            status.time_range.beg = seek_time_;
         }
 
         bool MuxerBase::close(
