@@ -76,42 +76,34 @@ namespace ppbox
         void RtpH264Transfer::transfer(
             Sample & sample)
         {
-            StreamInfo const & media = *(StreamInfo const *)sample.stream_info;
-            NaluList & nalus = *(NaluList *)sample.context;
+            RtpTransfer::transfer(sample); // call TimeScaleTransfer::transfer
 
-            boost::uint64_t cts_time = 0;
-            if (use_dts_) {
-                cts_time = scale_.transfer(sample.dts);
-                assert(cts_time == sample.dts * 90000 / media.time_scale);
-            } else {
-                cts_time = scale_.transfer(sample.dts + sample.cts_delta);
-            }
-            
-            //std::cout << "video dts = " << sample.dts << std::endl;
-            //std::cout << "video cts_delta = " << sample.cts_delta << std::endl;
-            //std::cout << "video cts = " << cts_time << std::endl;
+            boost::uint64_t rtp_time = use_dts_ ? sample.dts : sample.dts + sample.cts_delta;
 
             RtpTransfer::begin(sample);
 
             MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             // add two sps pps rtp packet
             if (0 != sample_description_index_) {
+                StreamInfo const & media = *(StreamInfo const *)sample.stream_info;
+
                 sample_description_index_ = 0;
                 AvcConfig const & avc_config = ((AvcCodec const *)media.codec)->config();
 
                 for (size_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); ++i) {
-                    begin_packet(false, cts_time, avc_config.sequenceParameterSetNALUnit[i].size());
+                    begin_packet(false, rtp_time, avc_config.sequenceParameterSetNALUnit[i].size());
                     push_buffers(boost::asio::buffer(avc_config.sequenceParameterSetNALUnit[i]));
                     finish_packet();
                 }
                 
                 for (size_t i = 0; i < avc_config.pictureParameterSetNALUnit.size(); ++i) {
-                    begin_packet(false, cts_time, avc_config.pictureParameterSetNALUnit[i].size());
+                    begin_packet(false, rtp_time, avc_config.pictureParameterSetNALUnit[i].size());
                     push_buffers(boost::asio::buffer(avc_config.pictureParameterSetNALUnit[i]));
                     finish_packet();
                 }
             }
 
+            NaluList & nalus = *(NaluList *)sample.context;
             for (size_t i = 0; i < nalus.size(); ++i) {
                 size_t l = nalus[i].size;
                 if (l > (mtu_size_)) {
@@ -122,7 +114,7 @@ namespace ppbox
                     --l;
                     MyBuffersPosition pos = nalus[i].begin;
                     nalus[i].begin.increment_bytes(limit, mtu_size_ - 2);
-                    begin_packet(false, cts_time, mtu_size_);
+                    begin_packet(false, rtp_time, mtu_size_);
                     push_buffers(boost::asio::buffer(prefix_[0], 2));
                     push_buffers(MyBufferIterator(limit, pos, nalus[i].begin), MyBufferIterator());
                     finish_packet();
@@ -132,7 +124,7 @@ namespace ppbox
                     while (l > mtu_size_ - 2) {
                         MyBuffersPosition pos1 = nalus[i].begin;
                         nalus[i].begin.increment_bytes(limit, mtu_size_ - 2);
-                        begin_packet(false, cts_time, mtu_size_);
+                        begin_packet(false, rtp_time, mtu_size_);
                         push_buffers(boost::asio::buffer(prefix_[1], 2));
                         push_buffers(MyBufferIterator(limit, pos1, nalus[i].begin), MyBufferIterator());
                         finish_packet();
@@ -140,12 +132,12 @@ namespace ppbox
                     };
                     prefix_[2][0] = prefix_[1][0];
                     prefix_[2][1] = prefix_[1][1] | 0x40;
-                    begin_packet(i == nalus.size() - 1, cts_time, l + 2);
+                    begin_packet(i == nalus.size() - 1, rtp_time, l + 2);
                     push_buffers(boost::asio::buffer(prefix_[2], 2));
                     push_buffers(MyBufferIterator(limit, nalus[i].begin, nalus[i].end), MyBufferIterator());
                     finish_packet();
                 } else {
-                    begin_packet(i == nalus.size() - 1, cts_time, l);
+                    begin_packet(i == nalus.size() - 1, rtp_time, l);
                     push_buffers(MyBufferIterator(limit, nalus[i].begin, nalus[i].end), MyBufferIterator());
                     finish_packet();
                 }

@@ -42,11 +42,11 @@ namespace ppbox
         void RtpMpegAudioTransfer::transfer(
             Sample & sample)
         {
-            RtpTransfer::transfer(sample);
+            RtpTransfer::transfer(sample); // call TimeScaleTransfer::transfer
 
             RtpTransfer::begin(sample);
 
-            begin_packet(true, scale_.transfer(sample.dts), sample.size);
+            begin_packet(true, sample.dts, sample.size);
             push_buffers(boost::asio::buffer(header_, 4));
             push_buffers(sample.data);
             finish_packet();

@@ -85,9 +85,6 @@ namespace ppbox
         void RtpTransfer::begin(
             Sample & sample)
         {
-            num_pkt_ += packets_.size();
-            num_byte_ += total_size_;
-
             packets_.clear();
             total_size_ = 0;
             buffers_.clear();
@@ -95,8 +92,6 @@ namespace ppbox
             if (rtcp_interval_ && sample.time >= next_time_) {
                 push_rtcp_packet(sample);
                 next_time_ += rtcp_interval_;
-                --num_pkt_;
-                num_byte_ -= total_size_;
             }
         }
 
@@ -115,6 +110,9 @@ namespace ppbox
             packet.size = (sizeof(RtpHead) + size);
             packet.buf_beg = buffers_.size();
             total_size_ += packet.size;
+
+            ++num_pkt_;
+            num_byte_ += size;
 
             packets_.push_back(packet);
             buffers_.push_back(boost::asio::buffer(&packets_.back(), sizeof(RtpHead))); // 后面可能还要重新调整
@@ -156,14 +154,13 @@ namespace ppbox
 
             RtcpSR * sr = (RtcpSR *)(head + 1);
             sr->ssrc = rtp_head_.ssrc;
-            boost::posix_time::ptime t1900(boost::gregorian::date(1900, 1, 1));
             boost::posix_time::time_duration time_since_1900 = time_start_from_1900_ + boost::posix_time::milliseconds(sample.time);
             boost::uint32_t ntp_sec = time_since_1900.total_seconds();
             boost::uint32_t ntp_frac = (time_since_1900 - boost::posix_time::seconds(ntp_sec)).total_microseconds();
-            ntp_frac = (boost::uint32_t)((boost::uint64_t)ntp_frac << 32 / 1000000);
+            ntp_frac = (boost::uint32_t)(((boost::uint64_t)ntp_frac << 32) / 1000000);
             sr->ntph = framework::system::BytesOrder::host_to_big_endian(ntp_sec);
             sr->ntpl = framework::system::BytesOrder::host_to_big_endian(ntp_frac);
-            sr->timestamp = framework::system::BytesOrder::host_to_big_endian(rtp_head_.timestamp);
+            sr->timestamp = framework::system::BytesOrder::host_to_big_endian(rtp_head_.timestamp + (boost::uint32_t)sample.dts);
             sr->packet = framework::system::BytesOrder::host_to_big_endian(num_pkt_);
             sr->octet = framework::system::BytesOrder::host_to_big_endian((boost::uint32_t)num_byte_);
 
@@ -184,7 +181,7 @@ namespace ppbox
             packet.vpxcc = 0;
             packet.mpt = 0;
             packet.sequence = 0;
-            packet.timestamp = 0;
+            packet.timestamp = sr->timestamp;
             packet.ssrc = 0;
             packet.size = length;
             total_size_ += packet.size;
