@@ -96,6 +96,7 @@ namespace ppbox
                 push_rtcp_packet(sample);
                 next_time_ += rtcp_interval_;
                 --num_pkt_;
+                num_byte_ -= total_size_;
             }
         }
 
@@ -111,9 +112,9 @@ namespace ppbox
             packet.timestamp = framework::system::BytesOrder::host_to_big_endian(rtp_head_.timestamp + (boost::uint32_t)time);
             packet.ssrc = rtp_head_.ssrc;
 
-            packet.size = size;
+            packet.size = (sizeof(RtpHead) + size);
             packet.buf_beg = buffers_.size();
-            total_size_ += (sizeof(RtpHead) + size);
+            total_size_ += packet.size;
 
             packets_.push_back(packet);
             buffers_.push_back(boost::asio::buffer(&packets_.back(), sizeof(RtpHead))); // 后面可能还要重新调整
@@ -128,10 +129,14 @@ namespace ppbox
         void RtpTransfer::finish(
             Sample & sample)
         {
-            if (boost::asio::buffer_cast<void const *>(buffers_.front()) != &packets_.front()) {
-                for (size_t i = 0; i < packets_.size(); ++i) {
-                    buffers_[packets_[i].buf_beg] = boost::asio::buffer(&packets_[i], sizeof(RtpHead));
+            for (size_t i = 0; i < packets_.size(); ++i) {
+                if (packets_[i].mpt == 0) { // RTCP
+                    continue;
                 }
+                if (boost::asio::buffer_cast<void const *>(buffers_[packets_[i].buf_beg]) == &packets_[i]) {
+                    break;
+                }
+                buffers_[packets_[i].buf_beg] = boost::asio::buffer(&packets_[i], sizeof(RtpHead));
             }
             sample.size = total_size_;
             sample.data.swap(buffers_);
@@ -176,7 +181,13 @@ namespace ppbox
             strcpy((char *)sdes->data, "PPBOX12345678");
 
             RtpPacket packet;
-            packet.size = 0;
+            packet.vpxcc = 0;
+            packet.mpt = 0;
+            packet.sequence = 0;
+            packet.timestamp = 0;
+            packet.ssrc = 0;
+            packet.size = length;
+            total_size_ += packet.size;
             packet.buf_beg = buffers_.size();
             buffers_.push_back(boost::asio::buffer(rtcp_buffer_, length));
             packet.buf_end = buffers_.size();
