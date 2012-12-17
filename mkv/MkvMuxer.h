@@ -5,13 +5,14 @@
 
 #include  "ppbox/mux/MuxerBase.h"
 
-#include <ppbox/mux/mkv/MkvTransfer.h>
-#include <ppbox/avformat/mkv/MkvObjectType.h>
+#include <boost/asio/streambuf.hpp>
 
 namespace ppbox
 {
     namespace mux
     {
+
+        class MkvTransfer;
 
         class MkvMuxer
             : public MuxerBase
@@ -26,22 +27,21 @@ namespace ppbox
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);
 
+            virtual void file_header(
+                Sample & sample);
+
             virtual void stream_header(
                 boost::uint32_t index, 
                 Sample & sample);
 
-            virtual void file_header(
-                Sample & sample);
-
         private:
             boost::uint8_t stream_number_;
-            MkvTransfer* transfer_;
+            MkvTransfer * transfer_;
+            boost::asio::streambuf header_buf_;
             boost::asio::streambuf track_buf_;
-            boost::asio::streambuf ebml_buf_;
-            boost::asio::streambuf segment_buf_;
-            boost::asio::streambuf track_head_buf_;
-            boost::asio::streambuf cluster_buf_;
         };
+
+        PPBOX_REGISTER_MUXER("mkv", MkvMuxer);
 
     } // namespace mux
 } // namespace ppbox

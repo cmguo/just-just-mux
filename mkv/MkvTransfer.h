@@ -3,9 +3,7 @@
 #ifndef _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 #define _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 
-#include "ppbox/mux/Transfer.h"
-
-#include <ppbox/avformat/mkv/MkvObjectType.h>
+#include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
 #include <boost/asio/streambuf.hpp>
 
@@ -15,7 +13,7 @@ namespace ppbox
     {
 
         class MkvTransfer
-            : public Transfer
+            : public TimeScaleTransfer
         {
         public:
             MkvTransfer();
@@ -32,8 +30,18 @@ namespace ppbox
             virtual void on_seek(
                 boost::uint64_t time);
 
+        public:
+            void file_header(
+                MediaInfo const & info, 
+                size_t stream_obj_size, 
+                boost::asio::streambuf & buf);
+
+            void stream_header(
+                StreamInfo const & info, 
+                boost::asio::streambuf & buf);
+
         private:
-            boost::asio::streambuf block_head_buf_;
+            boost::uint8_t block_head_buf_[64];
             boost::uint64_t add_cluster_flag_;
             boost::uint64_t time_code_;
         };
