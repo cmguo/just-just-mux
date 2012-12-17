@@ -32,9 +32,23 @@ namespace ppbox
                 boost::uint64_t time);
 
         protected:
-            boost::uint8_t time_adjust_;
-            boost::uint32_t sample_per_frame_;
-            framework::system::ScaleTransform scale_;
+            boost::uint32_t scale_out();
+
+        protected:
+            struct Item
+            {
+                Item()
+                    : time_adjust_(0)
+                    , sample_per_frame_(0)
+                {
+                }
+
+                boost::uint8_t time_adjust_;
+                boost::uint32_t sample_per_frame_;
+                framework::system::ScaleTransform scale_;
+            };
+            boost::uint32_t scale_out_;
+            std::vector<Item> items_;
         };
 
     } // namespace mux

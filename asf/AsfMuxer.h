@@ -27,11 +27,11 @@ namespace ppbox
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);
 
-            void stream_header(
-                boost::uint32_t index, 
+            void file_header(
                 Sample & sample);
 
-            void file_header(
+            void stream_header(
+                boost::uint32_t index, 
                 Sample & sample);
 
         private:

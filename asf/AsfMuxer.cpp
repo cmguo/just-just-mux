@@ -46,12 +46,6 @@ namespace ppbox
              transfer_->stream_header(info, stream_buf_);
         }
 
-        void AsfMuxer::stream_header(
-            boost::uint32_t index, 
-            Sample & sample)
-        {
-        }
-
         void AsfMuxer::file_header(
             Sample & sample)
         {
@@ -63,6 +57,12 @@ namespace ppbox
             sample.data.push_back(file_buf_.data());
             sample.data.push_back(stream_buf_.data());
             sample.data.push_back(data_buf_.data());
+        }
+
+        void AsfMuxer::stream_header(
+            boost::uint32_t index, 
+            Sample & sample)
+        {
         }
 
     } // namespace mux

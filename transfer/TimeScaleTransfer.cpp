@@ -12,8 +12,7 @@ namespace ppbox
 
         TimeScaleTransfer::TimeScaleTransfer(
             boost::uint32_t time_scale)
-            : time_adjust_(0)
-            , scale_(1, time_scale)
+            : scale_out_(time_scale)
         {
         }
 
@@ -24,22 +23,26 @@ namespace ppbox
         void TimeScaleTransfer::transfer(
             StreamInfo & info)
         {
+            if (info.index >= items_.size()) {
+                items_.resize(info.index + 1);
+            }
+            Item & item = items_[info.index];
             if (info.type == MEDIA_TYPE_VIDE) {
-                scale_.reset(info.time_scale, scale_.scale_out());
+                item.scale_.reset(info.time_scale, scale_out_);
             } else {
                 if (info.time_scale < info.audio_format.sample_rate) {
-                    if (scale_.scale_out() == 1) {
-                        scale_.reset(1, info.audio_format.sample_rate);
+                    if (scale_out_ == 1) {
+                        scale_out_ = info.audio_format.sample_rate;
                     }
-                    scale_.reset(info.audio_format.sample_rate, scale_.scale_out());
-                    time_adjust_ = 1;
+                    item.scale_.reset(info.audio_format.sample_rate, scale_out_);
+                    item.time_adjust_ = 1;
                      // TO DO:
-                    sample_per_frame_ = 1024;
+                    item.sample_per_frame_ = 1024;
                 } else {
-                    if (scale_.scale_out() == 1) {
-                        scale_.reset(1, info.time_scale);
+                    if (scale_out_ == 1) {
+                        scale_out_ = info.time_scale;
                     }
-                    scale_.reset(info.time_scale, scale_.scale_out());
+                    item.scale_.reset(info.time_scale, scale_out_);
                 }
             }
         }
@@ -47,19 +50,20 @@ namespace ppbox
         void TimeScaleTransfer::transfer(
             Sample & sample)
         {
-            StreamInfo const & media = 
+            StreamInfo const & info = 
                 *(StreamInfo const *)sample.stream_info;
             //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
-            if (time_adjust_ == 0) {
-                sample.dts = scale_.transfer(sample.dts);
-                boost::uint64_t cts = scale_.inc(sample.cts_delta);
+            Item & item = items_[info.index];
+            if (item.time_adjust_ == 0) {
+                sample.dts = item.scale_.transfer(sample.dts);
+                boost::uint64_t cts = item.scale_.inc(sample.cts_delta);
                 sample.cts_delta = (boost::uint32_t)(cts - sample.dts);
-            } else if (time_adjust_ == 1) {
-                sample.dts = scale_.static_transfer(media.time_scale, scale_.scale_out(), sample.dts);
-                scale_.set(sample.dts);
-                time_adjust_ = 2;
+            } else if (item.time_adjust_ == 1) {
+                sample.dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
+                item.scale_.set(sample.dts);
+                item.time_adjust_ = 2;
             } else {
-                sample.dts = scale_.inc(sample_per_frame_);
+                sample.dts = item.scale_.inc(item.sample_per_frame_);
             }
             //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
         }
@@ -67,8 +71,16 @@ namespace ppbox
         void TimeScaleTransfer::on_seek(
             boost::uint64_t time)
         {
-            if (time_adjust_ == 2)
-                time_adjust_ = 1;
+            for (size_t i = 0; i < items_.size(); ++i) {
+                Item & item = items_[i];
+                if (item.time_adjust_ == 2)
+                    item.time_adjust_ = 1;
+            }
+        }
+
+        boost::uint32_t TimeScaleTransfer::scale_out()
+        {
+            return scale_out_;
         }
 
     } // namespace mux

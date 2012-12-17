@@ -33,7 +33,7 @@ namespace ppbox
         void RtpAsfTransfer::transfer(
             StreamInfo & info)
         {
-            RtpTransfer::transfer(info);
+            //RtpTransfer::transfer(info);
 
             std::string sdp;
             if (info.type == MEDIA_TYPE_VIDE) {
@@ -49,8 +49,6 @@ namespace ppbox
                 + framework::string::format(info.index)
                 + "\r\n";
             rtp_info_.sdp += sdp;
-
-            scale_.reset(1000, 1000);
         }
 
         void RtpAsfTransfer::transfer(

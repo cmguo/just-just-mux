@@ -42,6 +42,8 @@ namespace ppbox
         void RtpH264Transfer::transfer(
             StreamInfo & info)
         {
+            RtpTransfer::transfer(info); // call TimeScaleTransfer::transfer
+
             using namespace framework::string;
             std::string map_id_str = format(rtp_head_.mpt);
 
@@ -69,8 +71,6 @@ namespace ppbox
             rtp_info_.sdp += "a=control:track" + format(info.index) + "\r\n";
 
             rtp_info_.stream_index = info.index;
-
-            scale_.reset(info.time_scale, 90000);
         }
 
         void RtpH264Transfer::transfer(

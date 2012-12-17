@@ -67,9 +67,10 @@ namespace ppbox
                 boost::uint32_t last_timestamp = 
                     framework::system::BytesOrder::host_to_big_endian(packets_[0].timestamp);
                 // add 8 seconds to keep distance from timestamp before
-                rtp_info_.timestamp = last_timestamp + (boost::uint32_t)scale_.scale_out() * 8;
+                rtp_info_.timestamp = last_timestamp + (boost::uint32_t)scale_out() * 8;
             }
-            rtp_head_.timestamp = rtp_info_.timestamp - (boost::uint32_t)scale_.static_transfer(1000, scale_.scale_out(), time);
+            rtp_head_.timestamp = rtp_info_.timestamp 
+                - (boost::uint32_t)framework::system::ScaleTransform::static_transfer(1000, scale_out(), time);
             rtp_info_.sequence = rtp_head_.sequence;
             rtp_info_.seek_time = (boost::uint32_t)time;
 
