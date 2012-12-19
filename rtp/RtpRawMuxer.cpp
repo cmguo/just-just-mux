@@ -6,6 +6,7 @@
 #include "ppbox/mux/transfer/StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/ParseH264Transfer.h"
+#include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 #include "ppbox/mux/rtp/RtpMpeg4GenericTransfer.h"
 #include "ppbox/mux/rtp/RtpMpegAudioTransfer.h"
 #include "ppbox/mux/rtp/RtpH264Transfer.h"
@@ -51,10 +52,16 @@ namespace ppbox
                 if (info.sub_type == AUDIO_TYPE_MP1A) {
                     rtp_transfer = new RtpMpegAudioTransfer;
                 } else {
+                    if (info.format_type == StreamInfo::audio_aac_adts) {
+                        transfer = new MpegAudioAdtsDecodeTransfer();
+                        transfers.push_back(transfer);
+                    }
                     rtp_transfer = new RtpMpeg4GenericTransfer;
                 }
                 transfers.push_back(rtp_transfer);
                 add_rtp_transfer(rtp_transfer);
+            } else {
+                add_rtp_transfer(NULL);
             }
         }
 

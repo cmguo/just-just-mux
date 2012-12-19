@@ -46,7 +46,7 @@ namespace ppbox
 
             RtpTransfer::begin(sample);
 
-            begin_packet(true, sample.dts, sample.size);
+            begin_packet(true, sample.dts, 4 + sample.size);
             push_buffers(boost::asio::buffer(header_, 4));
             push_buffers(sample.data);
             finish_packet();

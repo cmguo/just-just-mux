@@ -35,6 +35,8 @@ namespace ppbox
         {
             ec = framework::system::logic_error::out_of_range;
             for(size_t i = 0; i < rtp_transfers_.size(); ++i) {
+                if (rtp_transfers_[i] == NULL)
+                    continue;
                 RtpInfo const & rtp_info = rtp_transfers_[i]->rtp_info();
                 if (rtp_info.stream_index == index) {
                     rtp_transfers_[i]->setup();
@@ -81,6 +83,8 @@ namespace ppbox
         {
             MuxerBase::media_info(info);
             for(boost::uint32_t i = 0; i < rtp_transfers_.size(); ++i) {
+                if (rtp_transfers_[i] == NULL)
+                    continue;
                 info.format_data += rtp_transfers_[i]->rtp_info().sdp;
             }
         }
@@ -90,6 +94,8 @@ namespace ppbox
         {
             MuxerBase::stream_info(streams);
             for(boost::uint32_t i = 0; i < rtp_transfers_.size(); ++i) {
+                if (rtp_transfers_[i] == NULL)
+                    continue;
                 RtpInfo const & rtp_info = rtp_transfers_[i]->rtp_info();
                 RtpStreamDesc desc;
                 desc.stream = "track" + framework::string::format(rtp_info.stream_index);
