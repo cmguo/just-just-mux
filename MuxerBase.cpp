@@ -166,6 +166,7 @@ namespace ppbox
                 read_flag_ |= f_head;
                 on_seek(time);
             } else if (ec ==boost::asio::error::would_block) {
+                seek_time_ = time;
                 read_flag_ |= f_head;
                 read_flag_ |= f_seek;
             }
@@ -178,6 +179,21 @@ namespace ppbox
         {
             boost::uint64_t seek_time = (offset * media_info_.duration) / media_info_.file_size;
             return time_seek(seek_time, ec);
+        }
+
+        boost::uint64_t MuxerBase::check_seek(
+            boost::system::error_code & ec)
+        {
+            if (read_flag_ & f_seek) {
+                boost::uint64_t time = demuxer_->check_seek(ec);
+                if (!ec) {
+                    on_seek(time);
+                    read_flag_ &= ~f_seek;
+                }
+            } else {
+                ec.clear();
+            }
+            return seek_time_;
         }
 
         void MuxerBase::media_info(
@@ -199,8 +215,10 @@ namespace ppbox
             StreamStatus & status) const
         {
             boost::system::error_code ec;
-            demuxer_->get_stream_status(status, ec);
-            status.time_range.beg = seek_time_;
+            StreamStatus status1;
+            demuxer_->get_stream_status(status1, ec);
+            status1.time_range.beg = seek_time_;
+            status = status1;
         }
 
         bool MuxerBase::close(

@@ -58,6 +58,9 @@ namespace ppbox
                 boost::uint64_t & offset,
                 boost::system::error_code & ec);
 
+            virtual boost::uint64_t check_seek(
+                boost::system::error_code & ec);
+
             bool close(
                 boost::system::error_code & ec);
 
