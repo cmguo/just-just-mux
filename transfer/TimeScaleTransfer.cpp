@@ -58,7 +58,7 @@ namespace ppbox
                 sample.dts = item.scale_.transfer(sample.dts);
                 boost::uint64_t cts = item.scale_.inc(sample.cts_delta);
                 sample.cts_delta = (boost::uint32_t)(cts - sample.dts);
-            } else if (item.time_adjust_ == 1) {
+            } else if (item.time_adjust_ == 1 || (sample.flags & sample.discontinuity)) {
                 sample.dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
                 item.scale_.set(sample.dts);
                 item.time_adjust_ = 2;
