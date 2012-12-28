@@ -23,7 +23,7 @@ namespace ppbox
         void RtpStreamDesc::to_data(
             std::vector<boost::uint8_t> & desc)
         {
-            desc.resize(1024);
+            desc.resize(sdp_info.size() + rtp_info.size() + 1024);
             util::archive::ArchiveBuffer<> buf((char *)&desc.front(), desc.size());
             util::archive::TextOArchive<> oa(buf);
             oa << (*this);
