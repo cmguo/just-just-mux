@@ -258,9 +258,6 @@ namespace ppbox
                 // TODO: add codec
                 if (stream.codec == NULL) {
                     stream.codec = Codec::create(stream.sub_type, stream.format_data);
-                    if (stream.codec) {
-                        codecs_.push_back(stream.codec);
-                    }
                 }
                 add_stream(stream, transfers_[i]);
                 streams_.push_back(stream);
@@ -311,9 +308,6 @@ namespace ppbox
 
         void MuxerBase::close()
         {
-            for (boost::uint32_t i = 0; i < codecs_.size(); ++i) {
-                delete codecs_[i];
-            }
             for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
                 for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
                     delete transfers_[i][j];

@@ -6,6 +6,7 @@
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
+#include <ppbox/avformat/stream/SampleBuffers.h>
 
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/BuffersCopy.h>
@@ -67,8 +68,8 @@ namespace ppbox
         void AsfTransfer::transfer(
             Sample & sample) 
         {
-            MyBuffersLimit limit(sample.data.begin(), sample.data.end());
-            MyBuffersPosition pos1(limit);
+            SampleBuffers::BuffersPosition pos1(sample.data.begin(), sample.data.end());
+            SampleBuffers::BuffersPosition end(sample.data.end());
             boost::uint32_t sample_remain = sample.size;
 
             packets_[0] = packets_.back();
@@ -76,31 +77,37 @@ namespace ppbox
 
             while (0 != sample_remain) {
                 if(sample_remain + PAYLOAD_HEAD_LENGTH * 2 < packet_left_) {
-                    MyBuffersPosition pos2 = pos1;
-                    pos1.increment_bytes(limit, sample_remain);
+                    SampleBuffers::BuffersPosition pos2 = pos1;
+                    pos1.increment_bytes(end, sample_remain);
                     if (single_payload_) {
-                        add_payload(sample, limit, pos2, pos1,
+                        add_payload(sample, SampleBuffers::range_buffers(pos2, pos1), 
+                            pos2.skipped_bytes(), pos1.skipped_bytes() - pos2.skipped_bytes(), 
                             packet_left_ - (sample_remain + PAYLOAD_HEAD_LENGTH), false);
                         add_packet(sample, false);
                     } else {
-                        add_payload(sample, limit, pos2, pos1, 0, true);
+                        add_payload(sample, SampleBuffers::range_buffers(pos2, pos1), 
+                            pos2.skipped_bytes(), pos1.skipped_bytes() - pos2.skipped_bytes(), 
+                            0, true);
                     }
                     sample_remain = 0;
                 } else if(sample_remain + PAYLOAD_HEAD_LENGTH < packet_left_) {
-                    MyBuffersPosition pos2 = pos1;
-                    pos1.increment_bytes(limit, sample_remain);
-                    add_payload(sample, limit, pos2, pos1, 
+                    SampleBuffers::BuffersPosition pos2 = pos1;
+                    pos1.increment_bytes(end, sample_remain);
+                    add_payload(sample, SampleBuffers::range_buffers(pos2, pos1), 
+                        pos2.skipped_bytes(), pos1.skipped_bytes() - pos2.skipped_bytes(), 
                         packet_left_ - (sample_remain + PAYLOAD_HEAD_LENGTH), false);
                     sample_remain = 0;
                     assert(packet_left_ == 0);
                     add_packet(sample, true);
                 } else {
-                    MyBuffersPosition pos2 = pos1;
-                    pos1.increment_bytes(limit, packet_left_ - PAYLOAD_HEAD_LENGTH);
+                    SampleBuffers::BuffersPosition pos2 = pos1;
+                    pos1.increment_bytes(end, packet_left_ - PAYLOAD_HEAD_LENGTH);
                     sample_remain -= (packet_left_ - PAYLOAD_HEAD_LENGTH);
-                    add_payload(sample, limit, pos2, pos1, 0, false);
+                    add_payload(sample, SampleBuffers::range_buffers(pos2, pos1), 
+                        pos2.skipped_bytes(), pos1.skipped_bytes() - pos2.skipped_bytes(), 
+                        0, false);
                     assert(packet_left_ == 0);
-                    add_packet(sample, sample_remain < packet_length_ - PACKET_HEAD_LENGTH - PAYLOAD_HEAD_LENGTH * 2);
+                    add_packet(sample, sample_remain < (packet_length_ - PACKET_HEAD_LENGTH - PAYLOAD_HEAD_LENGTH * 2));
                 }
             }//while
 
@@ -209,7 +216,7 @@ namespace ppbox
                 streams_object.Video_Media_Type.FormatData.BitsPerPixelCount = 24;
                 if (info.sub_type == VIDEO_TYPE_AVC1) {
                     streams_object.Video_Media_Type.FormatData.CompressionID = MAKE_FOURC_TYPE('H', '2', '6', '4');
-                    ((AvcCodec *)info.codec)->config_helper().to_es_data(
+                    ((AvcCodec *)info.codec.get())->config_helper().to_es_data(
                         streams_object.Video_Media_Type.FormatData.CodecSpecificData);
                 } else {
                     streams_object.Video_Media_Type.FormatData.CompressionID = 0;
@@ -307,12 +314,13 @@ namespace ppbox
             data_.push_back(boost::asio::buffer(asf_buf, PACKET_HEAD_LENGTH));
         }
 
+        template <typename BuffersContainer>
         void AsfTransfer::add_payload(//构造payload头部
             Sample & sample,
-            MyBuffersLimit & limit,
-            MyBuffersPosition & pos1,
-            MyBuffersPosition & pos2,
-            size_t padding_size,
+            BuffersContainer & buffers,
+            boost::uint32_t payload_offset, 
+            boost::uint32_t payload_size, 
+            boost::uint8_t padding_size,
             bool copy_flag)
         {
             ASF_PayloadHeader payload_header;
@@ -331,7 +339,6 @@ namespace ppbox
             p_pyd_num = reinterpret_cast<P_NUM *>(head_buf_queue_.get_mark() + PACKET_HEAD_LENGTH - 1);
             p_pyd_num->PayloadNum += 1;
 
-            size_t payload_size = pos2.skipped_bytes() - pos1.skipped_bytes();
             //payload头部构造
             payload_header.StreamNum = sample.itrack + 1;
             if( Sample::sync & sample.flags ) {
@@ -341,7 +348,7 @@ namespace ppbox
                 payload_header.KeyFrameBit = 0;
             }
             payload_header.MediaObjNum = media_number_[sample.itrack];
-            payload_header.OffsetIntoMediaObj = pos1.skipped_bytes();
+            payload_header.OffsetIntoMediaObj = payload_offset;
             payload_header.ReplicatedDataLen = 8;
             payload_header.MediaObjectSize = sample.size;
             payload_header.PresTime = (boost::uint32_t)sample.time + 2000;
@@ -363,10 +370,10 @@ namespace ppbox
                 assert(packet_left_< packet_length_);
                 util::buffers::buffers_copy(
                     boost::asio::buffer(data_ptr_ + packet_length_ - packet_left_, payload_size), 
-                    MyBuffers(MyBufferIterator(limit, pos1, pos2)));
+                    buffers);
                 data_.push_back(boost::asio::buffer(data_ptr_ + packet_length_ - packet_left_, payload_size));
             } else {
-                data_.insert(data_.end(), MyBufferIterator(limit, pos1, pos2), MyBufferIterator());
+                data_.insert(data_.end(), buffers.begin(), buffers.end());
             }
 
             assert(packet_left_ >= payload_size);

@@ -11,6 +11,7 @@ using namespace ppbox::avformat;
 #include <framework/string/Base64.h>
 
 #include <util/buffers/BuffersCopy.h>
+#include <util/buffers/BuffersSize.h>
 
 namespace ppbox
 {

@@ -2,7 +2,6 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/ts/PesTransfer.h"
-#include "ppbox/mux/detail/BitsReader.h"
 
 #include <ppbox/avformat/ts/PesPacket.h>
 using namespace ppbox::avformat;

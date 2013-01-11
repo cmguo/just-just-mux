@@ -2,11 +2,9 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/StreamJoinTransfer.h"
-#include "ppbox/mux/detail/BitsReader.h"
 
-#include <ppbox/avformat/codec/avc/AvcCodec.h>
-#include <ppbox/avformat/codec/avc/AvcConfig.h>
 #include <ppbox/avformat/codec/avc/AvcNalu.h>
+#include <ppbox/avformat/codec/avc/AvcCodec.h>
 using namespace ppbox::avformat;
 
 namespace ppbox
@@ -18,10 +16,6 @@ namespace ppbox
             : sample_description_index_(boost::uint32_t(-1))
         {
             // start code
-            nalu_start_code_.push_back(0);
-            nalu_start_code_.push_back(0);
-            nalu_start_code_.push_back(0);
-            nalu_start_code_.push_back(1);
         }
 
         StreamJoinTransfer::~StreamJoinTransfer()
@@ -29,12 +23,13 @@ namespace ppbox
         }
 
         void StreamJoinTransfer::transfer(
-            StreamInfo & media)
+            StreamInfo & info)
         {
             AvcConfigHelper const & avc_config = 
-                ((AvcCodec const *)media.codec)->config_helper();
+                ((AvcCodec const *)info.codec.get())->config_helper();
             // access unit delimiter
-            access_unit_delimiter_ = nalu_start_code_;
+            boost::uint8_t nalu_start_code[] = {0, 0, 0, 1};
+            access_unit_delimiter_.assign(nalu_start_code, nalu_start_code + 4);
             access_unit_delimiter_.push_back(9);
             access_unit_delimiter_.push_back(0xF0);
             // sps
@@ -46,15 +41,17 @@ namespace ppbox
         void StreamJoinTransfer::transfer(
             Sample & sample)
         {
+            std::vector<NaluBuffer> & nalus = 
+                *(std::vector<NaluBuffer> *)sample.context;
+
             //packet -> es
             if (0 != sample_description_index_) {
                 sample_description_index_ = 0;
-                NaluList const & nalus = 
-                    *(NaluList const * )sample.context;
                 bool need_aud = true;
                 bool need_sps_pps = true;
                 for (boost::uint32_t i = 0; i < nalus.size(); ++i) {
-                    NaluHeader nalu_header(nalus[i].begin.dereference_byte());
+                    NaluBuffer const & nalu = nalus[i];
+                    NaluHeader nalu_header(nalu.begin.dereference_byte());
                     if (nalu_header.nal_unit_type == NaluHeader::AccessUnitDelimiter) {
                         need_aud = false;
                     }
@@ -74,42 +71,18 @@ namespace ppbox
                 }
             }
 
-            std::deque<boost::asio::const_buffer> datas;
             sample.size = 0;
-            datas.push_back(boost::asio::buffer(access_unit_delimiter_));
-            sample.size += access_unit_delimiter_.size();
-            //if (sample.flags & demux::Sample::sync) { 
-            //    datas.push_back(boost::asio::buffer(sps_pps_));
-            //    sample.size += sps_pps_.size();
-            //}
-            NaluList const & nalus = 
-                *(NaluList const * )sample.context;
-            util::buffers::BuffersLimit<ConstBuffers::const_iterator> limit(sample.data.begin(), sample.data.end());
-            MyBufferIterator end;
-            for (boost::uint32_t i = 0; i < nalus.size(); ++i) {
-                NaluHeader nalu_header(nalus[i].begin.dereference_byte());
-                MyBufferIterator iter(limit, nalus[i].begin, nalus[i].end);
-                //if (nalu_header.nal_unit_type == NaluHeader::AccessUnitDelimiter) {
-                //    continue;
-                //}
-                //if (nalu_header.nal_unit_type == NaluHeader::SPS) {
-                //    continue;
-                //}
-                //if (nalu_header.nal_unit_type == NaluHeader::PPS) {
-                //    continue;
-                //}
-                if (nalu_header.nal_unit_type == NaluHeader::SEI) {
-                    continue;
-                }
-                if (nalu_header.nal_unit_type == NaluHeader::IDR) {
-                    datas.push_back(boost::asio::buffer(sps_pps_));
-                    sample.size += sps_pps_.size();
-                }
-                datas.push_back(boost::asio::buffer(nalu_start_code_));
-                datas.insert(datas.end(), iter, end);
-                sample.size += nalus[i].size + 4;
+            helper_.nalus(nalus);
+            helper_.to_stream(sample.size, sample.data);
+
+            if (sample.flags & demux::Sample::sync) { 
+                sample.data.push_front(boost::asio::buffer(sps_pps_));
+                sample.size += sps_pps_.size();
             }
-            sample.data.swap(datas);
+            sample.data.push_front(boost::asio::buffer(access_unit_delimiter_));
+            sample.size += access_unit_delimiter_.size();
+
+            sample.context = NULL;
         }
 
     } // namespace mux

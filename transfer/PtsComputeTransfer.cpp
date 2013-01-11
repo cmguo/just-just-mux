@@ -2,13 +2,13 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/PtsComputeTransfer.h"
-#include "ppbox/mux/detail/BitsReader.h"
 
 #include <ppbox/avformat/stream/BitsIStream.h>
 #include <ppbox/avformat/stream/BitsOStream.h>
 #include <ppbox/avformat/stream/FormatBuffer.h>
 #include <ppbox/avformat/stream/BitsBuffer.h>
 #include <ppbox/avformat/codec/avc/AvcSliceType.h>
+#include <ppbox/avformat/codec/avc/AvcNaluBuffer.h>
 using namespace ppbox::avformat;
 
 #include <util/buffers/CycleBuffers.h>
@@ -22,12 +22,9 @@ namespace ppbox
         static bool parse(
             T & t, 
             Sample & s, 
-            Nalu const & n)
+            NaluBuffer const & n)
         {
-            util::buffers::BuffersLimit<ConstBuffers::const_iterator> limit(s.data.begin(), s.data.end());
-            MyBufferIterator iter(limit, n.begin, n.end);
-            MyBuffers buffers(iter);
-            util::buffers::CycleBuffers<MyBuffers, boost::uint8_t> buf(buffers);
+            util::buffers::CycleBuffers<SampleBuffers::RangeBuffers, boost::uint8_t> buf(n.buffers());
             buf.commit(n.size);
             BitsBuffer<boost::uint8_t> bits_buf(buf);
             BitsIStream<boost::uint8_t> bits_reader(bits_buf);
@@ -48,6 +45,10 @@ namespace ppbox
             if (sample.cts_delta != boost::uint32_t(-1)) {
                 return;
             }
+
+            std::vector<NaluBuffer> & nalus = 
+                *(std::vector<NaluBuffer> *)sample.context;
+
             if (sample.flags & Sample::sync) {
                 idr_dts_ = sample.dts;
                 is_last_a_idr_ = true;
@@ -55,23 +56,21 @@ namespace ppbox
                 frame_scale_ = boost::uint32_t(sample.dts - idr_dts_);
                 is_last_a_idr_ = false;
             }
-            NaluList const & nalus = 
-                *(NaluList const * )sample.context;
-            util::buffers::BuffersLimit<ConstBuffers::const_iterator> limit(sample.data.begin(), sample.data.end());
             for (size_t i = 0; i < nalus.size(); ++i) {
-                NaluHeader nalu_header(nalus[i].begin.dereference_byte());
+                NaluBuffer const & nalu = nalus[i];
+                NaluHeader nalu_header(nalu.begin.dereference_byte());
                 if (NaluHeader::SPS == nalu_header.nal_unit_type) {
                     SeqParameterSetRbsp sps;
-                    parse(sps, sample, nalus[i]);
+                    parse(sps, sample, nalu);
                     spss_.insert(std::make_pair(sps.sps_seq_parameter_set_id, sps));
                 } else if (NaluHeader::PPS == nalu_header.nal_unit_type) {
                     PicParameterSetRbsp pps(spss_);
-                    parse(pps, sample, nalus[i]);
+                    parse(pps, sample, nalu);
                     ppss_.insert(std::make_pair(pps.pps_pic_parameter_set_id, pps));
                 } else if (NaluHeader::UNIDR == nalu_header.nal_unit_type
                     || NaluHeader::IDR == nalu_header.nal_unit_type) {
                     SliceLayerWithoutPartitioningRbsp slice(ppss_);
-                    parse(slice, sample, nalus[i]);
+                    parse(slice, sample, nalu);
                     sample.cts_delta = (boost::uint32_t)(idr_dts_ + frame_scale_ * slice.slice_header.pic_order_cnt_lsb / 2 - sample.dts);
                     // iphoneÂ¼ÖÆÊ¹ÓÃ
                     if (slice.slice_header.slice_type % 5 == 2) {

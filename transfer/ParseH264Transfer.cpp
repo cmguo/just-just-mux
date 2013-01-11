@@ -2,7 +2,6 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/ParseH264Transfer.h"
-#include "ppbox/mux/detail/BitsReader.h"
 
 #include <ppbox/avformat/stream/BitsOStream.h>
 #include <ppbox/avformat/stream/BitsIStream.h>
@@ -10,6 +9,7 @@
 #include <ppbox/avformat/codec/avc/AvcConfig.h>
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
 #include <ppbox/avformat/codec/avc/AvcType.h>
+#include <ppbox/avformat/codec/avc/AvcNaluBuffer.h>
 #include <ppbox/avformat/stream/FormatBuffer.h>
 using namespace ppbox::avformat;
 
@@ -28,7 +28,7 @@ namespace ppbox
 
         void ParseH264Transfer::transfer(
             StreamInfo & info)        {            AvcConfig const & avc_config = 
-                ((AvcCodec const *)info.codec)->config();
+                ((AvcCodec const *)info.codec.get())->config();
             for (boost::uint32_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); i++) {
                 std::vector<boost::uint8_t> sps_vec = avc_config.sequenceParameterSetNALUnit[i];
                 FormatBuffer buf((boost::uint8_t *)&sps_vec[0], sps_vec.size(), sps_vec.size());
@@ -65,20 +65,17 @@ namespace ppbox
         void ParseH264Transfer::transfer(
             Sample & sample)
         {
-            NaluList const & nalus = 
-                *(NaluList const * )sample.context;
-            util::buffers::BuffersLimit<ConstBuffers::const_iterator> limit(sample.data.begin(), sample.data.end());
+            std::vector<NaluBuffer> & nalus = 
+                *(std::vector<NaluBuffer> *)sample.context;
+
             std::cout << "Frame: " << " dts: " << sample.dts << ",\t cts: " << sample.dts + sample.cts_delta << std::endl;
-            for (boost::uint32_t i = 0; i < nalus.size(); ++i) {
-                NaluHeader nalu_header(nalus[i].begin.dereference_byte());
-                std::cout << "Nalu type: " 
-                    << NaluHeader::nalu_type_str[nalu_header.nal_unit_type] 
-                << std::endl;
-                MyBufferIterator iter(limit, nalus[i].begin, nalus[i].end);
+            for (boost::uint32_t i = 0; i < nalus.size(); ++i) {                NaluBuffer const & nalu = nalus[i];
+                NaluHeader nalu_header(nalu.begin.dereference_byte());
+                std::cout << "Nalu type: " << NaluHeader::nalu_type_str[nalu_header.nal_unit_type] << std::endl;
+
                 if (nalu_header.nal_unit_type == NaluHeader::SEI) {
                     std::cout << "Sei: size = " << nalus[i].size << std::endl;
-                    MyBuffers buffers(iter);
-                    util::buffers::CycleBuffers<MyBuffers, boost::uint8_t> buf(buffers);
+                    util::buffers::CycleBuffers<NaluBuffer::RangeBuffers, boost::uint8_t> buf(nalu.buffers());
                     buf.commit(nalus[i].size);
                     BitsBuffer<boost::uint8_t> bits_buf(buf);
                     BitsIStream<boost::uint8_t> bits_reader(bits_buf);
@@ -87,8 +84,7 @@ namespace ppbox
                 }
                 if (nalu_header.nal_unit_type == NaluHeader::UNIDR
                     || nalu_header.nal_unit_type == NaluHeader::IDR) {
-                        MyBuffers buffers(iter);
-                        util::buffers::CycleBuffers<MyBuffers, boost::uint8_t> buf(buffers);
+                        util::buffers::CycleBuffers<NaluBuffer::RangeBuffers, boost::uint8_t> buf(nalu.buffers());
                         buf.commit(nalus[i].size);
                         BitsBuffer<boost::uint8_t> bits_buf(buf);
                         BitsIStream<boost::uint8_t> bits_reader(bits_buf);

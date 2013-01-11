@@ -3,10 +3,10 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/rtp/RtpH264Transfer.h"
-#include "ppbox/mux/detail/BitsReader.h" // for Nalu
 
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
 #include <ppbox/avformat/codec/avc/AvcConfig.h>
+#include <ppbox/avformat/codec/avc/AvcNaluBuffer.h>
 using namespace ppbox::avformat;
 
 #include <framework/string/Base16.h>
@@ -47,7 +47,7 @@ namespace ppbox
             using namespace framework::string;
             std::string map_id_str = format(rtp_head_.mpt);
 
-            AvcCodec & codec = *(AvcCodec *)info.codec;
+            AvcCodec & codec = *(AvcCodec *)info.codec.get();
             std::vector<boost::uint8_t> sps_data = codec.config().sequenceParameterSetNALUnit[0];
             std::vector<boost::uint8_t> pps_data = codec.config().pictureParameterSetNALUnit[0];
 
@@ -82,13 +82,12 @@ namespace ppbox
 
             RtpTransfer::begin(sample);
 
-            MyBuffersLimit limit(sample.data.begin(), sample.data.end());
             // add two sps pps rtp packet
             if (0 != sample_description_index_) {
                 StreamInfo const & media = *(StreamInfo const *)sample.stream_info;
 
                 sample_description_index_ = 0;
-                AvcConfig const & avc_config = ((AvcCodec const *)media.codec)->config();
+                AvcConfig const & avc_config = ((AvcCodec const *)media.codec.get())->config();
 
                 for (size_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); ++i) {
                     begin_packet(false, rtp_time, avc_config.sequenceParameterSetNALUnit[i].size());
@@ -103,30 +102,32 @@ namespace ppbox
                 }
             }
 
-            NaluList & nalus = *(NaluList *)sample.context;
+            std::vector<NaluBuffer> & nalus = 
+                *(std::vector<NaluBuffer> *)sample.context;
             for (size_t i = 0; i < nalus.size(); ++i) {
-                size_t l = nalus[i].size;
+                NaluBuffer & nalu = nalus[i];
+                size_t l = nalu.size;
                 if (l > (mtu_size_)) {
-                    boost::uint8_t b = nalus[i].begin.dereference_byte();
+                    boost::uint8_t b = nalu.begin.dereference_byte();
                     prefix_[0][0] = (b & 0xE0) | 28;
                     prefix_[0][1] = (b | 0x80) & 0x9F;
-                    nalus[i].begin.increment_byte(limit);
+                    nalu.begin.increment_byte(nalu.end);
                     --l;
-                    MyBuffersPosition pos = nalus[i].begin;
-                    nalus[i].begin.increment_bytes(limit, mtu_size_ - 2);
+                    NaluBuffer::BuffersPosition pos = nalu.begin;
+                    nalu.begin.increment_bytes(nalu.end, mtu_size_ - 2);
                     begin_packet(false, rtp_time, mtu_size_);
                     push_buffers(boost::asio::buffer(prefix_[0], 2));
-                    push_buffers(MyBufferIterator(limit, pos, nalus[i].begin), MyBufferIterator());
+                    push_buffers(NaluBuffer::range_buffers(pos, nalu.begin));
                     finish_packet();
                     l -= mtu_size_ - 2;
                     prefix_[1][0] = prefix_[0][0];
                     prefix_[1][1] = prefix_[0][1] & 0x7F;
                     while (l > mtu_size_ - 2) {
-                        MyBuffersPosition pos1 = nalus[i].begin;
-                        nalus[i].begin.increment_bytes(limit, mtu_size_ - 2);
+                        NaluBuffer::BuffersPosition pos1 = nalu.begin;
+                        nalu.begin.increment_bytes(nalu.end, mtu_size_ - 2);
                         begin_packet(false, rtp_time, mtu_size_);
                         push_buffers(boost::asio::buffer(prefix_[1], 2));
-                        push_buffers(MyBufferIterator(limit, pos1, nalus[i].begin), MyBufferIterator());
+                        push_buffers(NaluBuffer::range_buffers(pos1, nalu.begin));
                         finish_packet();
                         l -= mtu_size_ - 2;
                     };
@@ -134,11 +135,11 @@ namespace ppbox
                     prefix_[2][1] = prefix_[1][1] | 0x40;
                     begin_packet(i == nalus.size() - 1, rtp_time, l + 2);
                     push_buffers(boost::asio::buffer(prefix_[2], 2));
-                    push_buffers(MyBufferIterator(limit, nalus[i].begin, nalus[i].end), MyBufferIterator());
+                    push_buffers(nalu.buffers());
                     finish_packet();
                 } else {
                     begin_packet(i == nalus.size() - 1, rtp_time, l);
-                    push_buffers(MyBufferIterator(limit, nalus[i].begin, nalus[i].end), MyBufferIterator());
+                    push_buffers(nalu.buffers());
                     finish_packet();
                 }
             }

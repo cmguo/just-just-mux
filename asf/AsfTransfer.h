@@ -4,7 +4,6 @@
 
 #include "ppbox/mux/Transfer.h"
 #include "ppbox/mux/asf/AsfBuffer.h"
-#include <ppbox/mux/detail/BitsReader.h>
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
 
@@ -61,7 +60,7 @@ namespace ppbox
             struct AsfPacket
             {
                  size_t off_seg;
-                 size_t pad_len;
+                 boost::uint8_t pad_len;
                  bool key_frame;
             };
 
@@ -70,12 +69,13 @@ namespace ppbox
                 Sample & sample, 
                 bool need_data_buf);
 
+            template <typename BuffersContainer>
             void add_payload(
                 Sample & sample,
-                MyBuffersLimit & limit,
-                MyBuffersPosition & pos1,
-                MyBuffersPosition & pos2,
-                size_t padding_size,
+                BuffersContainer & buffers, 
+                boost::uint32_t payload_offset, 
+                boost::uint32_t payload_size, 
+                boost::uint8_t padding_size,
                 bool copy_flag);
 
         private:

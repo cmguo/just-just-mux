@@ -28,7 +28,7 @@ namespace ppbox
             Sample & sample)
         {
             header_.DataSize = sample.size;
-            header_.Timestamp = sample.time;
+            header_.Timestamp = (boost::uint32_t)sample.time;
             header_.TimestampExtended   = (boost::uint8_t)(sample.time >> 24);
             header_.StreamID = 0x00;
 

@@ -3,8 +3,6 @@
 #ifndef _PPBOX_MUX_MODULE_H_
 #define _PPBOX_MUX_MODULE_H_
 
-#include "ppbox/mux/MuxBase.h"
-
 #include <framework/string/Url.h>
 
 #include <boost/thread/mutex.hpp>
@@ -12,6 +10,11 @@
 
 namespace ppbox
 {
+    namespace demux
+    {
+        class DemuxerBase;
+    }
+
     namespace mux
     {
 

@@ -53,7 +53,7 @@ namespace ppbox
             sample.stream_info = &info;
             if (info.sub_type == VIDEO_TYPE_AVC1) {
                 header_.AVCPacketType = 0;
-                AvcConfigHelper const & config = ((AvcCodec *)info.codec)->config_helper();
+                AvcConfigHelper const & config = ((AvcCodec *)info.codec.get())->config_helper();
                 config.to_data(config_data_);
                 sample.data.push_back(boost::asio::buffer(config_data_));
                 sample.size += config_data_.size();

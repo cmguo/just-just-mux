@@ -4,7 +4,8 @@
 #define _PPBOX_MUX_TRANSFER_STREAM_SPLIT_TRANSFER_H_
 
 #include "ppbox/mux/Transfer.h"
-#include "ppbox/mux/detail/BitsReader.h"
+
+#include <ppbox/avformat/codec/avc/AvcNaluHelper.h>
 
 namespace ppbox
 {
@@ -19,7 +20,7 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            NaluList nalus_;
+            ppbox::avformat::AvcNaluHelper helper_;
         };
 
     } // namespace mux

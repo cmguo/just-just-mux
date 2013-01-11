@@ -5,6 +5,8 @@
 
 #include "ppbox/mux/Transfer.h"
 
+#include <ppbox/avformat/codec/avc/AvcNaluHelper.h>
+
 namespace ppbox
 {
     namespace mux
@@ -26,7 +28,7 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            std::vector<boost::uint8_t> nalu_start_code_;
+            ppbox::avformat::AvcNaluHelper helper_;
             std::vector<boost::uint8_t> access_unit_delimiter_;
             std::vector<boost::uint8_t> sps_pps_;
             boost::uint32_t sample_description_index_;

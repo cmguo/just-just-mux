@@ -28,7 +28,7 @@ namespace ppbox
             Sample & sample)
         {
             AacConfigHelper const & config_helper = 
-                ((AacCodec *)sample.stream_info->codec)->config_helper();
+                ((AacCodec *)sample.stream_info->codec.get())->config_helper();
 
             config_helper.to_adts_data(sample.size, adts_header_);
             sample.data.push_front(boost::asio::buffer(adts_header_));

@@ -2,9 +2,9 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/ts/TsTransfer.h"
-#include "ppbox/mux/detail/BitsReader.h"
 
 #include <ppbox/avformat/ts/TsPacket.h>
+#include <ppbox/avformat/stream/SampleBuffers.h>
 using namespace ppbox::avformat;
 
 #include <util/archive/ArchiveBuffer.h>
@@ -33,8 +33,8 @@ namespace ppbox
         {
             boost::uint32_t frame_size = sample.size;
 
-            MyBuffersLimit limit(sample.data.begin(), sample.data.end());
-            MyBuffersPosition position(limit);
+            SampleBuffers::BuffersPosition position(sample.data.begin(), sample.data.end());
+            SampleBuffers::BuffersPosition end(sample.data.end());
 
             ts_buffers_.clear();
             header_buffer_.clear();
@@ -54,7 +54,7 @@ namespace ppbox
 
             while (frame_size) {
                 boost::uint32_t payload_size = frame_size;
-                MyBuffersPosition begin = position;
+                SampleBuffers::BuffersPosition begin = position;
                 off_segs_.push_back(ts_buffers_.size());
                 if (first_packet)  {
                     if (with_pcr_) {
@@ -74,8 +74,8 @@ namespace ppbox
                 }
                 ts_buffers_.push_back(buf.data());
                 buf.consume(buf.size());
-                position.increment_bytes(limit, payload_size);
-                push_buffers(MyBufferIterator(limit, begin, position), MyBufferIterator());
+                position.increment_bytes(end, payload_size);
+                push_buffers(SampleBuffers::range_buffers_begin(begin, position), SampleBuffers::range_buffers_end());
                 ++continuity_counter_;
                 frame_size -= payload_size;
             }

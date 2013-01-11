@@ -4,7 +4,8 @@
 #define _PPBOX_TRANSFER_MUX_PACKAGE_SPLIT_TRANSFER_H_
 
 #include "ppbox/mux/Transfer.h"
-#include "ppbox/mux/detail/BitsReader.h"
+
+#include <ppbox/avformat/codec/avc/AvcNaluHelper.h>
 
 namespace ppbox
 {
@@ -19,11 +20,14 @@ namespace ppbox
 
         public:
             virtual void transfer(
+                StreamInfo & info);
+
+            virtual void transfer(
                 Sample & sample);
 
         private:
-            boost::uint32_t nalu_length_;
-            NaluList nalus_;
+            ppbox::avformat::AvcNaluHelper helper_;
+            std::vector<ppbox::avformat::NaluBuffer> nalus_;
         };
 
     } // namespace mux

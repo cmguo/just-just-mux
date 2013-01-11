@@ -5,6 +5,8 @@
 
 #include "ppbox/mux/Transfer.h"
 
+#include <ppbox/avformat/codec/avc/AvcNaluHelper.h>
+
 namespace ppbox
 {
     namespace mux
@@ -21,6 +23,7 @@ namespace ppbox
                 Sample & sample);
 
         private:
+            ppbox::avformat::AvcNaluHelper helper_;
             boost::uint32_t frame_data_size_;
         };
 

@@ -84,7 +84,7 @@ namespace ppbox
             sample.stream_info = &info;
             if (info.sub_type == AUDIO_TYPE_MP4A) {
                 header_.AACPacketType = 0;
-                AacConfigHelper const & config = ((AacCodec *)info.codec)->config_helper();
+                AacConfigHelper const & config = ((AacCodec *)info.codec.get())->config_helper();
                 config.to_data(config_data_);
                 sample.data.push_back(boost::asio::buffer(config_data_));
                 sample.size += config_data_.size();
