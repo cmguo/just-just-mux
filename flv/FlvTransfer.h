@@ -34,7 +34,7 @@ namespace ppbox
         public:
             virtual void stream_header(
                 StreamInfo const & info, 
-                Sample & sample) = 0;
+                Sample & sample);
 
         private:
             ppbox::avformat::FlvTagHeader header_;

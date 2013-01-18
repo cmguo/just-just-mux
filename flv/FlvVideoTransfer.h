@@ -24,7 +24,7 @@ namespace ppbox
                 StreamInfo & info);
 
         public:
-            void stream_header(
+            virtual void stream_header(
                 StreamInfo const & info, 
                 Sample & sample);
 

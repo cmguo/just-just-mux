@@ -50,6 +50,7 @@ namespace ppbox
             StreamInfo const & info, 
             Sample & sample)
         {
+            sample.flags |= Sample::sync;
             sample.stream_info = &info;
             if (info.sub_type == VIDEO_TYPE_AVC1) {
                 header_.AVCPacketType = 0;

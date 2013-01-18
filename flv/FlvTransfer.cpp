@@ -43,5 +43,11 @@ namespace ppbox
             sample.size += 4;
         }
 
+        void FlvTransfer::stream_header(
+            StreamInfo const & info, 
+            Sample & sample)
+        {
+        }
+
     } // namespace mux
 } // namespace ppbox

@@ -23,10 +23,12 @@ namespace ppbox
 
         FlvMuxer::FlvMuxer()
         {
+            meta_data_transfer_ = new FlvTransfer(FlvTagType::META);
         }
 
         FlvMuxer::~FlvMuxer()
         {
+            delete meta_data_transfer_;
         }
 
         void FlvMuxer::add_stream(
@@ -49,6 +51,8 @@ namespace ppbox
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);
                 flv_header_.TypeFlagsVideo = 1;
+                meta_data_.width = info.video_format.width;
+                meta_data_.height= info.video_format.height;
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     if (info.format_type == StreamInfo::audio_aac_adts) {
@@ -60,6 +64,8 @@ namespace ppbox
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);
                 flv_header_.TypeFlagsAudio = 1;
+                meta_data_.audiosamplerate = info.audio_format.sample_rate;
+                meta_data_.audiosamplesize = info.audio_format.sample_size;
             }
         }
 
@@ -69,8 +75,21 @@ namespace ppbox
             FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
             ppbox::avformat::FlvOArchive archive(buf);
             archive << flv_header_;
-            sample.data.push_back(buf.data());
-            sample.size = buf.size();
+
+            {
+                FormatBuffer buf(meta_data_buffer_, sizeof(meta_data_buffer_));
+                ppbox::avformat::FlvOArchive archive(buf);
+                FlvDataTag tag;
+                tag.Name = "onMetaData";
+                meta_data_.to_data(tag.Value);
+                archive << tag;
+                sample.data.push_back(buf.data());
+                sample.size = buf.size();
+                meta_data_transfer_->transfer(sample);
+            }
+
+            sample.data.push_front(buf.data());
+            sample.size += buf.size();
         }
 
         void FlvMuxer::stream_header(
