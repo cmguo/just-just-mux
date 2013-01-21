@@ -32,7 +32,7 @@ namespace ppbox
             , packet_left_(0)
             , data_ptr_(NULL)
         {
-            data_ptr_[0] = data_ptr_[1] = 0;
+            data_buf_[0] = data_buf_[1] = 0;
         }
 
         AsfTransfer::~AsfTransfer()
@@ -46,7 +46,7 @@ namespace ppbox
         void AsfTransfer::config(
             framework::configure::Config & conf)
         {
-            if (data_buf_)
+            if (data_ptr_)
                 return;
 
             conf.register_module("Asf")
