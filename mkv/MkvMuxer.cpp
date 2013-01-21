@@ -5,8 +5,8 @@
 #include "ppbox/mux/mkv/MkvTransfer.h"
 
 #include "ppbox/mux/transfer/MergeTransfer.h"
-#include "ppbox/mux/transfer/PackageSplitTransfer.h"
-#include "ppbox/mux/transfer/StreamJoinTransfer.h"
+#include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
+#include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
 using namespace ppbox::avformat;
 
@@ -34,9 +34,9 @@ namespace ppbox
             //Transfer * transfer = NULL;
             //if (mediainfoex.type == MEDIA_TYPE_VIDE) {
                 //if (mediainfoex.format_type == MediaInfo::video_avc_packet) {
-                    //transfer = new PackageSplitTransfer();
+                    //transfer = new H264PackageSplitTransfer();
                     //mediainfoex.transfers.push_back(transfer);
-                    //transfer = new StreamJoinTransfer();
+                    //transfer = new H264StreamJoinTransfer();
                     //mediainfoex.transfers.push_back(transfer);
                 //}
             //}

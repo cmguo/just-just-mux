@@ -1,4 +1,4 @@
-//MkvTransfer.cpp
+// MkvTransfer.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/mkv/MkvTransfer.h"
@@ -64,6 +64,8 @@ namespace ppbox
         void MkvTransfer::on_seek(
             boost::uint64_t time)
         {
+            TimeScaleTransfer::on_seek(time);
+
             add_cluster_flag_ = 0;
             time_code_ = 0;
         }
@@ -73,7 +75,6 @@ namespace ppbox
             size_t stream_obj_size, 
             boost::asio::streambuf & buf)
         {
-
             //EBML_buf_
             MkvFile file;
 

@@ -1,7 +1,7 @@
-// PackageJoinTransfer.cpp
+// H264PackageJoinTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/PackageJoinTransfer.h"
+#include "ppbox/mux/transfer/H264PackageJoinTransfer.h"
 
 #include <framework/system/BytesOrder.h>
 
@@ -10,12 +10,12 @@ namespace ppbox
     namespace mux
     {
 
-        PackageJoinTransfer::PackageJoinTransfer()
+        H264PackageJoinTransfer::H264PackageJoinTransfer()
             : frame_data_size_(0)
         {
         }
 
-        void PackageJoinTransfer::transfer(
+        void H264PackageJoinTransfer::transfer(
             Sample & sample)
         {
             std::vector<ppbox::avformat::NaluBuffer> & nalus = 

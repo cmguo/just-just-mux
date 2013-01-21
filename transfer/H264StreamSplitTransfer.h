@@ -1,7 +1,7 @@
-// StreamSplitTransfer.h
+// H264StreamSplitTransfer.h
 
-#ifndef _PPBOX_MUX_TRANSFER_STREAM_SPLIT_TRANSFER_H_
-#define _PPBOX_MUX_TRANSFER_STREAM_SPLIT_TRANSFER_H_
+#ifndef _PPBOX_MUX_TRANSFER_H264_STREAM_SPLIT_TRANSFER_H_
+#define _PPBOX_MUX_TRANSFER_H264_STREAM_SPLIT_TRANSFER_H_
 
 #include "ppbox/mux/Transfer.h"
 
@@ -12,7 +12,7 @@ namespace ppbox
     namespace mux
     {
 
-        class StreamSplitTransfer
+        class H264StreamSplitTransfer
             : public Transfer
         {
         public:
@@ -26,4 +26,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_TRANSFER_STREAM_SPLIT_TRANSFER_H_
+#endif // _PPBOX_MUX_TRANSFER_H264_STREAM_SPLIT_TRANSFER_H_

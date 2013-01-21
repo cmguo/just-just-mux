@@ -4,9 +4,9 @@
 #include "ppbox/mux/flv/FlvMuxer.h"
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
-#include "ppbox/mux/transfer/PackageJoinTransfer.h"
-#include "ppbox/mux/transfer/StreamSplitTransfer.h"
-#include "ppbox/mux/transfer/PtsComputeTransfer.h"
+#include "ppbox/mux/transfer/H264PackageJoinTransfer.h"
+#include "ppbox/mux/transfer/H264StreamSplitTransfer.h"
+#include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 
 using namespace ppbox::avformat;
@@ -40,11 +40,11 @@ namespace ppbox
                 if (info.format_type == StreamInfo::video_avc_packet) {
                     // empty
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
-                    transfer = new StreamSplitTransfer();
+                    transfer = new H264StreamSplitTransfer();
                     transfers.push_back(transfer);
-                    transfer = new PtsComputeTransfer();
+                    transfer = new H264PtsComputeTransfer();
                     transfers.push_back(transfer);
-                    transfer = new PackageJoinTransfer();
+                    transfer = new H264PackageJoinTransfer();
                     transfers.push_back(transfer);
                 }
                 FlvVideoTransfer * transfer = new FlvVideoTransfer;

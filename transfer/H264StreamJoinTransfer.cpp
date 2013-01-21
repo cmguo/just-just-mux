@@ -1,7 +1,7 @@
-// StreamJoinTransfer.cpp
+// H264StreamJoinTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/StreamJoinTransfer.h"
+#include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
 #include <ppbox/avformat/codec/avc/AvcNalu.h>
 #include <ppbox/avformat/codec/avc/AvcCodec.h>
@@ -12,17 +12,17 @@ namespace ppbox
     namespace mux
     {
 
-        StreamJoinTransfer::StreamJoinTransfer()
+        H264StreamJoinTransfer::H264StreamJoinTransfer()
             : sample_description_index_(boost::uint32_t(-1))
         {
             // start code
         }
 
-        StreamJoinTransfer::~StreamJoinTransfer()
+        H264StreamJoinTransfer::~H264StreamJoinTransfer()
         {
         }
 
-        void StreamJoinTransfer::transfer(
+        void H264StreamJoinTransfer::transfer(
             StreamInfo & info)
         {
             AvcConfigHelper const & avc_config = 
@@ -38,7 +38,7 @@ namespace ppbox
             sample_description_index_ = boost::uint32_t(-1);
         }
 
-        void StreamJoinTransfer::transfer(
+        void H264StreamJoinTransfer::transfer(
             Sample & sample)
         {
             std::vector<NaluBuffer> & nalus = 

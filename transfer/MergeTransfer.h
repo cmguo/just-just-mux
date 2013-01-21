@@ -9,6 +9,7 @@ namespace ppbox
 {
     namespace mux
     {
+
         class MergeTransfer
             : public Transfer
         {
@@ -17,6 +18,13 @@ namespace ppbox
                 Transfer * transfer)
                 : transfer_(transfer)
             {
+            }
+
+        public:
+            virtual void config(
+                framework::configure::Config & conf)
+            {
+                transfer_->config(conf);
             }
 
         public:
@@ -30,6 +38,12 @@ namespace ppbox
                 Sample & sample)
             {
                 transfer_->transfer(sample);
+            }
+
+            virtual void on_seek(
+                boost::uint64_t time)
+            {
+                transfer_->on_seek(time);
             }
 
         private:

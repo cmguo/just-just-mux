@@ -1,7 +1,7 @@
-// PtsComputeTransfer.h
+// H264PtsComputeTransfer.h
 
-#ifndef _PPBOX_MUX_TRANSFER_PTS_COMPUTE_TRANSFER_H_
-#define _PPBOX_MUX_TRANSFER_PTS_COMPUTE_TRANSFER_H_
+#ifndef _PPBOX_MUX_TRANSFER_H264_PTS_COMPUTE_TRANSFER_H_
+#define _PPBOX_MUX_TRANSFER_H264_PTS_COMPUTE_TRANSFER_H_
 
 #include "ppbox/mux/Transfer.h"
 
@@ -12,11 +12,11 @@ namespace ppbox
     namespace mux
     {
 
-        class PtsComputeTransfer
+        class H264PtsComputeTransfer
             : public Transfer
         {
         public:
-            PtsComputeTransfer();
+            H264PtsComputeTransfer();
 
         public:
             virtual void transfer(
@@ -33,4 +33,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_TRANSFER_PTS_COMPUTE_TRANSFER_H_
+#endif // _PPBOX_MUX_TRANSFER_H264_PTS_COMPUTE_TRANSFER_H_

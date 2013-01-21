@@ -12,8 +12,6 @@
 #include <ppbox/avformat/codec/Codec.h>
 using namespace ppbox::avformat;
 
-#include <ppbox/common/UrlHelper.h>
-
 #include <util/buffers/BuffersSize.h>
 
 using namespace boost::system;
@@ -24,13 +22,11 @@ namespace ppbox
     {
 
         MuxerBase * MuxerBase::create(
-            framework::string::Url const & config)
+            std::string const & format)
         {
-            std::string foramt = config.param("format");
-            MuxerBase * muxer = factory_type::create(foramt);
+            MuxerBase * muxer = factory_type::create(format);
             if (muxer) {
-                muxer->format_ = foramt;
-                ppbox::common::apply_config(muxer->config_, config, "mux.");
+                muxer->format_ = format;
             }
             return muxer;
         }

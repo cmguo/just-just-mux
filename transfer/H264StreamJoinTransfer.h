@@ -1,7 +1,7 @@
-// StreamJoinTransfer.h
+// H264StreamJoinTransfer.h
 
-#ifndef _PPBOX_MUX_TRANSFER_STREAM_JOIN_TRANSFER_H_
-#define _PPBOX_MUX_TRANSFER_STREAM_JOIN_TRANSFER_H_
+#ifndef _PPBOX_MUX_TRANSFER_H264_STREAM_JOIN_TRANSFER_H_
+#define _PPBOX_MUX_TRANSFER_H264_STREAM_JOIN_TRANSFER_H_
 
 #include "ppbox/mux/Transfer.h"
 
@@ -12,13 +12,13 @@ namespace ppbox
     namespace mux
     {
 
-        class StreamJoinTransfer
+        class H264StreamJoinTransfer
             : public Transfer
         {
         public:
-            StreamJoinTransfer();
+            H264StreamJoinTransfer();
 
-            ~StreamJoinTransfer();
+            ~H264StreamJoinTransfer();
 
         public:
             virtual void transfer(
@@ -37,4 +37,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_TRANSFER_STREAM_JOIN_TRANSFER_H_
+#endif // _PPBOX_MUX_TRANSFER_H264_STREAM_JOIN_TRANSFER_H_

@@ -1,7 +1,7 @@
-// ParseH264Transfer.cpp
+// H264DebugTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/ParseH264Transfer.h"
+#include "ppbox/mux/transfer/H264DebugTransfer.h"
 
 #include <ppbox/avformat/stream/BitsOStream.h>
 #include <ppbox/avformat/stream/BitsIStream.h>
@@ -11,7 +11,7 @@
 #include <ppbox/avformat/codec/avc/AvcType.h>
 #include <ppbox/avformat/codec/avc/AvcNaluBuffer.h>
 #include <ppbox/avformat/stream/FormatBuffer.h>
-using namespace ppbox::avformat;
+using namespace ppbox::avformat;
 
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/CycleBuffers.h>
@@ -26,8 +26,10 @@ namespace ppbox
         std::map<boost::uint32_t, SeqParameterSetRbsp> spss;
         std::map<boost::uint32_t, PicParameterSetRbsp> ppss;
 
-        void ParseH264Transfer::transfer(
-            StreamInfo & info)        {            AvcConfig const & avc_config = 
+        void H264DebugTransfer::transfer(
+            StreamInfo & info)
+        {
+            AvcConfig const & avc_config = 
                 ((AvcCodec const *)info.codec.get())->config();
             for (boost::uint32_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); i++) {
                 std::vector<boost::uint8_t> sps_vec = avc_config.sequenceParameterSetNALUnit[i];
@@ -59,18 +61,19 @@ namespace ppbox
                 PicParameterSetRbsp pps(spss);
                 bits_reader >> pps;
                 ppss.insert(std::make_pair(pps.pps_pic_parameter_set_id, pps));
-            }
+            }
         }
 
-        void ParseH264Transfer::transfer(
+        void H264DebugTransfer::transfer(
             Sample & sample)
         {
             std::vector<NaluBuffer> & nalus = 
                 *(std::vector<NaluBuffer> *)sample.context;
 
             std::cout << "Frame: " << " dts: " << sample.dts << ",\t cts: " << sample.dts + sample.cts_delta << std::endl;
-            for (boost::uint32_t i = 0; i < nalus.size(); ++i) {                NaluBuffer const & nalu = nalus[i];
-                NaluHeader nalu_header(nalu.begin.dereference_byte());
+            for (boost::uint32_t i = 0; i < nalus.size(); ++i) {
+                NaluBuffer const & nalu = nalus[i];
+                NaluHeader nalu_header(nalu.begin.dereference_byte());
                 std::cout << "Nalu type: " << NaluHeader::nalu_type_str[nalu_header.nal_unit_type] << std::endl;
 
                 if (nalu_header.nal_unit_type == NaluHeader::SEI) {
@@ -94,7 +97,8 @@ namespace ppbox
                             << SliceHeader::slice_type_str[slice.slice_header.slice_type] 
                         << std::endl;
                 }
-            }        }
+            }
+        }
 
     } // namespace mux
 } // namespace ppbox

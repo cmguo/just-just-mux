@@ -7,7 +7,7 @@
 #include "ppbox/mux/MuxerTypes.h"
 
 #include <ppbox/demux/DemuxModule.h>
-using namespace ppbox::demux;
+#include <ppbox/common/UrlHelper.h>
 
 #include <boost/bind.hpp>
 using namespace boost::system;
@@ -44,10 +44,12 @@ namespace ppbox
             framework::string::Url const & config, 
             boost::system::error_code & ec)
         {
-            MuxerBase * muxer = MuxerBase::create(config);
+            std::string format = config.param("format");
+            MuxerBase * muxer = MuxerBase::create(format);
             if (muxer == NULL) {
                 ec = error::format_not_support;
             } else {
+                ppbox::common::apply_config(muxer->config(), config, "mux.");
                 muxer->open(demuxer, ec);
             }
             if (muxer) {

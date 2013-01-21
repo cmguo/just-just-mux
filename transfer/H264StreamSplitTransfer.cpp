@@ -1,14 +1,14 @@
-// StreamSplitTransfer.cpp
+// H264StreamSplitTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/StreamSplitTransfer.h"
+#include "ppbox/mux/transfer/H264StreamSplitTransfer.h"
 
 namespace ppbox
 {
     namespace mux
     {
 
-        void StreamSplitTransfer::transfer(
+        void H264StreamSplitTransfer::transfer(
             Sample & sample)
         {
             helper_.from_stream(sample.size, sample.data);

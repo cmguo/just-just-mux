@@ -32,7 +32,7 @@ namespace ppbox
 
         public:
             static MuxerBase * create(
-                framework::string::Url const & config);
+                std::string const & foramt);
 
         public:
             bool open(

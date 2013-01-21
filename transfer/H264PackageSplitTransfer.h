@@ -1,7 +1,7 @@
-// PackageSplitTransfer.h
+// H264PackageSplitTransfer.h
 
-#ifndef _PPBOX_TRANSFER_MUX_PACKAGE_SPLIT_TRANSFER_H_
-#define _PPBOX_TRANSFER_MUX_PACKAGE_SPLIT_TRANSFER_H_
+#ifndef _PPBOX_TRANSFER_MUX_H264_PACKAGE_SPLIT_TRANSFER_H_
+#define _PPBOX_TRANSFER_MUX_H264_PACKAGE_SPLIT_TRANSFER_H_
 
 #include "ppbox/mux/Transfer.h"
 
@@ -12,11 +12,11 @@ namespace ppbox
     namespace mux
     {
 
-        class PackageSplitTransfer
+        class H264PackageSplitTransfer
             : public Transfer
         {
         public:
-            PackageSplitTransfer();
+            H264PackageSplitTransfer();
 
         public:
             virtual void transfer(
@@ -33,4 +33,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_TRANSFER_MUX_PACKAGE_SPLIT_TRANSFER_H_
+#endif // _PPBOX_TRANSFER_MUX_H264_PACKAGE_SPLIT_TRANSFER_H_

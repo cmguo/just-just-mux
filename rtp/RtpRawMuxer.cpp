@@ -2,10 +2,10 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/rtp/RtpRawMuxer.h"
-#include "ppbox/mux/transfer/PackageSplitTransfer.h"
-#include "ppbox/mux/transfer/StreamSplitTransfer.h"
-#include "ppbox/mux/transfer/PtsComputeTransfer.h"
-#include "ppbox/mux/transfer/ParseH264Transfer.h"
+#include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
+#include "ppbox/mux/transfer/H264StreamSplitTransfer.h"
+#include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
+#include "ppbox/mux/transfer/H264DebugTransfer.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 #include "ppbox/mux/rtp/RtpMpeg4GenericTransfer.h"
 #include "ppbox/mux/rtp/RtpMpegAudioTransfer.h"
@@ -34,14 +34,14 @@ namespace ppbox
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
                 if (info.format_type == StreamInfo::video_avc_packet) {
-                    transfer = new PackageSplitTransfer();
+                    transfer = new H264PackageSplitTransfer();
                     transfers.push_back(transfer);
                     //transfer = new ParseH264Transfer();
                     //transfers.push_back(transfer);
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
-                    transfer = new StreamSplitTransfer();
+                    transfer = new H264StreamSplitTransfer();
                     transfers.push_back(transfer);
-                    transfer = new PtsComputeTransfer();
+                    transfer = new H264PtsComputeTransfer();
                     transfers.push_back(transfer);
                 }
                 RtpTransfer * rtp_transfer = new RtpH264Transfer;

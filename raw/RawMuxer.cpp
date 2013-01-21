@@ -2,10 +2,10 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/raw/RawMuxer.h"
-#include "ppbox/mux/transfer/PackageSplitTransfer.h"
-#include "ppbox/mux/transfer/StreamSplitTransfer.h"
-#include "ppbox/mux/transfer/PtsComputeTransfer.h"
-#include "ppbox/mux/transfer/StreamJoinTransfer.h"
+#include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
+#include "ppbox/mux/transfer/H264StreamSplitTransfer.h"
+#include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
+#include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsEncodeTransfer.h"
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
@@ -42,16 +42,16 @@ namespace ppbox
             if (info.type == MEDIA_TYPE_VIDE) {
                 if (info.format_type == StreamInfo::video_avc_packet) {
                     if (video_format_ == "es") {
-                        transfer = new PackageSplitTransfer();
+                        transfer = new H264PackageSplitTransfer();
                         transfers.push_back(transfer);
-                        transfer = new StreamJoinTransfer();
+                        transfer = new H264StreamJoinTransfer();
                         transfers.push_back(transfer);
                     }
                 } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
                     if (video_format_ == "es") {
-                        transfer = new StreamSplitTransfer();
+                        transfer = new H264StreamSplitTransfer();
                         transfers.push_back(transfer);
-                        transfer = new PtsComputeTransfer();
+                        transfer = new H264PtsComputeTransfer();
                         transfers.push_back(transfer);
                     }
                 }

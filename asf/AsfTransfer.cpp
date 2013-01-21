@@ -30,18 +30,25 @@ namespace ppbox
             , p_index_(0)
             , packet_head_(max_packet_length_)
             , packet_left_(0)
+            , data_ptr_(NULL)
         {
+            data_ptr_[0] = data_ptr_[1] = 0;
         }
 
         AsfTransfer::~AsfTransfer()
         {
-            delete [] data_buf_[0];
-            delete [] data_buf_[1];
+            if (data_ptr_[0])
+                delete [] data_buf_[0];
+            if (data_ptr_[1])
+                delete [] data_buf_[1];
         }
 
         void AsfTransfer::config(
             framework::configure::Config & conf)
         {
+            if (data_buf_)
+                return;
+
             conf.register_module("Asf")
                 << CONFIG_PARAM_NAME_RDWR("packet_length", packet_length_)
                 << CONFIG_PARAM_NAME_RDWR("single_payload", single_payload_);

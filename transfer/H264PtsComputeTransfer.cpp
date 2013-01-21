@@ -1,7 +1,7 @@
-// PtsComputeTransfer.cpp
+// H264PtsComputeTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/PtsComputeTransfer.h"
+#include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
 
 #include <ppbox/avformat/stream/BitsIStream.h>
 #include <ppbox/avformat/stream/BitsOStream.h>
@@ -32,14 +32,14 @@ namespace ppbox
             return !!bits_reader;
         }
 
-        PtsComputeTransfer::PtsComputeTransfer()
+        H264PtsComputeTransfer::H264PtsComputeTransfer()
             : idr_dts_(0)
             , frame_scale_(0)
             , is_last_a_idr_(false)
         {
         }
 
-        void PtsComputeTransfer::transfer(
+        void H264PtsComputeTransfer::transfer(
             Sample & sample)
         {
             if (sample.cts_delta != boost::uint32_t(-1)) {
