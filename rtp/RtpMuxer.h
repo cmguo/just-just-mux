@@ -36,7 +36,7 @@ namespace ppbox
             virtual void stream_info(
                 std::vector<StreamInfo> & streams) const;
 
-        public:
+        protected:
             void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);

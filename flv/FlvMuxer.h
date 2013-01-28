@@ -23,7 +23,7 @@ namespace ppbox
 
             ~FlvMuxer();
 
-        public:
+        private:
             void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);

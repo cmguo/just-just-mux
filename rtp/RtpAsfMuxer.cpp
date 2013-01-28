@@ -39,16 +39,16 @@ namespace ppbox
             transfers.push_back(transfer);
         }
 
-        error_code RtpAsfMuxer::get_sdp(
-            std::string & sdp_out, 
-            error_code & ec)
+        void RtpAsfMuxer::media_info(
+            MediaInfo & info) const
         {
+            RtpMuxer::media_info(info);
+            std::string sdp;
             Sample tag;
-            RtpMuxer::read(tag, ec);
-            if (!ec) {
-                rtp_asf_transfer_->get_sdp(tag, sdp_out);
-            }
-            return ec;
+            const_cast<RtpAsfMuxer *>(this)->RtpMuxer::file_header(tag);
+            rtp_asf_transfer_->get_sdp(tag, sdp);
+            sdp += info.format_data;
+            info.format_data.swap(sdp);
         }
 
     } // namespace mux

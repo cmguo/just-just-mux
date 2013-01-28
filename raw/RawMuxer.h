@@ -18,12 +18,11 @@ namespace ppbox
 
             virtual ~RawMuxer();
 
-        public:
+        private:
             virtual void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);
 
-        private:
             virtual void file_header(
                 Sample & sample);
 

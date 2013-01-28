@@ -1,25 +1,24 @@
-// RtpAsfMuxer.h
+// MmsMuxer.h
 
-#ifndef _PPBOX_MUX_RTP_RTP_ASF_MUXER_H_
-#define _PPBOX_MUX_RTP_RTP_ASF_MUXER_H_
+#ifndef _PPBOX_MUX_MMS_MMS_MUXER_H_
+#define _PPBOX_MUX_MMS_MMS_MUXER_H_
 
 #include "ppbox/mux/asf/AsfMuxer.h"
-#include "ppbox/mux/rtp/RtpMuxer.h"
 
 namespace ppbox
 {
     namespace mux
     {
 
-        class RtpAsfTransfer;
+        class MmsTransfer;
 
-        class RtpAsfMuxer
-            : public RtpMuxer
+        class MmsMuxer
+            : public AsfMuxer
         {
         public:
-            RtpAsfMuxer();
+            MmsMuxer();
 
-            ~RtpAsfMuxer();
+            ~MmsMuxer();
 
         public:
             virtual void media_info(
@@ -30,14 +29,17 @@ namespace ppbox
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);
 
+            virtual void file_header(
+                Sample & sample);
+
         private:
             AsfMuxer asf_mux_;
-            RtpAsfTransfer * rtp_asf_transfer_;
+            MmsTransfer * mms_transfer_;
         };
 
-        PPBOX_REGISTER_MUXER("rtp-asf", RtpAsfMuxer);
+        PPBOX_REGISTER_MUXER("mms", MmsMuxer);
 
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_RTP_RTP_ASF_MUXER_H_
+#endif // _PPBOX_MUX_MMS_MMS_MUXER_H_

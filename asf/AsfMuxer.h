@@ -22,7 +22,7 @@ namespace ppbox
 
             ~AsfMuxer();
 
-        public:
+        protected:
             void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);

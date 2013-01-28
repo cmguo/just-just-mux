@@ -14,5 +14,6 @@
 #include "ppbox/mux/rtp/RtpRawMuxer.h"
 #include "ppbox/mux/rtp/RtpTsMuxer.h"
 #include "ppbox/mux/rtp/RtpAsfMuxer.h"
+#include "ppbox/mux/mms/MmsMuxer.h"
 
 #endif // _PPBOX_MUX_MUXER_TYPES_H_

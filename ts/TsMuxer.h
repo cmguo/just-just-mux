@@ -21,7 +21,7 @@ namespace ppbox
 
             virtual ~TsMuxer();
 
-        public:
+        protected:
             void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);

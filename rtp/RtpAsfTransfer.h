@@ -25,7 +25,8 @@ namespace ppbox
             virtual void transfer(
                 StreamInfo & info);
 
-            void get_sdp(
+        public:
+            void RtpAsfTransfer::get_sdp(
                 Sample const & tag, 
                 std::string & sdp);
 

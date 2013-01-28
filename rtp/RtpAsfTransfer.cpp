@@ -85,7 +85,6 @@ namespace ppbox
             sdp += "a=pgmpu:data:application/vnd.ms.wms-hdr.asf1;base64," 
                 + framework::string::Base64::encode(asf_head) 
                 + "\r\n";
-            sdp += rtp_info_.sdp;
         }
 
     } // namespace mux
