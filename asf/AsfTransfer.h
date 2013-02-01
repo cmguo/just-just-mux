@@ -72,7 +72,7 @@ namespace ppbox
             template <typename BuffersContainer>
             void add_payload(
                 Sample & sample,
-                BuffersContainer & buffers, 
+                BuffersContainer const & buffers, 
                 boost::uint32_t payload_offset, 
                 boost::uint32_t payload_size, 
                 boost::uint8_t padding_size,

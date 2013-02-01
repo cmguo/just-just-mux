@@ -49,7 +49,6 @@ namespace ppbox
             std::deque<boost::asio::const_buffer>::const_iterator buf_beg = sample.data.begin();
             std::deque<boost::asio::const_buffer>::const_iterator buf_end = sample.data.end();
             for (size_t i = 0; i + 1 < packets.size(); ++i) {
-                AsfTransfer::AsfPacket const & packet = packets[i];
                 oa << header_;
                 data.push_back(buf.data());
                 buf_end = sample.data.begin() + packets[i + 1].off_seg;

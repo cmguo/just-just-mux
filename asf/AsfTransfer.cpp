@@ -324,7 +324,7 @@ namespace ppbox
         template <typename BuffersContainer>
         void AsfTransfer::add_payload(//构造payload头部
             Sample & sample,
-            BuffersContainer & buffers,
+            BuffersContainer const & buffers,
             boost::uint32_t payload_offset, 
             boost::uint32_t payload_size, 
             boost::uint8_t padding_size,
