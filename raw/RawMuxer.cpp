@@ -7,7 +7,9 @@
 #include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsEncodeTransfer.h"
+#include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
+#include "ppbox/mux/filter/AdtsSplitFilter.h"
 
 using namespace ppbox::avformat;
 
@@ -61,9 +63,18 @@ namespace ppbox
                 }
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
+                    if (info.format_type == StreamInfo::audio_aac_adts) {
+                        if (audio_format_ != "adts") {
+                            add_filter(new AdtsSplitFilter);
+                            transfer = new MpegAudioAdtsDecodeTransfer();
+                            transfers.push_back(transfer);
+                        }
+                    }
                     if (audio_format_ == "adts") {
-                        transfer = new MpegAudioAdtsEncodeTransfer();
-                        transfers.push_back(transfer);
+                        if (info.format_type != StreamInfo::audio_aac_adts) {
+                            transfer = new MpegAudioAdtsEncodeTransfer();
+                            transfers.push_back(transfer);
+                        }
                     }
                 }
                 if (time_scale_ || audio_time_scale_) {

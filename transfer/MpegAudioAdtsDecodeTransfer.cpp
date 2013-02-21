@@ -3,10 +3,8 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 
-#include <ppbox/avformat/codec/aac/AacCodec.h>
 #include <ppbox/avformat/codec/aac/AacAdts.h>
 #include <ppbox/avformat/stream/BitsIStream.h>
-#include <ppbox/avformat/stream/BitsBuffer.h>
 #include <ppbox/avformat/stream/SampleBuffers.h>
 using namespace ppbox::avformat;
 

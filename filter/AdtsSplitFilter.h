@@ -1,7 +1,7 @@
-// SegmentFilter.h
+// AdtsSplitFilter.h
 
-#ifndef _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
-#define _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
+#ifndef _PPBOX_MUX_FILTER_ADTS_SPLIT_FILTER_H_
+#define _PPBOX_MUX_FILTER_ADTS_SPLIT_FILTER_H_
 
 #include "ppbox/mux/Filter.h"
 
@@ -10,13 +10,13 @@ namespace ppbox
     namespace mux
     {
 
-        class SegmentFilter
+        class AdtsSplitFilter
             : public Filter
         {
         public:
-            SegmentFilter();
+            AdtsSplitFilter();
 
-            virtual ~SegmentFilter();
+            virtual ~AdtsSplitFilter();
 
         public:
             virtual bool open(
@@ -31,24 +31,13 @@ namespace ppbox
             virtual void on_seek(
                 boost::uint64_t time);
 
-        public:
-            void set_end_time(
-                boost::uint64_t time);
-
-            bool is_sequence()
-            {
-                return is_save_sample_ || is_eof_;
-            }
-
         private:
-            boost::uint32_t video_track_;
-            boost::uint64_t segent_end_time_;
+            boost::uint32_t audio_track_;
             bool is_save_sample_;
-            bool is_eof_;
             Sample sample_;
         };
 
     } // namespace mux
 } // namespace ppbox
 
-#endif // _PPBOX_MUX_FILTER_SEGMENT_FILTER_H_
+#endif // _PPBOX_MUX_FILTER_ADTS_SPLIT_FILTER_H_

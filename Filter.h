@@ -36,6 +36,12 @@ namespace ppbox
                 return prev()->get_sample(sample, ec);
             }
 
+            virtual void on_seek(
+                boost::uint64_t time)
+            {
+                prev()->on_seek(time);
+            }
+
         protected:
             void detach_self()
             {

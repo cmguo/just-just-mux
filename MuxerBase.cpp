@@ -4,6 +4,7 @@
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/Transfer.h"
 #include "ppbox/mux/MuxError.h"
+#include "ppbox/mux/filter/DemuxerFilter.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
 #include <ppbox/demux/base/DemuxerBase.h>
@@ -38,8 +39,8 @@ namespace ppbox
             , read_flag_(0)
             , head_step_(0)
         {
-            filters_.push_back(&demux_filter_);
-            filters_.push_back(&key_filter_);
+            demux_filter_ = new DemuxerFilter;
+            key_filter_ = new KeyFrameFilter;
         }
 
         MuxerBase::~MuxerBase()
@@ -48,6 +49,8 @@ namespace ppbox
                 // demuxer具体的析构不在mux内里实现
                 demuxer_ = NULL;
             }
+            delete key_filter_;
+            delete demux_filter_;
         }
 
         bool MuxerBase::open(
@@ -56,7 +59,9 @@ namespace ppbox
         {
             assert(demuxer != NULL);
             demuxer_ = demuxer;
-            demux_filter_.set_demuxer(demuxer_);
+            demux_filter_->set_demuxer(demuxer_);
+            filters_.push_back(demux_filter_);
+            filters_.push_back(key_filter_);
             open(ec);
             if (ec) {
                 demuxer_ = NULL;
@@ -161,7 +166,7 @@ namespace ppbox
             if (!ec) {
                 read_flag_ |= f_head;
                 on_seek(time);
-            } else if (ec ==boost::asio::error::would_block) {
+            } else if (ec == boost::asio::error::would_block) {
                 seek_time_ = time;
                 read_flag_ |= f_head;
                 read_flag_ |= f_seek;
@@ -226,6 +231,12 @@ namespace ppbox
             return true;
         }
 
+        void MuxerBase::add_filter(
+            Filter * filter)
+        {
+            filters_.push_back(filter);
+        }
+
         void MuxerBase::reset_header(
             bool file_header, 
             bool stream_header)
@@ -242,6 +253,7 @@ namespace ppbox
             if (ec) {
                 return;
             }
+            do_open(media_info_);
             size_t stream_count = demuxer_->get_stream_count(ec);
             transfers_.clear();
             transfers_.resize(stream_count);
@@ -308,6 +320,12 @@ namespace ppbox
                 for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
                     delete transfers_[i][j];
                 }
+            }
+            demux_filter_->unlink();
+            key_filter_->unlink();
+            do_close();
+            while (!filters_.empty()) {
+                delete filters_.last();
             }
             streams_.clear();
             transfers_.clear();

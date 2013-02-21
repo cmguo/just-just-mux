@@ -4,12 +4,12 @@
 #define _PPBOX_MUX_MUXER_BASE_H_
 
 #include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/filter/DemuxerFilter.h"
-#include "ppbox/mux/filter/KeyFrameFilter.h"
+#include "ppbox/mux/Filter.h"
 
 #include <ppbox/common/ClassFactory.h>
 
 #include <framework/configure/Config.h>
+#include <framework/container/List.h>
 
 namespace ppbox
 {
@@ -17,6 +17,8 @@ namespace ppbox
     {
 
         class Transfer;
+        class DemuxerFilter;
+        class KeyFrameFilter;
 
         class MuxerBase
             : public ppbox::common::ClassFactory<
@@ -81,6 +83,9 @@ namespace ppbox
             }
 
         protected:
+            virtual void do_open(
+                MediaInfo & info) {};
+
             virtual void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers) = 0;
@@ -92,6 +97,8 @@ namespace ppbox
                 boost::uint32_t index, 
                 Sample & sample) = 0;
 
+            virtual void do_close() {};
+
         protected:
             ppbox::demux::DemuxerBase const & demuxer() const
             {
@@ -99,10 +106,7 @@ namespace ppbox
             };
 
             void add_filter(
-                Filter & filter)
-            {
-                filters_.push_back(&filter);
-            }
+                Filter * filter);
 
             void reset_header(
                 bool file_header = true, 
@@ -141,8 +145,8 @@ namespace ppbox
             boost::uint64_t play_time_; // ms
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;
-            DemuxerFilter demux_filter_;
-            KeyFrameFilter key_filter_;
+            DemuxerFilter * demux_filter_;
+            KeyFrameFilter * key_filter_;
 
             framework::configure::Config config_;
         };

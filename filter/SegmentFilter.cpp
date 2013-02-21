@@ -1,8 +1,10 @@
-// SegmentFilter.h
+// SegmentFilter.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/filter/SegmentFilter.h"
 #include "ppbox/mux/MuxError.h"
+
+#include <ppbox/demux/base/DemuxError.h>
 
 using namespace ppbox::avformat;
 
@@ -16,8 +18,8 @@ namespace ppbox
         SegmentFilter::SegmentFilter()
             : video_track_(boost::uint32_t(-1))
             , segent_end_time_(0)
-            , fisrt_idr_timestamp_us_(boost::uint64_t(-1))
             , is_save_sample_(false)
+            , is_eof_(false)
         {
         }
 
@@ -50,17 +52,14 @@ namespace ppbox
                 sample = sample_;
                 is_save_sample_ = false;
                 ec.clear();
+            } else if (is_eof_) {
+                ec = ppbox::demux::error::no_more_sample;
+                return false;
             } else {
-                if (!Filter::get_sample(sample, ec))
+                if (!Filter::get_sample(sample, ec)) {
+                    is_eof_ = (ec == ppbox::demux::error::no_more_sample);
                     return false;
-            }
-            if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1)
-                && (video_track_ == boost::uint32_t(-1)
-                    || (sample.itrack == video_track_
-                    && (sample.flags & Sample::sync)))) {
-                        // fisrt_idr_timestamp_us_ = sample.ustime;
-                        fisrt_idr_timestamp_us_ = 0;
-                        segent_end_time_ += fisrt_idr_timestamp_us_;
+                }
             }
             //std::cout << "[SegmentFilter::get_sample] sample.ustime = " << sample.ustime << " segent_end_time_ = " << segent_end_time_ << std::endl;
             if (sample.ustime >= segent_end_time_
@@ -75,20 +74,17 @@ namespace ppbox
             return true;
         }
 
+        void SegmentFilter::on_seek(
+            boost::uint64_t time)
+        {
+            is_save_sample_ = false;
+            is_eof_ = false;
+        }
+
         void SegmentFilter::set_end_time(
             boost::uint64_t time)
         {
-            if (fisrt_idr_timestamp_us_ == boost::uint64_t(-1))
-                segent_end_time_ = time;
-            else
-                segent_end_time_ = time + fisrt_idr_timestamp_us_;
-        }
-
-        void SegmentFilter::reset()
-        {
-            fisrt_idr_timestamp_us_ = boost::uint64_t(-1);
-            is_save_sample_ = false;
-            segent_end_time_ = 0;
+            segent_end_time_ = time;
         }
 
     } // namespace mux

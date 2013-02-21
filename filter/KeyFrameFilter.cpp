@@ -1,4 +1,4 @@
-// KeyFrameFilter.h
+// KeyFrameFilter.cpp
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/MuxerBase.h"
