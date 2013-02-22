@@ -22,6 +22,10 @@ namespace ppbox
             ~TimeScaleTransfer();
 
         public:
+            virtual void config(
+                framework::configure::Config & conf);
+
+        public:
             virtual void transfer(
                 StreamInfo & info);
 
@@ -47,6 +51,7 @@ namespace ppbox
                 boost::uint32_t sample_per_frame_;
                 framework::system::ScaleTransform scale_;
             };
+            int time_adjust_mode_; // 0 - auto, 1 - disable, 2 - enable
             boost::uint32_t scale_out_;
             std::vector<Item> items_;
         };

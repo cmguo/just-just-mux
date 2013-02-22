@@ -77,6 +77,7 @@ namespace ppbox
         void SegmentFilter::on_seek(
             boost::uint64_t time)
         {
+            Filter::on_seek(time);
             is_save_sample_ = false;
             is_eof_ = false;
         }

@@ -12,12 +12,20 @@ namespace ppbox
 
         TimeScaleTransfer::TimeScaleTransfer(
             boost::uint32_t time_scale)
-            : scale_out_(time_scale)
+            : time_adjust_mode_(0)
+            , scale_out_(time_scale)
         {
         }
 
         TimeScaleTransfer::~TimeScaleTransfer()
         {
+        }
+
+        void TimeScaleTransfer::config(
+            framework::configure::Config & conf)
+        {
+            conf.register_module("TimeScale")
+                << CONFIG_PARAM_NAME_NOACC("time_adjust_mode", time_adjust_mode_);
         }
 
         void TimeScaleTransfer::transfer(
@@ -30,14 +38,15 @@ namespace ppbox
             if (info.type == MEDIA_TYPE_VIDE) {
                 item.scale_.reset(info.time_scale, scale_out_);
             } else {
-                if (info.time_scale < info.audio_format.sample_rate) {
-                    if (scale_out_ == 1) {
-                        scale_out_ = info.audio_format.sample_rate;
-                    }
-                    item.scale_.reset(info.audio_format.sample_rate, scale_out_);
-                    item.time_adjust_ = 1;
-                     // TO DO:
-                    item.sample_per_frame_ = 1024;
+                if ((time_adjust_mode_ == 2) || 
+                    (time_adjust_mode_ == 1 && info.time_scale < info.audio_format.sample_rate)) {
+                        if (scale_out_ == 1) {
+                            scale_out_ = info.audio_format.sample_rate;
+                        }
+                        item.scale_.reset(info.audio_format.sample_rate, scale_out_);
+                        item.time_adjust_ = 1;
+                         // TO DO:
+                        item.sample_per_frame_ = 1024;
                 } else {
                     if (scale_out_ == 1) {
                         scale_out_ = info.time_scale;

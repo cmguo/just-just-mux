@@ -26,6 +26,7 @@ namespace ppbox
                 demuxer_ = NULL;
             }
 
+        public:
             virtual bool open(
                 MediaInfo const & media_info, 
                 std::vector<StreamInfo> const & streams, 
@@ -45,6 +46,12 @@ namespace ppbox
                 return !ec;
             }
 
+            virtual void on_seek(
+                boost::uint64_t time)
+            {
+            }
+
+        public:
             void set_demuxer(
                 ppbox::demux::DemuxerBase * demuxer)
             {

@@ -284,6 +284,7 @@ namespace ppbox
         {
             seek_time_ = time;
             play_time_ = time;
+            filters_.last()->on_seek(time);
             for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
                 for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
                     transfers_[i][j]->on_seek(time);
