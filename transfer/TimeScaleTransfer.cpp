@@ -72,7 +72,12 @@ namespace ppbox
                 item.scale_.set(sample.dts);
                 item.time_adjust_ = 2;
             } else {
+                boost::uint64_t dts = sample.dts;
                 sample.dts = item.scale_.inc(item.sample_per_frame_);
+                if (sample.dts > dts + item.scale_.scale_out() && sample.dts + item.scale_.scale_out() < dts) {
+                    sample.dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
+                    item.scale_.set(sample.dts);
+                }
             }
             //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
         }
