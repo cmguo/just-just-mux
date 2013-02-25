@@ -21,6 +21,7 @@ namespace ppbox
         AdtsSplitFilter::AdtsSplitFilter()
             : audio_track_(boost::uint32_t(-1))
             , is_save_sample_(false)
+            , sample_per_frame_(0)
         {
         }
 
@@ -39,6 +40,9 @@ namespace ppbox
             for (size_t i = 0; i < streams.size(); ++i) {
                 if (streams[i].type == MEDIA_TYPE_AUDI) {
                     audio_track_ = i;
+                    // ²Î¿¼ TimeScaleTransfer
+                    scale_.reset(streams[i].audio_format.sample_rate, streams[i].time_scale);
+                    sample_per_frame_ = 1024;
                     break;
                 }
             }
@@ -55,6 +59,7 @@ namespace ppbox
                 if (sample.itrack == audio_track_) {
                     sample_ = sample;
                     is_save_sample_ = true;
+                    scale_.set(sample.dts);
                 } else {
                     return true;
                 }
@@ -78,6 +83,8 @@ namespace ppbox
                 sample_.data.swap(data2);
                 sample.size = adts.frame_length;
                 sample_.size -= sample.size;
+                sample_.dts = scale_.get();
+                scale_.inc(sample_per_frame_);
             } else {
                 sample = sample_;
                 is_save_sample_ = false;

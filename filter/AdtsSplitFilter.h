@@ -5,6 +5,8 @@
 
 #include "ppbox/mux/Filter.h"
 
+#include <framework/system/ScaleTransform.h>
+
 namespace ppbox
 {
     namespace mux
@@ -35,6 +37,8 @@ namespace ppbox
             boost::uint32_t audio_track_;
             bool is_save_sample_;
             Sample sample_;
+            framework::system::ScaleTransform scale_;
+            boost::uint32_t sample_per_frame_;
         };
 
     } // namespace mux
