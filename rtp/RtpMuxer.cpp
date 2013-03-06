@@ -7,7 +7,6 @@
 
 #include <framework/string/Base16.h>
 #include <framework/string/Format.h>
-using namespace boost::system;
 
 namespace ppbox
 {

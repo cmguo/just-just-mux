@@ -23,7 +23,7 @@ namespace ppbox
 
         FlvMuxer::FlvMuxer()
         {
-            meta_data_transfer_ = new FlvTransfer(FlvTagType::META);
+            meta_data_transfer_ = new FlvTransfer(FlvTagType::DATA);
         }
 
         FlvMuxer::~FlvMuxer()

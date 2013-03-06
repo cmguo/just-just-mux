@@ -23,17 +23,17 @@ namespace ppbox
 
             ~FlvMuxer();
 
-        private:
-            void add_stream(
+        protected:
+            virtual void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);
 
-            void file_header(
-                Sample & tag);
+            virtual void file_header(
+                Sample & sample);
 
-            void stream_header(
+            virtual void stream_header(
                 boost::uint32_t index, 
-                Sample & tag);
+                Sample & sample);
 
         private:
             ppbox::avformat::FlvHeader flv_header_;

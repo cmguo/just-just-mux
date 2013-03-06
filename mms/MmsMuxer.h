@@ -33,7 +33,6 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            AsfMuxer asf_mux_;
             MmsTransfer * mms_transfer_;
         };
 

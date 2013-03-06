@@ -41,6 +41,8 @@ namespace ppbox
             previous_tag_size_ = BytesOrder::host_to_big_endian_long(sample.size);
             sample.data.push_back(boost::asio::buffer((boost::uint8_t*)&previous_tag_size_, 4));
             sample.size += 4;
+
+            sample.context = &header_;
         }
 
         void FlvTransfer::stream_header(

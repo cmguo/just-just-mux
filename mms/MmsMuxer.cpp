@@ -7,8 +7,6 @@
 
 #include <util/buffers/BuffersCopy.h>
 
-using namespace boost::system;
-
 namespace ppbox
 {
     namespace mux
