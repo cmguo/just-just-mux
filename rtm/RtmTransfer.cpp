@@ -72,18 +72,10 @@ namespace ppbox
             sample.data.swap(data);
         }
 
-        void RtmTransfer::file_header(
-            Sample & sample)
+        void RtmTransfer::on_seek(
+            boost::uint64_t time)
         {
-            FlvTagHeader tag_header;
-            tag_header.Type = FlvTagType::DATA;
-            tag_header.Timestamp = 0;
-            tag_header.DataSize = sample.size;
-            sample.data.push_front(boost::asio::buffer(header_buffer_, 0));
-            sample.data.push_back(boost::asio::buffer(header_buffer_, 0));
-            sample.context = & tag_header;
-
-            transfer(sample);
+            header_ = util::protocol::RtmpChunkHeader();
         }
 
     } // namespace mux

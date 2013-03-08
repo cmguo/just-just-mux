@@ -24,9 +24,8 @@ namespace ppbox
             virtual void transfer(
                 Sample & sample);
 
-        public:
-            void file_header(
-                Sample & sample);
+            virtual void on_seek(
+                boost::uint64_t time);
 
         private:
             boost::uint8_t header_buffer_[20];
