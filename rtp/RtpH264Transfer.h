@@ -33,7 +33,7 @@ namespace ppbox
             boost::uint32_t mtu_size_;
             boost::uint8_t prefix_[3][2];
             boost::uint32_t sample_description_index_;
-            boost::uint32_t use_dts_;
+            bool use_dts_;
         };
 
     } // namespace mux

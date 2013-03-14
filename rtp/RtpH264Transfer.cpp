@@ -23,7 +23,7 @@ namespace ppbox
             : RtpTransfer("RtpH264", 96, TIME_SCALE)
             , mtu_size_(1436)
             , sample_description_index_(boost::uint32_t(-1))
-            , use_dts_(0)
+            , use_dts_(false)
         {
         }
 
