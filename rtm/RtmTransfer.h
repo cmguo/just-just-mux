@@ -6,6 +6,7 @@
 #include "ppbox/mux/Transfer.h"
 
 #include <util/protocol/rtmp/RtmpChunkHeader.h>
+#include <util/protocol/rtmp/RtmpMessage.h>
 
 namespace ppbox
 {
@@ -30,6 +31,7 @@ namespace ppbox
         private:
             boost::uint8_t header_buffer_[20];
             util::protocol::RtmpChunkHeader header_;
+            util::protocol::RtmpMessageHeaderEx msg_header_;
             boost::uint32_t chunk_size_;
         };
 

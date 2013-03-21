@@ -19,7 +19,10 @@ namespace ppbox
         RtmTransfer::RtmTransfer()
             : chunk_size_(128)
         {
-            header_.cs_id(8);
+            msg_header_.chunk = 8;
+            msg_header_.stream = 1;
+            msg_header_.chunk_size = chunk_size_;
+            header_.cs_id(msg_header_.chunk);
         }
 
         RtmTransfer::~RtmTransfer()
@@ -34,7 +37,7 @@ namespace ppbox
             chunk.calc_timestamp = tag_header->Timestamp; // it is really 32 bits long
             chunk.message_length = tag_header->DataSize;
             chunk.message_type_id = tag_header->Type;
-            chunk.message_stream_id = 1;
+            chunk.message_stream_id = msg_header_.stream;
             header_.dec(chunk);
             sample.data.pop_front(); // È¥³ý FlvTagHeader
             sample.data.pop_back(); // È¥³ý previous_tag_size_
@@ -70,6 +73,11 @@ namespace ppbox
             data.insert(data.end(), SampleBuffers::range_buffers_begin(beg, end), SampleBuffers::range_buffers_end());
 
             sample.data.swap(data);
+
+            msg_header_.length = tag_header->DataSize;
+            msg_header_.type = tag_header->Type;
+            msg_header_.timestamp = tag_header->Timestamp;
+            sample.context = &msg_header_;
         }
 
         void RtmTransfer::on_seek(

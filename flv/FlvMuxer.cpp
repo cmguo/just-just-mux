@@ -53,6 +53,7 @@ namespace ppbox
                 flv_header_.TypeFlagsVideo = 1;
                 meta_data_.width = info.video_format.width;
                 meta_data_.height= info.video_format.height;
+                meta_data_.framerate = info.video_format.frame_rate;
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
                     if (info.format_type == StreamInfo::audio_aac_adts) {
@@ -66,6 +67,7 @@ namespace ppbox
                 flv_header_.TypeFlagsAudio = 1;
                 meta_data_.audiosamplerate = info.audio_format.sample_rate;
                 meta_data_.audiosamplesize = info.audio_format.sample_size;
+                //meta_data_.stereo = info.audio_format.channel_count;
             }
         }
 
@@ -75,6 +77,14 @@ namespace ppbox
             FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
             ppbox::avformat::FlvOArchive archive(buf);
             archive << flv_header_;
+
+            meta_data_.author = "ppbox muxer";
+            meta_data_.copyright = "ppbox 2013";
+            meta_data_.description = media_info_.name;
+
+            if (media_info_.duration != ppbox::data::invalid_size) {
+                //meta_data_.duration = media_info_.duration;
+            }
 
             {
                 FormatBuffer buf(meta_data_buffer_, sizeof(meta_data_buffer_));
