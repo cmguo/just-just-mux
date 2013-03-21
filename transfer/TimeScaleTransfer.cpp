@@ -3,6 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
+#include <ppbox/avformat/codec/aac/AacCodec.h>
 using namespace ppbox::avformat;
 
 namespace ppbox
@@ -12,7 +13,7 @@ namespace ppbox
 
         TimeScaleTransfer::TimeScaleTransfer(
             boost::uint32_t time_scale)
-            : time_adjust_mode_(0)
+            : time_adjust_mode_(1)
             , scale_out_(time_scale)
         {
         }
@@ -47,6 +48,12 @@ namespace ppbox
                         item.time_adjust_ = 1;
                          // TO DO:
                         item.sample_per_frame_ = 1024;
+                        //if (info.sub_type == AUDIO_TYPE_MP4A) {
+                        //    AacConfigHelper const & config = ((AacCodec const *)info.codec.get())->config_helper();
+                        //    if (config.get_extension_object_type() == 5) {
+                        //        item.sample_per_frame_ *= 2;
+                        //    }
+                        //}
                 } else {
                     if (scale_out_ == 1) {
                         scale_out_ = info.time_scale;
@@ -72,10 +79,10 @@ namespace ppbox
                 item.scale_.set(sample.dts);
                 item.time_adjust_ = 2;
             } else {
-                boost::uint64_t dts = sample.dts;
+                boost::uint64_t dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
                 sample.dts = item.scale_.inc(item.sample_per_frame_);
-                if (sample.dts > dts + item.scale_.scale_out() && sample.dts + item.scale_.scale_out() < dts) {
-                    sample.dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
+                if (sample.dts > dts + item.scale_.scale_out() || sample.dts + item.scale_.scale_out() < dts) {
+                    sample.dts = dts;
                     item.scale_.set(sample.dts);
                 }
             }
