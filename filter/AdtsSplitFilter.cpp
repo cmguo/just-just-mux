@@ -92,11 +92,13 @@ namespace ppbox
             return true;
         }
 
-        void AdtsSplitFilter::on_seek(
-            boost::uint64_t time)
+        bool AdtsSplitFilter::before_seek(
+            Sample & sample, 
+            boost::system::error_code & ec)
         {
-            Filter::on_seek(time);
+            sample.append(sample_);
             is_save_sample_ = false;
+            return Filter::before_seek(sample, ec);
         }
 
     } // namespace mux

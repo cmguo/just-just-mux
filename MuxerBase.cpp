@@ -103,7 +103,6 @@ namespace ppbox
                     sample.duration = 0;
                     sample.size = 0;
                     sample.stream_info = NULL;
-                    sample.blocks.clear();
                     sample.data.clear();
                     do {
                         if (head_step_ == 0) {
@@ -144,6 +143,10 @@ namespace ppbox
         bool MuxerBase::reset(
             error_code & ec)
         {
+            Sample sample;
+            if (!filters_.last()->before_seek(sample, ec)) {
+                return false;
+            }
             demuxer_->reset(ec);
             if (!ec) {
                 read_flag_ |= f_head;
@@ -162,6 +165,11 @@ namespace ppbox
             boost::uint64_t & time,
             error_code & ec)
         {
+            Sample sample;
+            sample.time = time;
+            if (!filters_.last()->before_seek(sample, ec)) {
+                return false;
+            }
             demuxer_->seek(time, ec);
             if (!ec) {
                 read_flag_ |= f_head;

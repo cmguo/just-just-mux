@@ -30,10 +30,17 @@ namespace ppbox
             }
 
             virtual bool get_sample(
-                Sample & sample,
+                Sample & sample, 
                 boost::system::error_code & ec)
             {
                 return prev()->get_sample(sample, ec);
+            }
+
+            virtual bool before_seek(
+                Sample & sample, 
+                boost::system::error_code & ec)
+            {
+                return prev()->before_seek(sample, ec);
             }
 
             virtual void on_seek(

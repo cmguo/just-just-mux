@@ -46,6 +46,13 @@ namespace ppbox
                 return !ec;
             }
 
+            virtual bool before_seek(
+                Sample & sample,
+                boost::system::error_code & ec)
+            {
+                return demuxer_->free_sample(sample, ec);
+            }
+
             virtual void on_seek(
                 boost::uint64_t time)
             {

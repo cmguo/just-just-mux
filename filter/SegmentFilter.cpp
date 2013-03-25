@@ -74,12 +74,14 @@ namespace ppbox
             return true;
         }
 
-        void SegmentFilter::on_seek(
-            boost::uint64_t time)
+        bool SegmentFilter::before_seek(
+            Sample & sample, 
+            boost::system::error_code & ec)
         {
-            Filter::on_seek(time);
             is_save_sample_ = false;
             is_eof_ = false;
+            sample.append(sample_);
+            return Filter::before_seek(sample, ec);
         }
 
         void SegmentFilter::set_end_time(

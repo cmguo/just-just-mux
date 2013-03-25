@@ -28,8 +28,9 @@ namespace ppbox
                 Sample & sample,
                 boost::system::error_code & ec);
 
-            virtual void on_seek(
-                boost::uint64_t time);
+            virtual bool before_seek(
+                Sample & sample, 
+                boost::system::error_code & ec);
 
         public:
             void set_end_time(

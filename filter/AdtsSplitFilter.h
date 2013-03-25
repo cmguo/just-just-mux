@@ -30,8 +30,9 @@ namespace ppbox
                 Sample & sample,
                 boost::system::error_code & ec);
 
-            virtual void on_seek(
-                boost::uint64_t time);
+            virtual bool before_seek(
+                Sample & sample, 
+                boost::system::error_code & ec);
 
         private:
             boost::uint32_t audio_track_;

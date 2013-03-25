@@ -137,6 +137,11 @@ namespace ppbox
             }
         }
 
+        void AsfTransfer::before_seek(
+            Sample & sample)
+        {
+        }
+
         void AsfTransfer::on_seek(
             boost::uint64_t time)
         {
