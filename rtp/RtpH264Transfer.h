@@ -29,10 +29,13 @@ namespace ppbox
             virtual void transfer(
                 Sample & sample);
 
+            virtual void before_seek(
+                Sample & sample);
+
         private:
             boost::uint32_t mtu_size_;
             boost::uint8_t prefix_[3][2];
-            boost::uint32_t sample_description_index_;
+            bool sps_pps_sent_;
             bool use_dts_;
         };
 

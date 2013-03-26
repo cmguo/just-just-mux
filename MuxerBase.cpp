@@ -143,8 +143,7 @@ namespace ppbox
         bool MuxerBase::reset(
             error_code & ec)
         {
-            Sample sample;
-            if (!filters_.last()->before_seek(sample, ec)) {
+            if (!before_seek(true, 0, ec)) {
                 return false;
             }
             demuxer_->reset(ec);
@@ -165,9 +164,7 @@ namespace ppbox
             boost::uint64_t & time,
             error_code & ec)
         {
-            Sample sample;
-            sample.time = time;
-            if (!filters_.last()->before_seek(sample, ec)) {
+            if (!before_seek(false, time, ec)) {
                 return false;
             }
             demuxer_->seek(time, ec);
@@ -285,6 +282,23 @@ namespace ppbox
             if (!ec) {
                 filters_.last()->open(media_info_, streams_, ec);
             }
+        }
+
+        bool MuxerBase::before_seek(
+            bool reset, 
+            boost::uint64_t time,
+            boost::system::error_code & ec)
+        {
+            Sample sample;
+            sample.time = time;
+            for(size_t i = 0; i < transfers_.size(); ++i) {
+                std::vector<Transfer *> & transfers = transfers_[i];
+                for(boost::uint32_t j = 0; j < transfers.size(); ++j) {
+                    transfers[j]->before_seek(sample);
+                }
+            }
+            sample.flags = reset ? sample.sync : 0;
+            return filters_.last()->before_seek(sample, ec);
         }
 
         void MuxerBase::on_seek(

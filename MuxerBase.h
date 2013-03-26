@@ -120,6 +120,11 @@ namespace ppbox
                 Sample & sample,
                 boost::system::error_code & ec);
 
+            bool before_seek(
+                bool reset, 
+                boost::uint64_t time,
+                boost::system::error_code & ec);
+
             void on_seek(
                 boost::uint64_t time);
 

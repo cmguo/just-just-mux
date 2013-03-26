@@ -22,7 +22,7 @@ namespace ppbox
         RtpH264Transfer::RtpH264Transfer()
             : RtpTransfer("RtpH264", 96, TIME_SCALE)
             , mtu_size_(1436)
-            , sample_description_index_(boost::uint32_t(-1))
+            , sps_pps_sent_(false)
             , use_dts_(false)
         {
         }
@@ -83,10 +83,10 @@ namespace ppbox
             RtpTransfer::begin(sample);
 
             // add two sps pps rtp packet
-            if (0 != sample_description_index_) {
+            if (!sps_pps_sent_) {
                 StreamInfo const & media = *(StreamInfo const *)sample.stream_info;
 
-                sample_description_index_ = 0;
+                sps_pps_sent_ = true;
                 AvcConfig const & avc_config = ((AvcCodec const *)media.codec.get())->config();
 
                 for (size_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); ++i) {
@@ -94,7 +94,7 @@ namespace ppbox
                     push_buffers(boost::asio::buffer(avc_config.sequenceParameterSetNALUnit[i]));
                     finish_packet();
                 }
-                
+
                 for (size_t i = 0; i < avc_config.pictureParameterSetNALUnit.size(); ++i) {
                     begin_packet(false, rtp_time, avc_config.pictureParameterSetNALUnit[i].size());
                     push_buffers(boost::asio::buffer(avc_config.pictureParameterSetNALUnit[i]));
@@ -144,6 +144,14 @@ namespace ppbox
                 }
             }
             RtpTransfer::finish(sample);
+        }
+
+        void RtpH264Transfer::before_seek(
+            Sample & sample)
+        {
+            if (sample.flags & sample.sync) {
+                sps_pps_sent_ = false;
+            }
         }
 
     } // namespace mux
