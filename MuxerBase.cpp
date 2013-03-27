@@ -34,8 +34,6 @@ namespace ppbox
 
         MuxerBase::MuxerBase()
             : demuxer_(NULL)
-            , seek_time_(0)
-            , play_time_(0)
             , read_flag_(0)
             , head_step_(0)
         {
@@ -67,7 +65,7 @@ namespace ppbox
                 demuxer_ = NULL;
             } else {
                 read_flag_ = f_head;
-                seek_time_ = play_time_ = demuxer_->check_seek(ec);
+                stat_.time_range.beg = stat_.time_range.pos = demuxer_->check_seek(ec);
                 if (ec == boost::asio::error::would_block) {
                     ec.clear();
                     read_flag_ = f_seek;
@@ -122,6 +120,7 @@ namespace ppbox
                     if (!sample.data.empty()) {
                         sample.size = util::buffers::buffers_size(sample.data);
                         ec.clear();
+                        stat_.byte_range.pos += sample.size;
                         return true;
                     }
                 } else if (read_flag_ & f_seek) {
@@ -172,10 +171,14 @@ namespace ppbox
                 read_flag_ |= f_head;
                 on_seek(time);
             } else if (ec == boost::asio::error::would_block) {
-                seek_time_ = time;
+                stat_.time_range.beg = time;
                 read_flag_ |= f_head;
                 read_flag_ |= f_seek;
             }
+            stat_.byte_range.beg = 0;
+            stat_.byte_range.end = ppbox::data::invalid_size;
+            stat_.byte_range.pos = 0;
+            stat_.byte_range.buf = 0;
             return !ec;
         }
 
@@ -199,7 +202,7 @@ namespace ppbox
             } else {
                 ec.clear();
             }
-            return seek_time_;
+            return stat_.time_range.beg;
         }
 
         void MuxerBase::media_info(
@@ -223,7 +226,8 @@ namespace ppbox
             boost::system::error_code ec;
             StreamStatus status1;
             demuxer_->get_stream_status(status1, ec);
-            status1.time_range.beg = seek_time_;
+            status1.byte_range = stat_.byte_range;
+            status1.time_range.beg = stat_.time_range.beg;
             status = status1;
         }
 
@@ -304,8 +308,8 @@ namespace ppbox
         void MuxerBase::on_seek(
             boost::uint64_t time)
         {
-            seek_time_ = time;
-            play_time_ = time;
+            stat_.time_range.beg = time;
+            stat_.time_range.pos = time;
             filters_.last()->on_seek(time);
             for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
                 for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
@@ -327,12 +331,14 @@ namespace ppbox
                     //read_flag_ |= f_head;
                     //head_step_ = 1;
                 //}
-                play_time_ = sample.time;
+                stat_.time_range.pos = sample.time;
                 std::vector<Transfer *> & transfers = transfers_[sample.itrack];
                 for(boost::uint32_t i = 0; i < transfers.size(); ++i) {
                     transfers[i]->transfer(sample);
                 }
+                stat_.byte_range.pos += sample.size;
             } else if (ec == ppbox::demux::error::no_more_sample) {
+                stat_.byte_range.end = stat_.byte_range.pos;
                 ec = error::end_of_stream;
             }
         }

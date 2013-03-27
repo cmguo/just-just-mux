@@ -133,6 +133,7 @@ namespace ppbox
         protected:
             MediaInfo media_info_;
             std::vector<StreamInfo> streams_;
+            StreamStatus stat_;
 
         private:
             ppbox::demux::DemuxerBase * demuxer_;
@@ -146,8 +147,6 @@ namespace ppbox
             };
 
             std::string format_;
-            boost::uint64_t seek_time_; // ms
-            boost::uint64_t play_time_; // ms
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;
             DemuxerFilter * demux_filter_;
