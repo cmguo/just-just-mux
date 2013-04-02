@@ -72,8 +72,7 @@ namespace ppbox
             void finish_packet();
 
         protected:
-            void push_rtcp_packet(
-                Sample & sample);
+            void push_rtcp_packet();
 
         protected:
             char const * const name_;
@@ -87,6 +86,8 @@ namespace ppbox
             boost::uint32_t num_pkt_;
             boost::uint32_t num_byte_;
             boost::uint32_t next_time_;
+            boost::uint64_t time_ms_;
+            boost::uint64_t timestamp_;
             boost::posix_time::time_duration time_start_from_1900_;
             boost::uint8_t rtcp_buffer_[64];
         };

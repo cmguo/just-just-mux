@@ -22,10 +22,8 @@ namespace ppbox
             , num_byte_(0)
             , next_time_(0)
         {
-            static size_t g_ssrc = 0;
-            if (g_ssrc == 0) {
-                g_ssrc = rand();
-            }
+            static size_t g_ssrc = rand();
+
             rtp_head_.vpxcc = 0x80;
             rtp_head_.mpt = type;
             rtp_head_.sequence = rand();
@@ -38,7 +36,6 @@ namespace ppbox
             rtp_info_.ssrc = rtp_head_.ssrc;
             rtp_info_.sequence = rtp_head_.sequence;
             rtp_info_.setup = false;
-
         }
 
         RtpTransfer::~RtpTransfer()
@@ -90,10 +87,8 @@ namespace ppbox
             total_size_ = 0;
             buffers_.clear();
 
-            if (rtcp_interval_ && sample.time >= next_time_) {
-                push_rtcp_packet(sample);
-                next_time_ += rtcp_interval_;
-            }
+            time_ms_ = sample.time;
+            timestamp_ = sample.dts + sample.cts_delta;
         }
 
         void RtpTransfer::begin_packet(
@@ -123,6 +118,11 @@ namespace ppbox
         {
             RtpPacket & packet = packets_.back();
             packet.buf_end = buffers_.size();
+
+            if (rtcp_interval_ && time_ms_ >= next_time_) {
+                push_rtcp_packet();
+                next_time_ += rtcp_interval_;
+            }
         }
 
         void RtpTransfer::finish(
@@ -142,8 +142,7 @@ namespace ppbox
             sample.context = &packets_;
         }
 
-        void RtpTransfer::push_rtcp_packet(
-            Sample & sample)
+        void RtpTransfer::push_rtcp_packet()
         {
             size_t length = sizeof(RtcpHead) + sizeof(RtcpSR) 
                 + sizeof(RtcpHead) + sizeof(boost::uint32_t) + sizeof(RtcpSDESItem);
@@ -155,13 +154,13 @@ namespace ppbox
 
             RtcpSR * sr = (RtcpSR *)(head + 1);
             sr->ssrc = rtp_head_.ssrc;
-            boost::posix_time::time_duration time_since_1900 = time_start_from_1900_ + boost::posix_time::milliseconds(sample.time);
+            boost::posix_time::time_duration time_since_1900 = time_start_from_1900_ + boost::posix_time::milliseconds(time_ms_);
             boost::uint32_t ntp_sec = time_since_1900.total_seconds();
             boost::uint32_t ntp_frac = (time_since_1900 - boost::posix_time::seconds(ntp_sec)).total_microseconds();
             ntp_frac = (boost::uint32_t)(((boost::uint64_t)ntp_frac << 32) / 1000000);
             sr->ntph = framework::system::BytesOrder::host_to_big_endian(ntp_sec);
             sr->ntpl = framework::system::BytesOrder::host_to_big_endian(ntp_frac);
-            sr->timestamp = framework::system::BytesOrder::host_to_big_endian(rtp_head_.timestamp + (boost::uint32_t)sample.dts);
+            sr->timestamp = framework::system::BytesOrder::host_to_big_endian(rtp_head_.timestamp + (boost::uint32_t)timestamp_);
             sr->packet = framework::system::BytesOrder::host_to_big_endian(num_pkt_);
             sr->octet = framework::system::BytesOrder::host_to_big_endian((boost::uint32_t)num_byte_);
 
