@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_MUXER_TYPES_H_
 #define _PPBOX_MUX_MUXER_TYPES_H_
 
-#define PPBOX_ENABLE_REGISTER_CLASS
+#include <ppbox/common/ClassRegister.h>
 
 #include "ppbox/mux/raw/RawMuxer.h"
 #include "ppbox/mux/flv/FlvMuxer.h"
