@@ -40,8 +40,8 @@ namespace ppbox
             for (size_t i = 0; i < streams.size(); ++i) {
                 if (streams[i].type == MEDIA_TYPE_AUDI) {
                     audio_track_ = i;
-                    // ²Î¿¼ TimeScaleTransfer
-                    scale_.reset(streams[i].audio_format.sample_rate, streams[i].time_scale);
+                    // Î¿ TimeScaleTransfer
+                    scale_.reset_scale(streams[i].audio_format.sample_rate, streams[i].time_scale);
                     sample_per_frame_ = 1024;
                     break;
                 }
@@ -59,7 +59,7 @@ namespace ppbox
                 if (sample.itrack == audio_track_) {
                     sample_ = sample;
                     is_save_sample_ = true;
-                    scale_.set(sample.dts);
+                    scale_.last_out(sample.dts);
                 } else {
                     return true;
                 }
@@ -78,7 +78,7 @@ namespace ppbox
                 pos.increment_bytes(end, adts.frame_length);
                 data1.insert(data1.end(), SampleBuffers::range_buffers_begin(beg, pos), SampleBuffers::range_buffers_end());
                 data2.insert(data2.end(), SampleBuffers::range_buffers_begin(pos, end), SampleBuffers::range_buffers_end());
-                sample = sample_;
+                sample.slice(sample_);
                 sample.data.swap(data1);
                 sample_.data.swap(data2);
                 sample.size = adts.frame_length;
