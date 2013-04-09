@@ -37,7 +37,7 @@ namespace ppbox
             }
             Item & item = items_[info.index];
             if (info.type == MEDIA_TYPE_VIDE) {
-                item.scale_.reset(info.time_scale, scale_out_);
+                item.scale_.reset_scale(info.time_scale, scale_out_);
             } else {
                 if ((time_adjust_mode_ == 2) || 
                     (time_adjust_mode_ == 1 && info.time_scale < info.audio_format.sample_rate)) {
