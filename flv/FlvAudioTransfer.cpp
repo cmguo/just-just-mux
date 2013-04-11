@@ -90,8 +90,6 @@ namespace ppbox
                 sample.size += config_data_.size();
                 transfer(sample);
                 header_.AACPacketType = 1; // restore
-            } else {
-                assert(false);
             }
         }
 

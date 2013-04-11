@@ -37,15 +37,17 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
-                if (info.format_type == StreamInfo::video_avc_packet) {
-                    // empty
-                } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
-                    transfer = new H264StreamSplitTransfer();
-                    transfers.push_back(transfer);
-                    transfer = new H264PtsComputeTransfer();
-                    transfers.push_back(transfer);
-                    transfer = new H264PackageJoinTransfer();
-                    transfers.push_back(transfer);
+                if (info.sub_type == VIDEO_TYPE_AVC1) {
+                    if (info.format_type == StreamInfo::video_avc_packet) {
+                        // empty
+                    } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
+                        transfer = new H264StreamSplitTransfer();
+                        transfers.push_back(transfer);
+                        transfer = new H264PtsComputeTransfer();
+                        transfers.push_back(transfer);
+                        transfer = new H264PackageJoinTransfer();
+                        transfers.push_back(transfer);
+                    }
                 }
                 FlvVideoTransfer * transfer = new FlvVideoTransfer;
                 transfers_.push_back(transfer);

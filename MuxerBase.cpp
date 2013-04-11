@@ -350,6 +350,8 @@ namespace ppbox
                     delete transfers_[i][j];
                 }
             }
+            error_code ec;
+            before_seek(true, 0, ec);
             demux_filter_->unlink();
             key_filter_->unlink();
             do_close();
