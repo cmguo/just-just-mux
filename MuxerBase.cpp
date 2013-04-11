@@ -345,13 +345,13 @@ namespace ppbox
 
         void MuxerBase::close()
         {
+            error_code ec;
+            before_seek(true, 0, ec);
             for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
                 for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
                     delete transfers_[i][j];
                 }
             }
-            error_code ec;
-            before_seek(true, 0, ec);
             demux_filter_->unlink();
             key_filter_->unlink();
             do_close();
