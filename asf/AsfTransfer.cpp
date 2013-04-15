@@ -26,13 +26,13 @@ namespace ppbox
         AsfTransfer::AsfTransfer()
             : single_payload_(false)
             , packet_length_(4096)
-            , max_packet_length_(4096)
             , p_index_(0)
-            , packet_head_(max_packet_length_)
             , packet_left_(0)
             , data_ptr_(NULL)
         {
             data_buf_[0] = data_buf_[1] = 0;
+
+            context_.packet = &packet_head_;
         }
 
         AsfTransfer::~AsfTransfer()
@@ -53,7 +53,7 @@ namespace ppbox
                 << CONFIG_PARAM_NAME_RDWR("packet_length", packet_length_)
                 << CONFIG_PARAM_NAME_RDWR("single_payload", single_payload_);
 
-            max_packet_length_ = packet_length_;
+            context_.max_packet_size = packet_length_;
 
             data_buf_[0] = new boost::uint8_t[packet_length_];
             data_buf_[1] = new boost::uint8_t[packet_length_];
@@ -315,6 +315,7 @@ namespace ppbox
             boost::uint8_t * asf_buf = head_buf_queue_.alloc();
             FormatBuffer buf(asf_buf, PACKET_HEAD_LENGTH);
             ASFOArchive oar(buf);
+            oar.context(&context_);
             oar << packet_head_;
             //填充到data_中
             p_index_ = data_.size();
@@ -336,7 +337,6 @@ namespace ppbox
             bool copy_flag)
         {
             ASF_PayloadHeader payload_header;
-            payload_header.set_packet(packet_head_);
 
             struct P_NUM {
 #ifdef   BOOST_BIG_ENDIAN
@@ -369,6 +369,7 @@ namespace ppbox
             boost::uint8_t * asf_buf = head_buf_queue_.alloc();
             FormatBuffer buf(asf_buf, PAYLOAD_HEAD_LENGTH);
             ASFOArchive oar(buf);
+            oar.context(&context_);
             oar << payload_header;
             //填充到data_中
             data_.push_back(boost::asio::buffer(asf_buf, PAYLOAD_HEAD_LENGTH));
