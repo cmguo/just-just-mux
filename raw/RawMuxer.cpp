@@ -11,6 +11,7 @@
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
 #include "ppbox/mux/filter/AdtsSplitFilter.h"
 
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 namespace ppbox
@@ -42,19 +43,21 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
-                if (info.format_type == StreamInfo::video_avc_packet) {
-                    if (video_format_ == "es") {
-                        transfer = new H264PackageSplitTransfer();
-                        transfers.push_back(transfer);
-                        transfer = new H264StreamJoinTransfer();
-                        transfers.push_back(transfer);
-                    }
-                } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
-                    if (video_format_ == "es") {
-                        transfer = new H264StreamSplitTransfer();
-                        transfers.push_back(transfer);
-                        transfer = new H264PtsComputeTransfer();
-                        transfers.push_back(transfer);
+                if (info.sub_type == VIDEO_TYPE_AVC1) {
+                    if (info.format_type == FormatType::video_avc_packet) {
+                        if (video_format_ == "es") {
+                            transfer = new H264PackageSplitTransfer();
+                            transfers.push_back(transfer);
+                            transfer = new H264StreamJoinTransfer();
+                            transfers.push_back(transfer);
+                        }
+                    } else if (info.format_type == FormatType::video_avc_byte_stream) {
+                        if (video_format_ == "es") {
+                            transfer = new H264StreamSplitTransfer();
+                            transfers.push_back(transfer);
+                            transfer = new H264PtsComputeTransfer();
+                            transfers.push_back(transfer);
+                        }
                     }
                 }
                 if (time_scale_ || video_time_scale_) {
@@ -63,7 +66,7 @@ namespace ppbox
                 }
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
-                    if (info.format_type == StreamInfo::audio_aac_adts) {
+                    if (info.format_type == FormatType::audio_aac_adts) {
                         if (audio_format_ != "adts") {
                             add_filter(new AdtsSplitFilter);
                             transfer = new MpegAudioAdtsDecodeTransfer();
@@ -71,7 +74,7 @@ namespace ppbox
                         }
                     }
                     if (audio_format_ == "adts") {
-                        if (info.format_type != StreamInfo::audio_aac_adts) {
+                        if (info.format_type != FormatType::audio_aac_adts) {
                             transfer = new MpegAudioAdtsEncodeTransfer();
                             transfers.push_back(transfer);
                         }

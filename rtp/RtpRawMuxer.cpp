@@ -11,7 +11,7 @@
 #include "ppbox/mux/rtp/RtpMpegAudioTransfer.h"
 #include "ppbox/mux/rtp/RtpH264Transfer.h"
 
-using namespace ppbox::demux;
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 namespace ppbox
@@ -33,16 +33,18 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
-                if (info.format_type == StreamInfo::video_avc_packet) {
-                    transfer = new H264PackageSplitTransfer();
-                    transfers.push_back(transfer);
-                    //transfer = new ParseH264Transfer();
-                    //transfers.push_back(transfer);
-                } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
-                    transfer = new H264StreamSplitTransfer();
-                    transfers.push_back(transfer);
-                    transfer = new H264PtsComputeTransfer();
-                    transfers.push_back(transfer);
+                if (info.sub_type == VIDEO_TYPE_AVC1) {
+                    if (info.format_type == FormatType::video_avc_packet) {
+                        transfer = new H264PackageSplitTransfer();
+                        transfers.push_back(transfer);
+                        //transfer = new ParseH264Transfer();
+                        //transfers.push_back(transfer);
+                    } else if (info.format_type == FormatType::video_avc_byte_stream) {
+                        transfer = new H264StreamSplitTransfer();
+                        transfers.push_back(transfer);
+                        transfer = new H264PtsComputeTransfer();
+                        transfers.push_back(transfer);
+                    }
                 }
                 RtpTransfer * rtp_transfer = new RtpH264Transfer;
                 transfers.push_back(rtp_transfer);
@@ -51,8 +53,8 @@ namespace ppbox
                 RtpTransfer * rtp_transfer = NULL;
                 if (info.sub_type == AUDIO_TYPE_MP1A) {
                     rtp_transfer = new RtpMpegAudioTransfer;
-                } else {
-                    if (info.format_type == StreamInfo::audio_aac_adts) {
+                } else if (info.sub_type == AUDIO_TYPE_MP4A) {
+                    if (info.format_type == FormatType::audio_aac_adts) {
                         transfer = new MpegAudioAdtsDecodeTransfer();
                         transfers.push_back(transfer);
                     }

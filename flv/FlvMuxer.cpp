@@ -9,6 +9,7 @@
 #include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 #include <framework/system/BytesOrder.h>
@@ -38,9 +39,9 @@ namespace ppbox
             Transfer * transfer = NULL;
             if (info.type == MEDIA_TYPE_VIDE) {
                 if (info.sub_type == VIDEO_TYPE_AVC1) {
-                    if (info.format_type == StreamInfo::video_avc_packet) {
+                    if (info.format_type == FormatType::video_avc_packet) {
                         // empty
-                    } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
+                    } else if (info.format_type == FormatType::video_avc_byte_stream) {
                         transfer = new H264StreamSplitTransfer();
                         transfers.push_back(transfer);
                         transfer = new H264PtsComputeTransfer();
@@ -58,7 +59,7 @@ namespace ppbox
                 meta_data_.framerate = info.video_format.frame_rate;
             } else if (info.type == MEDIA_TYPE_AUDI) {
                 if (info.sub_type == AUDIO_TYPE_MP4A) {
-                    if (info.format_type == StreamInfo::audio_aac_adts) {
+                    if (info.format_type == FormatType::audio_aac_adts) {
                         transfer = new MpegAudioAdtsDecodeTransfer();
                         transfers.push_back(transfer);
                     }

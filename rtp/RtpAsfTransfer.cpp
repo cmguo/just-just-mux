@@ -5,6 +5,7 @@
 #include "ppbox/mux/asf/AsfTransfer.h"
 #include "ppbox/mux/rtp/RtpAsfTransfer.h"
 
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 #include <framework/string/Format.h>

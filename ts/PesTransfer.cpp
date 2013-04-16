@@ -4,6 +4,7 @@
 #include "ppbox/mux/ts/PesTransfer.h"
 
 #include <ppbox/avformat/ts/PesPacket.h>
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 #include <util/archive/ArchiveBuffer.h>

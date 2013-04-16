@@ -7,6 +7,7 @@
 #include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 #include <util/archive/BigEndianBinaryOArchive.h>
@@ -31,11 +32,13 @@ namespace ppbox
         {
              Transfer * transfer = NULL;
              if (info.type == MEDIA_TYPE_VIDE) {
-                 if (info.format_type == StreamInfo::video_avc_packet) {
-                     transfer = new H264PackageSplitTransfer();
-                     transfers.push_back(transfer);
-                     transfer = new H264StreamJoinTransfer();
-                     transfers.push_back(transfer);
+                 if (info.sub_type == VIDEO_TYPE_AVC1) {
+                     if (info.format_type == FormatType::video_avc_packet) {
+                         transfer = new H264PackageSplitTransfer();
+                         transfers.push_back(transfer);
+                         transfer = new H264StreamJoinTransfer();
+                         transfers.push_back(transfer);
+                     }
                  }
              }
              if (transfer_ == NULL)

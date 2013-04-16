@@ -220,19 +220,26 @@ namespace ppbox
             streams_object.Flag.StreamNumber = info.index + 1;
 
             if (ASF_Video_Media == streams_object.StreamType) {
+                switch (info.sub_type) {
+                    case VIDEO_TYPE_AVC1: 
+                        streams_object.Video_Media_Type.FormatData.CompressionID = MAKE_FOURC_TYPE('H', '2', '6', '4');
+                        ((AvcCodec *)info.codec.get())->config_helper().to_es_data(
+                            streams_object.Video_Media_Type.FormatData.CodecSpecificData);
+                        break;
+                    case VIDEO_TYPE_WMV3:
+                        streams_object.Video_Media_Type.FormatData.CompressionID = VIDEO_TYPE_WMV3;
+                        streams_object.Video_Media_Type.FormatData.CodecSpecificData = info.format_data;
+                        break;
+                    default:
+                        streams_object.Video_Media_Type.FormatData.CompressionID = 0;
+                        break;
+                }
                 streams_object.Video_Media_Type.EncodeImageWidth  = info.video_format.width;
                 streams_object.Video_Media_Type.EncodeImageHeight = info.video_format.height;
 
                 streams_object.Video_Media_Type.FormatData.ImageWidth  = info.video_format.width;
                 streams_object.Video_Media_Type.FormatData.ImageHeight = info.video_format.height;
                 streams_object.Video_Media_Type.FormatData.BitsPerPixelCount = 24;
-                if (info.sub_type == VIDEO_TYPE_AVC1) {
-                    streams_object.Video_Media_Type.FormatData.CompressionID = MAKE_FOURC_TYPE('H', '2', '6', '4');
-                    ((AvcCodec *)info.codec.get())->config_helper().to_es_data(
-                        streams_object.Video_Media_Type.FormatData.CodecSpecificData);
-                } else {
-                    streams_object.Video_Media_Type.FormatData.CompressionID = 0;
-                }
                 streams_object.Video_Media_Type.FormatData.FormatDataSize = 
                     streams_object.Video_Media_Type.FormatData.CodecSpecificData.size() + 40;
                 streams_object.Video_Media_Type.FormatDataSize = 
@@ -240,20 +247,20 @@ namespace ppbox
                 streams_object.ObjLength = 89 + streams_object.Video_Media_Type.FormatDataSize;
                 streams_object.TypeSpecificDataLength =
                     11 + streams_object.Video_Media_Type.FormatDataSize;
-            }
-            else
-            {
-                if (info.sub_type == AUDIO_TYPE_MP4A)
-                {
-                    streams_object.Audio_Media_Type.CodecId = 255;
-                }
-                else if (info.sub_type == AUDIO_TYPE_WMA2)
-                {
-                    streams_object.Audio_Media_Type.CodecId = 353;
-                }
-                else
-                {
-                    streams_object.Audio_Media_Type.CodecId = 0;
+            } else {
+                switch (info.sub_type) {
+                    case AUDIO_TYPE_MP4A: 
+                        streams_object.Audio_Media_Type.CodecId = 0x00ff;
+                        break;
+                    case AUDIO_TYPE_MP1A:
+                        streams_object.Audio_Media_Type.CodecId = 0x0055;
+                        break;
+                    case AUDIO_TYPE_WMA2:
+                        streams_object.Audio_Media_Type.CodecId = 0x0161;
+                        break;
+                    default:
+                        streams_object.Audio_Media_Type.CodecId = 0;
+                        break;
                 }
                 streams_object.Audio_Media_Type.NumberOfChannels = (boost::uint16_t)info.audio_format.channel_count;
                 streams_object.Audio_Media_Type.SamplesPerSecond = info.audio_format.sample_rate;

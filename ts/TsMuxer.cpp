@@ -10,6 +10,7 @@
 #include "ppbox/mux/transfer/MpegAudioAdtsEncodeTransfer.h"
 #include "ppbox/mux/ts/PesTransfer.h"
 
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 using namespace boost::system;
@@ -34,16 +35,18 @@ namespace ppbox
             Transfer * transfer = NULL;
             PmtSection & pmt_sec = pmt_.sections.front();
             if (info.type == MEDIA_TYPE_VIDE) {
-                if (info.format_type == StreamInfo::video_avc_packet) {
-                    transfer = new H264PackageSplitTransfer();
-                    transfers.push_back(transfer);
-                    transfer = new H264StreamJoinTransfer();
-                    transfers.push_back(transfer);
-                } else if (info.format_type == StreamInfo::video_avc_byte_stream) {
-                    transfer = new H264StreamSplitTransfer();
-                    transfers.push_back(transfer);
-                    transfer = new H264PtsComputeTransfer();
-                    transfers.push_back(transfer);
+                if (info.sub_type == VIDEO_TYPE_AVC1) {
+                    if (info.format_type == FormatType::video_avc_packet) {
+                        transfer = new H264PackageSplitTransfer();
+                        transfers.push_back(transfer);
+                        transfer = new H264StreamJoinTransfer();
+                        transfers.push_back(transfer);
+                    } else if (info.format_type == FormatType::video_avc_byte_stream) {
+                        transfer = new H264StreamSplitTransfer();
+                        transfers.push_back(transfer);
+                        transfer = new H264PtsComputeTransfer();
+                        transfers.push_back(transfer);
+                    }
                 }
                 pmt_sec.add_stream(TsStreamType::iso_13818_video);
             } else if (info.type == MEDIA_TYPE_AUDI) {

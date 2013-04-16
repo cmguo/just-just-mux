@@ -7,6 +7,7 @@
 #include <ppbox/avformat/codec/aac/AacAdts.h>
 #include <ppbox/avformat/stream/BitsIStream.h>
 #include <ppbox/avformat/stream/SampleBuffers.h>
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
 #include <util/buffers/CycleBuffers.h>
