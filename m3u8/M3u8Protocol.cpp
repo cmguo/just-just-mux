@@ -20,27 +20,24 @@ namespace ppbox
         bool M3u8Protocol::create(
             std::ostream & out, 
             M3u8Config const & config, 
-            MediaInfo const & info1, 
+            MediaInfo const & info, 
             boost::system::error_code & ec)
         {
-            MediaInfo info = info1;
             if (info.type == MediaInfo::live && info.delay < (config.live_delay * config.interval * 1000)) {
                 ec = framework::system::logic_error::invalid_argument;
                 return false;
             }
             boost::uint32_t interval = config.interval * 1000;
-            if (info.type == MediaInfo::live) {
-                info.current -= info.duration;
-                info.duration += info.current;
-                info.duration -= info.delay;
-                info.current /= interval;
-                info.current *= interval;
-                info.duration /= interval;
-                info.duration *= interval;
-                info.duration += config.live_delay * interval;
-            }
-            boost::uint64_t time_beg = info.type == MediaInfo::live ? info.current : 0;
+            boost::uint64_t time_beg = 0;
             boost::uint64_t time_end = info.duration;
+            if (info.type == MediaInfo::live) {
+                time_beg = info.current - info.shift;
+                time_end = info.current - info.delay + config.live_delay * interval;
+                time_beg /= interval;
+                time_beg *= interval;
+                time_end /= interval;
+                time_end *= interval;
+            }
             boost::uint64_t index_beg = time_beg / interval;
             boost::uint64_t index_end = time_end / interval;
             append_head(out, config.interval, index_beg);
