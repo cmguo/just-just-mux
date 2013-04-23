@@ -3,6 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/raw/RawMuxer.h"
 #include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
+#include "ppbox/mux/transfer/H264PackageJoinTransfer.h"
 #include "ppbox/mux/transfer/H264StreamSplitTransfer.h"
 #include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
@@ -56,6 +57,13 @@ namespace ppbox
                             transfer = new H264StreamSplitTransfer();
                             transfers.push_back(transfer);
                             transfer = new H264PtsComputeTransfer();
+                            transfers.push_back(transfer);
+                        } else {
+                            transfer = new H264StreamSplitTransfer();
+                            transfers.push_back(transfer);
+                            transfer = new H264PtsComputeTransfer();
+                            transfers.push_back(transfer);
+                            transfer = new H264PackageJoinTransfer();
                             transfers.push_back(transfer);
                         }
                     }
