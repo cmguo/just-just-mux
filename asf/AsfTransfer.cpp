@@ -212,22 +212,22 @@ namespace ppbox
             //structure ASF_Stream_Properties_Object
             ASF_Stream_Properties_Object streams_object;
             streams_object.StreamType = 
-                info.type == MEDIA_TYPE_VIDE ? ASF_Video_Media : ASF_Audio_Media;
+                info.type == StreamType::VIDE ? ASF_Video_Media : ASF_Audio_Media;
 
             //             streams_object.ErrorCorrectionType =
-            //                 info.type == MEDIA_TYPE_VIDE ? ASF_No_Error_Correction : ASF_Audio_Spread;
+            //                 info.type == StreamType::VIDE ? ASF_No_Error_Correction : ASF_Audio_Spread;
             streams_object.ErrorCorrectionType = ASF_No_Error_Correction;
             streams_object.Flag.StreamNumber = info.index + 1;
 
             if (ASF_Video_Media == streams_object.StreamType) {
                 switch (info.sub_type) {
-                    case VIDEO_TYPE_AVC1: 
+                    case VideoSubType::AVC1: 
                         streams_object.Video_Media_Type.FormatData.CompressionID = MAKE_FOURC_TYPE('H', '2', '6', '4');
                         ((AvcCodec *)info.codec.get())->config_helper().to_es_data(
                             streams_object.Video_Media_Type.FormatData.CodecSpecificData);
                         break;
-                    case VIDEO_TYPE_WMV3:
-                        streams_object.Video_Media_Type.FormatData.CompressionID = VIDEO_TYPE_WMV3;
+                    case VideoSubType::WMV3:
+                        streams_object.Video_Media_Type.FormatData.CompressionID = VideoSubType::WMV3;
                         streams_object.Video_Media_Type.FormatData.CodecSpecificData = info.format_data;
                         break;
                     default:
@@ -249,13 +249,13 @@ namespace ppbox
                     11 + streams_object.Video_Media_Type.FormatDataSize;
             } else {
                 switch (info.sub_type) {
-                    case AUDIO_TYPE_MP4A: 
+                    case AudioSubType::MP4A: 
                         streams_object.Audio_Media_Type.CodecId = 0x00ff;
                         break;
-                    case AUDIO_TYPE_MP1A:
+                    case AudioSubType::MP1A:
                         streams_object.Audio_Media_Type.CodecId = 0x0055;
                         break;
-                    case AUDIO_TYPE_WMA2:
+                    case AudioSubType::WMA2:
                         streams_object.Audio_Media_Type.CodecId = 0x0161;
                         break;
                     default:
@@ -360,7 +360,7 @@ namespace ppbox
 
             //payload头部构造
             payload_header.StreamNum = sample.itrack + 1;
-            if( Sample::sync & sample.flags ) {
+            if( Sample::f_sync & sample.flags ) {
                 payload_header.KeyFrameBit = 1;
                 packets_.back().key_frame = true;
             } else {

@@ -34,8 +34,8 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             PmtSection & pmt_sec = pmt_.sections.front();
-            if (info.type == MEDIA_TYPE_VIDE) {
-                if (info.sub_type == VIDEO_TYPE_AVC1) {
+            if (info.type == StreamType::VIDE) {
+                if (info.sub_type == VideoSubType::AVC1) {
                     if (info.format_type == FormatType::video_avc_packet) {
                         transfer = new H264PackageSplitTransfer();
                         transfers.push_back(transfer);
@@ -49,12 +49,12 @@ namespace ppbox
                     }
                 }
                 pmt_sec.add_stream(TsStreamType::iso_13818_video);
-            } else if (info.type == MEDIA_TYPE_AUDI) {
-                if (info.sub_type == AUDIO_TYPE_MP4A) {
+            } else if (info.type == StreamType::AUDI) {
+                if (info.sub_type == AudioSubType::MP4A) {
                     pmt_sec.add_stream(TsStreamType::iso_13818_7_audio);
                     transfer = new MpegAudioAdtsEncodeTransfer();
                     transfers.push_back(transfer);
-                } else if (info.sub_type == AUDIO_TYPE_MP1A) {
+                } else if (info.sub_type == AudioSubType::MP1A) {
                     pmt_sec.add_stream(TsStreamType::iso_11172_audio);
                 }
             }

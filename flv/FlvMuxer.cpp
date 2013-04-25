@@ -37,8 +37,8 @@ namespace ppbox
             std::vector<Transfer *> & transfers)
         {
             Transfer * transfer = NULL;
-            if (info.type == MEDIA_TYPE_VIDE) {
-                if (info.sub_type == VIDEO_TYPE_AVC1) {
+            if (info.type == StreamType::VIDE) {
+                if (info.sub_type == VideoSubType::AVC1) {
                     if (info.format_type == FormatType::video_avc_packet) {
                         // empty
                     } else if (info.format_type == FormatType::video_avc_byte_stream) {
@@ -57,9 +57,9 @@ namespace ppbox
                 meta_data_.width = info.video_format.width;
                 meta_data_.height= info.video_format.height;
                 meta_data_.framerate = info.video_format.frame_rate;
-            } else if (info.type == MEDIA_TYPE_AUDI) {
-                if (info.sub_type == AUDIO_TYPE_MP4A) {
-                    if (info.format_type == FormatType::audio_aac_adts) {
+            } else if (info.type == StreamType::AUDI) {
+                if (info.sub_type == AudioSubType::MP4A) {
+                    if (info.format_type == FormatType::audio_adts) {
                         transfer = new MpegAudioAdtsDecodeTransfer();
                         transfers.push_back(transfer);
                     }

@@ -49,7 +49,7 @@ namespace ppbox
             std::vector<NaluBuffer> & nalus = 
                 *(std::vector<NaluBuffer> *)sample.context;
 
-            if (sample.flags & Sample::sync) {
+            if (sample.flags & Sample::f_sync) {
                 idr_dts_ = sample.dts;
                 is_last_a_idr_ = true;
             } else if (is_last_a_idr_) {
@@ -74,7 +74,7 @@ namespace ppbox
                     sample.cts_delta = (boost::uint32_t)(idr_dts_ + frame_scale_ * slice.slice_header.pic_order_cnt_lsb / 2 - sample.dts);
                     // iphoneÂ¼ÖÆÊ¹ÓÃ
                     if (slice.slice_header.slice_type % 5 == 2) {
-                        sample.flags |= Sample::sync;
+                        sample.flags |= Sample::f_sync;
                     }
                 } else {
                     // skip

@@ -50,7 +50,7 @@ namespace ppbox
             MkvSimpleBlock simple_block;
             simple_block.TrackNumber = sample.itrack + 1;
             simple_block.TimeCode = (boost::uint16_t)(sample.dts - time_code_);
-            if (Sample::sync & sample.flags)
+            if (Sample::f_sync & sample.flags)
                 simple_block.Keyframe = 1;
             else
                 simple_block.Keyframe = 0;
@@ -112,14 +112,14 @@ namespace ppbox
             std::vector<boost::uint8_t> tem(4, (boost::uint8_t)(info.index + 1));
             track_entry.TrackUID = tem;
             track_entry.Language = "eng";
-            if (info.type == MEDIA_TYPE_VIDE) {
+            if (info.type == StreamType::VIDE) {
                 track_entry.TrackType = MkvTrackType::VIDEO;
                 track_entry.CodecID = "V_MPEG4/ISO/AVC";
                 track_entry.CodecPrivate = info.format_data;
                 track_entry.Video.PixelWidth = info.video_format.width;
                 track_entry.Video.PixelHeight = info.video_format.height;
                 track_entry.Video.Size = track_entry.Video.data_size();
-            } else if (info.type == MEDIA_TYPE_AUDI){
+            } else if (info.type == StreamType::AUDI){
                 track_entry.TrackType = MkvTrackType::AUDIO;
                 track_entry.CodecID = "A_AAC";
                 track_entry.CodecPrivate = info.format_data;

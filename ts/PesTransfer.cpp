@@ -33,7 +33,7 @@ namespace ppbox
         {
             TsTransfer::transfer(info);
 
-            if (info.type == MEDIA_TYPE_VIDE) {
+            if (info.type == StreamType::VIDE) {
                 stream_id_ = TsStreamId::video_base + (boost::uint16_t)info.index;
                 with_dts_ = true;
             } else {

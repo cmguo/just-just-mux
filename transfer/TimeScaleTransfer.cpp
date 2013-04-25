@@ -36,7 +36,7 @@ namespace ppbox
                 items_.resize(info.index + 1);
             }
             Item & item = items_[info.index];
-            if (info.type == MEDIA_TYPE_VIDE) {
+            if (info.type == StreamType::VIDE) {
                 item.scale_.reset_scale(info.time_scale, scale_out_);
             } else {
                 if ((time_adjust_mode_ == 2) || 
@@ -74,7 +74,7 @@ namespace ppbox
                 sample.dts = item.scale_.transfer(sample.dts);
                 boost::uint64_t cts = item.scale_.inc(sample.cts_delta);
                 sample.cts_delta = (boost::uint32_t)(cts - sample.dts);
-            } else if (item.time_adjust_ == 1 || (sample.flags & sample.discontinuity)) {
+            } else if (item.time_adjust_ == 1 || (sample.flags & sample.f_discontinuity)) {
                 sample.dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
                 item.scale_.last_out(sample.dts);
                 item.time_adjust_ = 2;

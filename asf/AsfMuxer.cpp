@@ -31,8 +31,8 @@ namespace ppbox
             std::vector<Transfer *> & transfers)
         {
              Transfer * transfer = NULL;
-             if (info.type == MEDIA_TYPE_VIDE) {
-                 if (info.sub_type == VIDEO_TYPE_AVC1) {
+             if (info.type == StreamType::VIDE) {
+                 if (info.sub_type == VideoSubType::AVC1) {
                      if (info.format_type == FormatType::video_avc_packet) {
                          transfer = new H264PackageSplitTransfer();
                          transfers.push_back(transfer);

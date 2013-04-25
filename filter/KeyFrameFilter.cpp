@@ -30,7 +30,7 @@ namespace ppbox
                 return false;
             video_track_ = boost::uint32_t(-1);
             for (size_t i = 0; i < streams.size(); ++i) {
-                if (streams[i].type == MEDIA_TYPE_VIDE) {
+                if (streams[i].type == StreamType::VIDE) {
                     video_track_ = i;
                     break;
                 }
@@ -45,7 +45,7 @@ namespace ppbox
             while (Filter::get_sample(sample, ec)) {
                 if (video_track_ == boost::uint32_t(-1) 
                     || (sample.itrack == video_track_
-                    && (sample.flags & Sample::sync))) {
+                    && (sample.flags & Sample::f_sync))) {
                         detach_self();
                         return true;
                 }

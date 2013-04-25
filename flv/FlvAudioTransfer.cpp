@@ -24,13 +24,13 @@ namespace ppbox
         {
             switch(info.sub_type)
             {
-            case AUDIO_TYPE_MP4A:
+            case AudioSubType::MP4A:
                 header_.SoundFormat = 10;
                 break;
-            case AUDIO_TYPE_MP1A:
+            case AudioSubType::MP1A:
                 header_.SoundFormat = 2;
                 break;
-            case AUDIO_TYPE_WMA2:
+            case AudioSubType::WMA2:
                 header_.SoundFormat = 11;
                 break;
             default:
@@ -82,7 +82,7 @@ namespace ppbox
             Sample & sample)
         {
             sample.stream_info = &info;
-            if (info.sub_type == AUDIO_TYPE_MP4A) {
+            if (info.sub_type == AudioSubType::MP4A) {
                 header_.AACPacketType = 0;
                 AacConfigHelper const & config = ((AacCodec *)info.codec.get())->config_helper();
                 config.to_data(config_data_);

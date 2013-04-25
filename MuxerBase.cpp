@@ -274,7 +274,7 @@ namespace ppbox
                 }
                 // TODO: add codec
                 if (stream.codec == NULL) {
-                    stream.codec = Codec::create(stream.sub_type, stream.format_data);
+                    stream.codec = Codec::create(stream.sub_type, stream.format_type, stream.format_data);
                 }
                 add_stream(stream, transfers_[i]);
                 streams_.push_back(stream);
@@ -301,7 +301,7 @@ namespace ppbox
                     transfers[j]->before_seek(sample);
                 }
             }
-            sample.flags = reset ? sample.sync : 0;
+            sample.flags = reset ? sample.f_sync : 0;
             return filters_.last()->before_seek(sample, ec);
         }
 

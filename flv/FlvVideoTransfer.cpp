@@ -29,7 +29,7 @@ namespace ppbox
         void FlvVideoTransfer::transfer(
             Sample & sample)
         {
-            if(sample.flags & Sample::sync) {
+            if(sample.flags & Sample::f_sync) {
                 header_.FrameType = 1;
             } else {
                 header_.FrameType = 2;
@@ -50,9 +50,9 @@ namespace ppbox
             StreamInfo const & info, 
             Sample & sample)
         {
-            sample.flags |= Sample::sync;
+            sample.flags |= Sample::f_sync;
             sample.stream_info = &info;
-            if (info.sub_type == VIDEO_TYPE_AVC1) {
+            if (info.sub_type == VideoSubType::AVC1) {
                 header_.AVCPacketType = 0;
                 AvcConfigHelper const & config = ((AvcCodec *)info.codec.get())->config_helper();
                 config.to_data(config_data_);

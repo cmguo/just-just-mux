@@ -75,7 +75,7 @@ namespace ppbox
             helper_.nalus(nalus);
             helper_.to_stream(sample.size, sample.data);
 
-            if (sample.flags & demux::Sample::sync) { 
+            if (sample.flags & demux::Sample::f_sync) { 
                 sample.data.push_front(boost::asio::buffer(sps_pps_));
                 sample.size += sps_pps_.size();
             }
