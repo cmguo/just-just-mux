@@ -58,13 +58,6 @@ namespace ppbox
                             transfers.push_back(transfer);
                             transfer = new H264PtsComputeTransfer();
                             transfers.push_back(transfer);
-                        } else {
-                            transfer = new H264StreamSplitTransfer();
-                            transfers.push_back(transfer);
-                            transfer = new H264PtsComputeTransfer();
-                            transfers.push_back(transfer);
-                            transfer = new H264PackageJoinTransfer();
-                            transfers.push_back(transfer);
                         }
                     }
                 }
