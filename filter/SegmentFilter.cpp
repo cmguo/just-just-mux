@@ -62,8 +62,8 @@ namespace ppbox
                     return false;
                 }
             }
-            //std::cout << "[SegmentFilter::get_sample] sample.ustime = " << sample.ustime << " segent_end_time_ = " << segent_end_time_ << std::endl;
-            if (sample.ustime >= segent_end_time_
+            //std::cout << "[SegmentFilter::get_sample] sample.time = " << sample.time << " segent_end_time_ = " << segent_end_time_ << std::endl;
+            if (sample.time >= segent_end_time_
                 && (video_track_ == boost::uint32_t(-1)
                     || (sample.itrack == video_track_
                     && (sample.flags & Sample::f_sync)))) {

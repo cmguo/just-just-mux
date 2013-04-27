@@ -74,7 +74,7 @@ namespace ppbox
             }
             if (!ec || ec == boost::asio::error::would_block) {
                 next_index_ = index + 1;
-                segment_filter_->set_end_time(m3u8_config_.interval * next_index_ * 1000000);
+                segment_filter_->set_end_time(m3u8_config_.interval * next_index_ * 1000);
             }
             return !ec;
         }

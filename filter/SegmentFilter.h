@@ -33,6 +33,7 @@ namespace ppbox
                 boost::system::error_code & ec);
 
         public:
+            // time µ•Œª£∫∫¡√Î
             void set_end_time(
                 boost::uint64_t time);
 
