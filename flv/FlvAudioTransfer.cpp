@@ -50,19 +50,26 @@ namespace ppbox
                 header_.SoundRate = 0;
             }
 
-            if (info.audio_format.channel_count <= 1) {
-                // for aac always 1;
-                header_.SoundType = 1;
-            } else {
-                header_.SoundType = 1;
-            }
-
             if (info.audio_format.sample_size == 8) {
                 header_.SoundSize = 0;
             } else {
                 header_.SoundSize = 1;
             }
-            header_.AACPacketType = 1;
+
+            if (info.audio_format.channel_count <= 1) {
+                // for aac always 1;
+                header_.SoundType = 0;
+            } else {
+                header_.SoundType = 1;
+            }
+
+            if (info.sub_type == AudioSubType::MP4A) {
+                // for aac always 1;
+                header_.SoundType = 1;
+                // for aac always 3;
+                header_.SoundRate = 3;
+                header_.AACPacketType = 1;
+            }
         }
 
         void FlvAudioTransfer::transfer(

@@ -54,6 +54,7 @@ namespace ppbox
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);
                 flv_header_.TypeFlagsVideo = 1;
+                meta_data_.hasvideo = true;
                 meta_data_.width = info.video_format.width;
                 meta_data_.height= info.video_format.height;
                 meta_data_.framerate = info.video_format.frame_rate;
@@ -68,6 +69,7 @@ namespace ppbox
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);
                 flv_header_.TypeFlagsAudio = 1;
+                meta_data_.hasaudio = true;
                 meta_data_.audiosamplerate = info.audio_format.sample_rate;
                 meta_data_.audiosamplesize = info.audio_format.sample_size;
                 //meta_data_.stereo = info.audio_format.channel_count;
