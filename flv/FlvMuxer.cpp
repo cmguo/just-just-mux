@@ -9,8 +9,10 @@
 #include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
 #include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 
-#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
+
+#include <ppbox/avcodec/Format.h>
+using namespace ppbox::avcodec;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;

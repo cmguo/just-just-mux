@@ -12,8 +12,8 @@
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
 #include "ppbox/mux/filter/AdtsSplitFilter.h"
 
-#include <ppbox/avformat/Format.h>
-using namespace ppbox::avformat;
+#include <ppbox/avcodec/Format.h>
+using namespace ppbox::avcodec;
 
 namespace ppbox
 {

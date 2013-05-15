@@ -6,8 +6,8 @@
 
 #include <ppbox/demux/base/DemuxError.h>
 
-#include <ppbox/avformat/Format.h>
-using namespace ppbox::avformat;
+#include <ppbox/avbase/Format.h>
+using namespace ppbox::avbase;
 
 using namespace boost::system;
 

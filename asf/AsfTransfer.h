@@ -90,8 +90,8 @@ namespace ppbox
             std::deque<boost::asio::const_buffer> data_;//保存buffer的地址和长度记录
             size_t p_index_;                            //保存当前的packet在data_中下标值
             std::vector<AsfPacket> packets_;
-            ppbox::avformat::ASF_ParseContext context_;
-            ppbox::avformat::ASF_Packet packet_head_;
+            ppbox::avformat::AsfParseContext context_;
+            ppbox::avformat::AsfPacket packet_head_;
             boost::uint32_t packet_left_;               //当前packet内存剩余空间
             AsfBufferQueue head_buf_queue_;
             boost::uint8_t * data_buf_[2];

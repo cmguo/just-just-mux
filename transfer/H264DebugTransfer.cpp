@@ -3,15 +3,17 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/H264DebugTransfer.h"
 
-#include <ppbox/avformat/stream/BitsOStream.h>
-#include <ppbox/avformat/stream/BitsIStream.h>
-#include <ppbox/avformat/stream/BitsBuffer.h>
-#include <ppbox/avformat/codec/avc/AvcConfig.h>
-#include <ppbox/avformat/codec/avc/AvcCodec.h>
-#include <ppbox/avformat/codec/avc/AvcType.h>
-#include <ppbox/avformat/codec/avc/AvcNaluBuffer.h>
-#include <ppbox/avformat/stream/FormatBuffer.h>
-using namespace ppbox::avformat;
+#include <ppbox/avcodec/avc/AvcConfig.h>
+#include <ppbox/avcodec/avc/AvcCodec.h>
+#include <ppbox/avcodec/avc/AvcType.h>
+#include <ppbox/avcodec/avc/AvcNaluBuffer.h>
+using namespace ppbox::avcodec;
+
+#include <ppbox/avbase/stream/BitsOStream.h>
+#include <ppbox/avbase/stream/BitsIStream.h>
+#include <ppbox/avbase/stream/BitsBuffer.h>
+#include <ppbox/avbase/stream/FormatBuffer.h>
+using namespace ppbox::avbase;
 
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/CycleBuffers.h>

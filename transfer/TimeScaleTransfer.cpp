@@ -3,8 +3,8 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
-#include <ppbox/avformat/codec/aac/AacCodec.h>
-using namespace ppbox::avformat;
+#include <ppbox/avcodec/aac/AacCodec.h>
+using namespace ppbox::avcodec;
 
 namespace ppbox
 {

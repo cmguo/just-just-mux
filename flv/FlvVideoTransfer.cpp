@@ -4,8 +4,10 @@
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
 #include <ppbox/avformat/flv/FlvFormat.h>
-#include <ppbox/avformat/codec/avc/AvcCodec.h>
 using namespace ppbox::avformat;
+
+#include <ppbox/avcodec/avc/AvcCodec.h>
+using namespace ppbox::avcodec;
 
 using namespace framework::system;
 

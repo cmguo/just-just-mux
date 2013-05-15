@@ -5,7 +5,7 @@
 
 #include "ppbox/mux/Transfer.h"
 
-#include <ppbox/avformat/codec/aac/AacConfigHelper.h>
+#include <ppbox/avcodec/aac/AacConfigHelper.h>
 
 namespace ppbox
 {
@@ -29,7 +29,7 @@ namespace ppbox
 
         private:
             std::vector<boost::uint8_t> adts_header_;
-            ppbox::avformat::AacConfigHelper aac_config_;
+            ppbox::avcodec::AacConfigHelper aac_config_;
         };
 
     } // namespace mux

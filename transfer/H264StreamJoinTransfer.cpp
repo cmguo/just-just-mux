@@ -3,9 +3,9 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
-#include <ppbox/avformat/codec/avc/AvcNalu.h>
-#include <ppbox/avformat/codec/avc/AvcCodec.h>
-using namespace ppbox::avformat;
+#include <ppbox/avcodec/avc/AvcNalu.h>
+#include <ppbox/avcodec/avc/AvcCodec.h>
+using namespace ppbox::avcodec;
 
 namespace ppbox
 {

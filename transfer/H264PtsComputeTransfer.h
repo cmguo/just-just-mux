@@ -5,7 +5,7 @@
 
 #include "ppbox/mux/Transfer.h"
 
-#include <ppbox/avformat/codec/avc/AvcSpsPpsType.h>
+#include <ppbox/avcodec/avc/AvcSpsPpsType.h>
 
 namespace ppbox
 {
@@ -23,8 +23,8 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            std::map<boost::uint32_t, ppbox::avformat::SeqParameterSetRbsp> spss_;
-            std::map<boost::uint32_t, ppbox::avformat::PicParameterSetRbsp> ppss_;
+            std::map<boost::uint32_t, ppbox::avcodec::SeqParameterSetRbsp> spss_;
+            std::map<boost::uint32_t, ppbox::avcodec::PicParameterSetRbsp> ppss_;
             boost::uint64_t idr_dts_;
             boost::uint32_t frame_scale_;
             bool is_last_a_idr_;

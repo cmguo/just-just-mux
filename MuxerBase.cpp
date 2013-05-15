@@ -10,8 +10,8 @@
 #include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/demux/base/DemuxError.h>
 
-#include <ppbox/avformat/codec/Codec.h>
-using namespace ppbox::avformat;
+#include <ppbox/avcodec/Codec.h>
+using namespace ppbox::avcodec;
 
 #include <util/buffers/BuffersSize.h>
 

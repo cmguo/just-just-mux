@@ -16,8 +16,8 @@ namespace ppbox
         using ppbox::data::MediaInfo;
         using ppbox::data::StreamStatus;
 
-        using ppbox::avformat::Sample;
-        using ppbox::avformat::StreamInfo;
+        using ppbox::avbase::Sample;
+        using ppbox::avbase::StreamInfo;
 
         class MuxerBase;
 

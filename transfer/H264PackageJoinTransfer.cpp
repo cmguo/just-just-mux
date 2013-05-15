@@ -18,8 +18,8 @@ namespace ppbox
         void H264PackageJoinTransfer::transfer(
             Sample & sample)
         {
-            std::vector<ppbox::avformat::NaluBuffer> & nalus = 
-                *(std::vector<ppbox::avformat::NaluBuffer> *)sample.context;
+            std::vector<ppbox::avcodec::NaluBuffer> & nalus = 
+                *(std::vector<ppbox::avcodec::NaluBuffer> *)sample.context;
 
             sample.size = 0;
             helper_.nalus(nalus);

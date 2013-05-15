@@ -4,8 +4,8 @@
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
 
-#include <ppbox/avformat/Format.h>
-using namespace ppbox::avformat;
+#include <ppbox/avbase/Format.h>
+using namespace ppbox::avbase;
 
 #include <boost/asio/error.hpp>
 

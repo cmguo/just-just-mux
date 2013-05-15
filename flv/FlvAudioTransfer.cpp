@@ -3,8 +3,12 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 
-#include <ppbox/avformat/codec/aac/AacCodec.h>
 using namespace ppbox::avformat;
+
+#include <ppbox/avcodec/aac/AacCodec.h>
+using namespace ppbox::avcodec;
+
+using namespace ppbox::avbase;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;

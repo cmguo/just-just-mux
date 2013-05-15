@@ -4,8 +4,9 @@
 #include "ppbox/mux/mkv/MkvTransfer.h"
 
 #include <ppbox/avformat/mkv/MkvObjectType.h>
-#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
+#include <ppbox/avcodec/Format.h>
+using namespace ppbox::avcodec;
 
 namespace ppbox
 {

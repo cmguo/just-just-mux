@@ -4,11 +4,13 @@
 #include "ppbox/mux/filter/AdtsSplitFilter.h"
 #include "ppbox/mux/MuxError.h"
 
-#include <ppbox/avformat/codec/aac/AacAdts.h>
-#include <ppbox/avformat/stream/BitsIStream.h>
-#include <ppbox/avformat/stream/SampleBuffers.h>
-#include <ppbox/avformat/Format.h>
-using namespace ppbox::avformat;
+#include <ppbox/avcodec/aac/AacAdts.h>
+using namespace ppbox::avcodec;
+
+#include <ppbox/avbase/Format.h>
+#include <ppbox/avbase/stream/BitsIStream.h>
+#include <ppbox/avbase/stream/SampleBuffers.h>
+using namespace ppbox::avbase;
 
 #include <util/buffers/CycleBuffers.h>
 

@@ -7,8 +7,10 @@
 #include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
-#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
+
+#include <ppbox/avcodec/Format.h>
+using namespace ppbox::avcodec;
 
 #include <util/archive/BigEndianBinaryOArchive.h>
 

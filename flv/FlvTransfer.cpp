@@ -4,6 +4,7 @@
 #include "ppbox/mux/flv/FlvTransfer.h"
 
 using namespace ppbox::avformat;
+using namespace ppbox::avbase;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;

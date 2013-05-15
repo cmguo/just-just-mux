@@ -5,7 +5,7 @@
 
 #include "ppbox/mux/Transfer.h"
 
-#include <ppbox/avformat/codec/avc/AvcNaluHelper.h>
+#include <ppbox/avcodec/avc/AvcNaluHelper.h>
 
 namespace ppbox
 {
@@ -26,8 +26,8 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            ppbox::avformat::AvcNaluHelper helper_;
-            std::vector<ppbox::avformat::NaluBuffer> nalus_;
+            ppbox::avcodec::AvcNaluHelper helper_;
+            std::vector<ppbox::avcodec::NaluBuffer> nalus_;
         };
 
     } // namespace mux

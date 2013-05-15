@@ -5,15 +5,17 @@
 #include "ppbox/mux/MuxerBase.h"
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
-#include <ppbox/avformat/codec/avc/AvcCodec.h>
-#include <ppbox/avformat/stream/SampleBuffers.h>
+using namespace ppbox::avformat;
+
+#include <ppbox/avcodec/avc/AvcCodec.h>
+using namespace ppbox::avcodec;
+#include <ppbox/avbase/stream/SampleBuffers.h>
+using namespace ppbox::avbase;
 
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/BuffersCopy.h>
 
 #include <boost/asio/streambuf.hpp>
-
-using namespace ppbox::avformat;
 
 namespace ppbox
 {
@@ -163,11 +165,11 @@ namespace ppbox
 
             //Header_Object
             // 先在buf中为header_object占位
-            ASF_Header_Object header_object;
+            AsfHeaderObject header_object;
             oa << header_object;
 
             //ASF_File_Properties_Object
-            ASF_File_Properties_Object file_object;
+            AsfFilePropertiesObject file_object;
             file_object.ObjLength = 104;
             file_object.FileId.generate();
             file_object.FileSize = 104;
@@ -180,7 +182,7 @@ namespace ppbox
             oa << file_object;
 
             //ASF_Header_Extension_Object
-            ASF_Header_Extension_Object extension_object;
+            AsfHeaderExtensionObject extension_object;
             extension_object.ObjectSize = 46;
             //extension_object.HeaderExtensionDataSize = 0;
             oa << extension_object;
@@ -197,7 +199,7 @@ namespace ppbox
             boost::asio::streambuf & buf)
         {
             //Data_Object_header
-            ASF_Data_Object data_object;
+            AsfDataObject data_object;
             data_object.ObjLength = 0x32;
             data_object.FileId.generate();
             //data_object.TotalDataPackets = 1;
@@ -210,7 +212,7 @@ namespace ppbox
             boost::asio::streambuf & buf)
         {
             //structure ASF_Stream_Properties_Object
-            ASF_Stream_Properties_Object streams_object;
+            AsfStreamPropertiesObject streams_object;
             streams_object.StreamType = 
                 info.type == StreamType::VIDE ? ASF_Video_Media : ASF_Audio_Media;
 
@@ -321,7 +323,7 @@ namespace ppbox
             head_buf_queue_.mark();
             boost::uint8_t * asf_buf = head_buf_queue_.alloc();
             FormatBuffer buf(asf_buf, PACKET_HEAD_LENGTH);
-            ASFOArchive oar(buf);
+            AsfOArchive oar(buf);
             oar.context(&context_);
             oar << packet_head_;
             //填充到data_中
@@ -343,7 +345,7 @@ namespace ppbox
             boost::uint8_t padding_size,
             bool copy_flag)
         {
-            ASF_PayloadHeader payload_header;
+            AsfPayloadHeader payload_header;
 
             struct P_NUM {
 #ifdef   BOOST_BIG_ENDIAN
@@ -375,7 +377,7 @@ namespace ppbox
 
             boost::uint8_t * asf_buf = head_buf_queue_.alloc();
             FormatBuffer buf(asf_buf, PAYLOAD_HEAD_LENGTH);
-            ASFOArchive oar(buf);
+            AsfOArchive oar(buf);
             oar.context(&context_);
             oar << payload_header;
             //填充到data_中

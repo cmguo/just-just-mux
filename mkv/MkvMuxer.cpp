@@ -8,8 +8,6 @@
 #include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
 #include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
-using namespace ppbox::avformat;
-
 namespace ppbox
 {
     namespace mux
