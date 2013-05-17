@@ -4,7 +4,7 @@
 #include "ppbox/mux/transfer/H264DebugTransfer.h"
 
 #include <ppbox/avcodec/avc/AvcConfig.h>
-#include <ppbox/avcodec/avc/AvcCodec.h>
+#include <ppbox/avcodec/avc/AvcConfigHelper.h>
 #include <ppbox/avcodec/avc/AvcType.h>
 #include <ppbox/avcodec/avc/AvcNaluBuffer.h>
 using namespace ppbox::avcodec;
@@ -32,7 +32,7 @@ namespace ppbox
             StreamInfo & info)
         {
             AvcConfig const & avc_config = 
-                ((AvcCodec const *)info.codec.get())->config();
+                ((AvcConfigHelper const *)info.context)->data();
             for (boost::uint32_t i = 0; i < avc_config.sequenceParameterSetNALUnit.size(); i++) {
                 std::vector<boost::uint8_t> sps_vec = avc_config.sequenceParameterSetNALUnit[i];
                 FormatBuffer buf((boost::uint8_t *)&sps_vec[0], sps_vec.size(), sps_vec.size());

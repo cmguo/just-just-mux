@@ -4,20 +4,10 @@
 #include "ppbox/mux/flv/FlvMuxer.h"
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
-#include "ppbox/mux/transfer/H264PackageJoinTransfer.h"
-#include "ppbox/mux/transfer/H264StreamSplitTransfer.h"
-#include "ppbox/mux/transfer/H264PtsComputeTransfer.h"
-#include "ppbox/mux/transfer/MpegAudioAdtsDecodeTransfer.h"
 
+#include <ppbox/avformat/Format.h>
+#include <ppbox/avformat/flv/FlvEnum.h>
 using namespace ppbox::avformat;
-
-#include <ppbox/avcodec/Format.h>
-using namespace ppbox::avcodec;
-
-#include <framework/system/BytesOrder.h>
-using namespace framework::system;
-
-using namespace boost::system;
 
 namespace ppbox
 {
@@ -40,18 +30,6 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             if (info.type == StreamType::VIDE) {
-                if (info.sub_type == VideoSubType::AVC1) {
-                    if (info.format_type == FormatType::video_avc_packet) {
-                        // empty
-                    } else if (info.format_type == FormatType::video_avc_byte_stream) {
-                        transfer = new H264StreamSplitTransfer();
-                        transfers.push_back(transfer);
-                        transfer = new H264PtsComputeTransfer();
-                        transfers.push_back(transfer);
-                        transfer = new H264PackageJoinTransfer();
-                        transfers.push_back(transfer);
-                    }
-                }
                 FlvVideoTransfer * transfer = new FlvVideoTransfer;
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);
@@ -61,12 +39,6 @@ namespace ppbox
                 meta_data_.height= info.video_format.height;
                 meta_data_.framerate = info.video_format.frame_rate;
             } else if (info.type == StreamType::AUDI) {
-                if (info.sub_type == AudioSubType::MP4A) {
-                    if (info.format_type == FormatType::audio_adts) {
-                        transfer = new MpegAudioAdtsDecodeTransfer();
-                        transfers.push_back(transfer);
-                    }
-                }
                 FlvAudioTransfer * transfer = new FlvAudioTransfer;
                 transfers_.push_back(transfer);
                 transfers.push_back(transfer);

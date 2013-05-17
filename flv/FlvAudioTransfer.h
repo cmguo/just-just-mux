@@ -31,7 +31,6 @@ namespace ppbox
         private:
             ppbox::avformat::FlvAudioTagHeader header_;
             boost::uint8_t header_buffer_[16];
-            std::vector<boost::uint8_t> config_data_;
         };
 
     } // namespace mux

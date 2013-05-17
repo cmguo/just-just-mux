@@ -19,6 +19,9 @@ namespace ppbox
             virtual ~RawMuxer();
 
         private:
+            virtual void do_open(
+                MediaInfo & info);
+
             virtual void add_stream(
                 StreamInfo & info, 
                 std::vector<Transfer *> & transfers);
@@ -31,8 +34,7 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            std::string video_format_;
-            std::string audio_format_;
+            std::string real_format_;
             boost::uint32_t time_scale_;
             boost::uint32_t video_time_scale_;
             boost::uint32_t audio_time_scale_;

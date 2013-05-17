@@ -4,11 +4,10 @@
 #include "ppbox/mux/ts/PesTransfer.h"
 
 #include <ppbox/avformat/ts/PesPacket.h>
+#include <ppbox/avformat/ts/TsEnum.h>
+#include <ppbox/avformat/ts/TsArchive.h>
+#include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
-#include <ppbox/avcodec/Format.h>
-using namespace ppbox::avcodec;
-
-#include <util/archive/ArchiveBuffer.h>
 
 #define PES_TIME_SCALE 90000
 

@@ -105,6 +105,9 @@ namespace ppbox
                 return *demuxer_;
             };
 
+            void format_type(
+                boost::uint8_t t);
+
             void add_filter(
                 Filter * filter);
 
@@ -147,6 +150,7 @@ namespace ppbox
             };
 
             std::string format_;
+            boost::uint32_t format_type_;
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;
             DemuxerFilter * demux_filter_;

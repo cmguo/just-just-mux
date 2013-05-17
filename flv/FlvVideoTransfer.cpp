@@ -4,6 +4,7 @@
 #include "ppbox/mux/flv/FlvVideoTransfer.h"
 
 #include <ppbox/avformat/flv/FlvFormat.h>
+#include <ppbox/avformat/flv/FlvEnum.h>
 using namespace ppbox::avformat;
 
 #include <ppbox/avcodec/avc/AvcCodec.h>
@@ -24,8 +25,15 @@ namespace ppbox
         void FlvVideoTransfer::transfer(
             StreamInfo & info)
         {
-            header_.CodecID = FlvVideoCodec::H264;
-            header_.AVCPacketType = 1;
+            FlvFormat flv;
+            CodecInfo const * codec = flv.codec_from_codec(info.type, info.sub_type);
+            if (codec) {
+                header_.CodecID = (boost::uint8_t)codec->format;
+            }
+
+            if (header_.CodecID == FlvVideoCodec::H264) {
+                header_.AVCPacketType = 1;
+            }
         }
 
         void FlvVideoTransfer::transfer(
@@ -56,10 +64,8 @@ namespace ppbox
             sample.stream_info = &info;
             if (info.sub_type == VideoSubType::AVC1) {
                 header_.AVCPacketType = 0;
-                AvcConfigHelper const & config = ((AvcCodec *)info.codec.get())->config_helper();
-                config.to_data(config_data_);
-                sample.data.push_back(boost::asio::buffer(config_data_));
-                sample.size += config_data_.size();
+                sample.data.push_back(boost::asio::buffer(info.format_data));
+                sample.size += info.format_data.size();
                 transfer(sample);
                 header_.AVCPacketType = 1; // restore
             } else {

@@ -6,10 +6,8 @@
 
 #include <ppbox/demux/base/DemuxError.h>
 
-#include <ppbox/avbase/Format.h>
+#include <ppbox/avbase/StreamType.h>
 using namespace ppbox::avbase;
-
-using namespace boost::system;
 
 namespace ppbox
 {

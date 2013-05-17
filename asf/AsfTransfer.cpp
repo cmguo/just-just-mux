@@ -5,10 +5,9 @@
 #include "ppbox/mux/MuxerBase.h"
 
 #include <ppbox/avformat/asf/AsfObjectType.h>
+#include <ppbox/avformat/asf/AsfFormat.h>
 using namespace ppbox::avformat;
 
-#include <ppbox/avcodec/avc/AvcCodec.h>
-using namespace ppbox::avcodec;
 #include <ppbox/avbase/stream/SampleBuffers.h>
 using namespace ppbox::avbase;
 
@@ -91,7 +90,7 @@ namespace ppbox
                     if (single_payload_) {
                         add_payload(sample, SampleBuffers::range_buffers(pos2, pos1), 
                             pos2.skipped_bytes(), pos1.skipped_bytes() - pos2.skipped_bytes(), 
-                            packet_left_ - (sample_remain + PAYLOAD_HEAD_LENGTH), false);
+                            (boost::uint8_t)(packet_left_ - (sample_remain + PAYLOAD_HEAD_LENGTH)), false);
                         add_packet(sample, false);
                     } else {
                         add_payload(sample, SampleBuffers::range_buffers(pos2, pos1), 
@@ -104,7 +103,7 @@ namespace ppbox
                     pos1.increment_bytes(end, sample_remain);
                     add_payload(sample, SampleBuffers::range_buffers(pos2, pos1), 
                         pos2.skipped_bytes(), pos1.skipped_bytes() - pos2.skipped_bytes(), 
-                        packet_left_ - (sample_remain + PAYLOAD_HEAD_LENGTH), false);
+                        (boost::uint8_t)(packet_left_ - (sample_remain + PAYLOAD_HEAD_LENGTH)), false);
                     sample_remain = 0;
                     assert(packet_left_ == 0);
                     add_packet(sample, true);
@@ -211,59 +210,35 @@ namespace ppbox
             StreamInfo const & info, 
             boost::asio::streambuf & buf)
         {
+            AsfFormat asf;
+            CodecInfo const * codec = asf.codec_from_codec(info.type, info.sub_type);
+            if (codec == NULL) {
+                return;
+            }
             //structure ASF_Stream_Properties_Object
             AsfStreamPropertiesObject streams_object;
             streams_object.StreamType = 
                 info.type == StreamType::VIDE ? ASF_Video_Media : ASF_Audio_Media;
-
-            //             streams_object.ErrorCorrectionType =
-            //                 info.type == StreamType::VIDE ? ASF_No_Error_Correction : ASF_Audio_Spread;
             streams_object.ErrorCorrectionType = ASF_No_Error_Correction;
             streams_object.Flag.StreamNumber = info.index + 1;
 
             if (ASF_Video_Media == streams_object.StreamType) {
-                switch (info.sub_type) {
-                    case VideoSubType::AVC1: 
-                        streams_object.Video_Media_Type.FormatData.CompressionID = MAKE_FOURC_TYPE('H', '2', '6', '4');
-                        ((AvcCodec *)info.codec.get())->config_helper().to_es_data(
-                            streams_object.Video_Media_Type.FormatData.CodecSpecificData);
-                        break;
-                    case VideoSubType::WMV3:
-                        streams_object.Video_Media_Type.FormatData.CompressionID = VideoSubType::WMV3;
-                        streams_object.Video_Media_Type.FormatData.CodecSpecificData = info.format_data;
-                        break;
-                    default:
-                        streams_object.Video_Media_Type.FormatData.CompressionID = 0;
-                        break;
-                }
                 streams_object.Video_Media_Type.EncodeImageWidth  = info.video_format.width;
                 streams_object.Video_Media_Type.EncodeImageHeight = info.video_format.height;
-
+                streams_object.Video_Media_Type.FormatData.FormatDataSize = 
+                    streams_object.Video_Media_Type.FormatData.CodecSpecificData.size() + 40;
                 streams_object.Video_Media_Type.FormatData.ImageWidth  = info.video_format.width;
                 streams_object.Video_Media_Type.FormatData.ImageHeight = info.video_format.height;
                 streams_object.Video_Media_Type.FormatData.BitsPerPixelCount = 24;
-                streams_object.Video_Media_Type.FormatData.FormatDataSize = 
-                    streams_object.Video_Media_Type.FormatData.CodecSpecificData.size() + 40;
+                streams_object.Video_Media_Type.FormatData.CompressionID = codec->format;
+                streams_object.Video_Media_Type.FormatData.CodecSpecificData = info.format_data;
                 streams_object.Video_Media_Type.FormatDataSize = 
                     (boost::uint16_t)streams_object.Video_Media_Type.FormatData.FormatDataSize;
                 streams_object.ObjLength = 89 + streams_object.Video_Media_Type.FormatDataSize;
                 streams_object.TypeSpecificDataLength =
                     11 + streams_object.Video_Media_Type.FormatDataSize;
             } else {
-                switch (info.sub_type) {
-                    case AudioSubType::MP4A: 
-                        streams_object.Audio_Media_Type.CodecId = 0x00ff;
-                        break;
-                    case AudioSubType::MP1A:
-                        streams_object.Audio_Media_Type.CodecId = 0x0055;
-                        break;
-                    case AudioSubType::WMA2:
-                        streams_object.Audio_Media_Type.CodecId = 0x0161;
-                        break;
-                    default:
-                        streams_object.Audio_Media_Type.CodecId = 0;
-                        break;
-                }
+                streams_object.Audio_Media_Type.CodecId = (boost::uint16_t)codec->format;
                 streams_object.Audio_Media_Type.NumberOfChannels = (boost::uint16_t)info.audio_format.channel_count;
                 streams_object.Audio_Media_Type.SamplesPerSecond = info.audio_format.sample_rate;
                 //streams_object.Audio_Media_Type.AverageNumberOfBytesPerSecond = 4000;

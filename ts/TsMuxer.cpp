@@ -10,10 +10,8 @@
 #include "ppbox/mux/transfer/MpegAudioAdtsEncodeTransfer.h"
 #include "ppbox/mux/ts/PesTransfer.h"
 
+#include <ppbox/avformat/ts/TsFormat.h>
 using namespace ppbox::avformat;
-
-#include <ppbox/avcodec/Format.h>
-using namespace ppbox::avcodec;
 
 namespace ppbox
 {
@@ -34,29 +32,10 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             PmtSection & pmt_sec = pmt_.sections.front();
-            if (info.type == StreamType::VIDE) {
-                if (info.sub_type == VideoSubType::AVC1) {
-                    if (info.format_type == FormatType::video_avc_packet) {
-                        transfer = new H264PackageSplitTransfer();
-                        transfers.push_back(transfer);
-                        transfer = new H264StreamJoinTransfer();
-                        transfers.push_back(transfer);
-                    } else if (info.format_type == FormatType::video_avc_byte_stream) {
-                        transfer = new H264StreamSplitTransfer();
-                        transfers.push_back(transfer);
-                        transfer = new H264PtsComputeTransfer();
-                        transfers.push_back(transfer);
-                    }
-                }
-                pmt_sec.add_stream(TsStreamType::iso_13818_video);
-            } else if (info.type == StreamType::AUDI) {
-                if (info.sub_type == AudioSubType::MP4A) {
-                    pmt_sec.add_stream(TsStreamType::iso_13818_7_audio);
-                    transfer = new MpegAudioAdtsEncodeTransfer();
-                    transfers.push_back(transfer);
-                } else if (info.sub_type == AudioSubType::MP1A) {
-                    pmt_sec.add_stream(TsStreamType::iso_11172_audio);
-                }
+            TsFormat ts;
+            CodecInfo const * codec = ts.codec_from_codec(info.type, info.sub_type);
+            if (codec) {
+                pmt_sec.add_stream((boost::uint8_t)codec->format);
             }
             transfer = new PesTransfer(info.index);
             transfers.push_back(transfer);

@@ -4,7 +4,9 @@
 #include "ppbox/mux/ts/TsTransfer.h"
 
 #include <ppbox/avformat/ts/TsPacket.h>
+#include <ppbox/avformat/ts/TsArchive.h>
 using namespace ppbox::avformat;
+
 #include <ppbox/avbase/stream/SampleBuffers.h>
 using namespace ppbox::avbase;
 

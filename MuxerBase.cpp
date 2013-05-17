@@ -6,12 +6,14 @@
 #include "ppbox/mux/MuxError.h"
 #include "ppbox/mux/filter/DemuxerFilter.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
+#include "ppbox/mux/transfer/CodecSplitterTransfer.h"
+#include "ppbox/mux/transfer/CodecAssemblerTransfer.h"
 
 #include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/demux/base/DemuxError.h>
 
-#include <ppbox/avcodec/Codec.h>
-using namespace ppbox::avcodec;
+#include <ppbox/avformat/Format.h>
+using namespace ppbox::avformat;
 
 #include <util/buffers/BuffersSize.h>
 
@@ -28,12 +30,16 @@ namespace ppbox
             MuxerBase * muxer = factory_type::create(format);
             if (muxer) {
                 muxer->format_ = format;
+                std::string format_type = format;
+                format_type.resize(4, '\0');
+                memcpy(&muxer->format_type_, format_type.c_str(), 4);
             }
             return muxer;
         }
 
         MuxerBase::MuxerBase()
             : demuxer_(NULL)
+            , format_type_(0)
             , read_flag_(0)
             , head_step_(0)
         {
@@ -238,6 +244,12 @@ namespace ppbox
             return true;
         }
 
+        void MuxerBase::format_type(
+            boost::uint8_t t)
+        {
+            format_type_ = t;
+        }
+
         void MuxerBase::add_filter(
             Filter * filter)
         {
@@ -264,18 +276,29 @@ namespace ppbox
             size_t stream_count = demuxer_->get_stream_count(ec);
             transfers_.clear();
             transfers_.resize(stream_count);
+            streams_.resize(stream_count);
+            Format * format = NULL;
+            if (format_type_) {
+                format = Format::create(format_type_);
+            }
             for (size_t i = 0; i < stream_count; ++i) {
-                StreamInfo stream;
+                StreamInfo & stream = streams_[i];
                 demuxer_->get_stream_info(i, stream, ec);
                 if (ec) {
                     break;
                 }
-                // TODO: add codec
-                if (stream.codec == NULL) {
-                    stream.codec = Codec::create(stream.sub_type, stream.format_type, stream.format_data);
+                if (format) {
+                    CodecInfo const * codec = format->codec_from_codec(stream.type, stream.sub_type);
+                    if (codec && codec->codec_format != stream.format_type) {
+                        if (stream.format_type) {
+                            transfers_[i].push_back(new CodecSplitterTransfer(stream.sub_type, stream.format_type));
+                        }
+                        if (codec->codec_format) {
+                            transfers_[i].push_back(new CodecAssemblerTransfer(stream.sub_type, codec->codec_format));
+                        }
+                    }
                 }
                 add_stream(stream, transfers_[i]);
-                streams_.push_back(stream);
                 for(boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
                     transfers_[i][j]->config(config_);
                     transfers_[i][j]->transfer(stream);

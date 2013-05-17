@@ -3,6 +3,8 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/flv/FlvAudioTransfer.h"
 
+#include <ppbox/avformat/flv/FlvFormat.h>
+#include <ppbox/avformat/flv/FlvEnum.h>
 using namespace ppbox::avformat;
 
 #include <ppbox/avcodec/aac/AacCodec.h>
@@ -26,20 +28,10 @@ namespace ppbox
         void FlvAudioTransfer::transfer(
             StreamInfo & info)
         {
-            switch(info.sub_type)
-            {
-            case AudioSubType::MP4A:
-                header_.SoundFormat = 10;
-                break;
-            case AudioSubType::MP1A:
-                header_.SoundFormat = 2;
-                break;
-            case AudioSubType::WMA2:
-                header_.SoundFormat = 11;
-                break;
-            default:
-                header_.SoundFormat = 10;
-                break;
+            FlvFormat flv;
+            CodecInfo const * codec = flv.codec_from_codec(info.type, info.sub_type);
+            if (codec) {
+                header_.SoundFormat = (boost::uint8_t)codec->format;
             }
 
             if (info.audio_format.sample_rate >= 44100 ) {
@@ -95,10 +87,8 @@ namespace ppbox
             sample.stream_info = &info;
             if (info.sub_type == AudioSubType::MP4A) {
                 header_.AACPacketType = 0;
-                AacConfigHelper const & config = ((AacCodec *)info.codec.get())->config_helper();
-                config.to_data(config_data_);
-                sample.data.push_back(boost::asio::buffer(config_data_));
-                sample.size += config_data_.size();
+                sample.data.push_back(boost::asio::buffer(info.format_data));
+                sample.size += info.format_data.size();
                 transfer(sample);
                 header_.AACPacketType = 1; // restore
             }

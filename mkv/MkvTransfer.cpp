@@ -4,9 +4,9 @@
 #include "ppbox/mux/mkv/MkvTransfer.h"
 
 #include <ppbox/avformat/mkv/MkvObjectType.h>
+#include <ppbox/avformat/mkv/MkvArchive.h>
+#include <ppbox/avformat/mkv/MkvFormat.h>
 using namespace ppbox::avformat;
-#include <ppbox/avcodec/Format.h>
-using namespace ppbox::avcodec;
 
 namespace ppbox
 {
@@ -107,6 +107,11 @@ namespace ppbox
             StreamInfo const & info, 
             boost::asio::streambuf & buf)
         {
+            MkvFormat mkv;
+            CodecInfo const * codec = mkv.codec_from_codec(info.type, info.sub_type);
+            if (codec == NULL) {
+                return;
+            }
             //每添加一个流需要添加一个track_entry
             MkvTrackEntry track_entry;
             track_entry.TrackNumber = info.index + 1;
@@ -115,14 +120,14 @@ namespace ppbox
             track_entry.Language = "eng";
             if (info.type == StreamType::VIDE) {
                 track_entry.TrackType = MkvTrackType::VIDEO;
-                track_entry.CodecID = "V_MPEG4/ISO/AVC";
+                track_entry.CodecID = (char const *)codec->format;
                 track_entry.CodecPrivate = info.format_data;
                 track_entry.Video.PixelWidth = info.video_format.width;
                 track_entry.Video.PixelHeight = info.video_format.height;
                 track_entry.Video.Size = track_entry.Video.data_size();
             } else if (info.type == StreamType::AUDI){
                 track_entry.TrackType = MkvTrackType::AUDIO;
-                track_entry.CodecID = "A_AAC";
+                track_entry.CodecID = (char const *)codec->format;
                 track_entry.CodecPrivate = info.format_data;
                 track_entry.Audio.SamplingFrequency = 
                     (float)info.audio_format.sample_rate;
