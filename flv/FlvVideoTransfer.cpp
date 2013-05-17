@@ -7,7 +7,7 @@
 #include <ppbox/avformat/flv/FlvEnum.h>
 using namespace ppbox::avformat;
 
-#include <ppbox/avcodec/avc/AvcCodec.h>
+#include <ppbox/avcodec/CodecType.h>
 using namespace ppbox::avcodec;
 
 using namespace framework::system;

@@ -3,10 +3,6 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/raw/RawMuxer.h"
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
-#include "ppbox/mux/filter/AdtsSplitFilter.h"
-
-#include <ppbox/avformat/Format.h>
-using namespace ppbox::avformat;
 
 namespace ppbox
 {

@@ -3,10 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/mkv/MkvMuxer.h"
 #include "ppbox/mux/mkv/MkvTransfer.h"
-
 #include "ppbox/mux/transfer/MergeTransfer.h"
-#include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
-#include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
 namespace ppbox
 {
@@ -29,15 +26,6 @@ namespace ppbox
         {
             stream_number_++;
 
-            //Transfer * transfer = NULL;
-            //if (mediainfoex.type == MEDIA_TYPE_VIDE) {
-                //if (mediainfoex.format_type == MediaInfo::video_avc_packet) {
-                    //transfer = new H264PackageSplitTransfer();
-                    //mediainfoex.transfers.push_back(transfer);
-                    //transfer = new H264StreamJoinTransfer();
-                    //mediainfoex.transfers.push_back(transfer);
-                //}
-            //}
             if (transfer_ == NULL)
                 transfer_ = new MkvTransfer();
             transfers.push_back(new MergeTransfer(transfer_));

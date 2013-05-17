@@ -7,10 +7,8 @@
 #include <ppbox/avformat/flv/FlvEnum.h>
 using namespace ppbox::avformat;
 
-#include <ppbox/avcodec/aac/AacCodec.h>
+#include <ppbox/avcodec/CodecType.h>
 using namespace ppbox::avcodec;
-
-using namespace ppbox::avbase;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;

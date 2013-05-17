@@ -245,7 +245,7 @@ namespace ppbox
         }
 
         void MuxerBase::format_type(
-            boost::uint8_t t)
+            boost::uint32_t t)
         {
             format_type_ = t;
         }

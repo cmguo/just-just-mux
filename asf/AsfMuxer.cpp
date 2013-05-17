@@ -4,8 +4,6 @@
 #include "ppbox/mux/asf/AsfMuxer.h"
 #include "ppbox/mux/asf/AsfTransfer.h"
 #include "ppbox/mux/transfer/MergeTransfer.h"
-#include "ppbox/mux/transfer/H264PackageSplitTransfer.h"
-#include "ppbox/mux/transfer/H264StreamJoinTransfer.h"
 
 #include <util/archive/BigEndianBinaryOArchive.h>
 

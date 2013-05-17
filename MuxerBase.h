@@ -106,7 +106,7 @@ namespace ppbox
             };
 
             void format_type(
-                boost::uint8_t t);
+                boost::uint32_t t);
 
             void add_filter(
                 Filter * filter);
