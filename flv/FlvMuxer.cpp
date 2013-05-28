@@ -27,7 +27,6 @@ namespace ppbox
             StreamInfo & info, 
             std::vector<Transfer *> & transfers)
         {
-            Transfer * transfer = NULL;
             if (info.type == StreamType::VIDE) {
                 FlvVideoTransfer * transfer = new FlvVideoTransfer;
                 transfers_.push_back(transfer);
