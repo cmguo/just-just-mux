@@ -116,7 +116,8 @@ namespace ppbox
                         if (ec == ppbox::demux::error::no_more_sample) {
                             for (size_t i = 0; i < filters_.size(); ++i) {
                                 FilterPipe & pipe = *filters_[i];
-                                pipe.first()->put(Filter::eos(), ec);
+                                Filter::eos_t eos;
+                                pipe.first()->put(eos, ec);
                             }
                             is_eof_ = true;
                             if (!out_samples_.empty()) {

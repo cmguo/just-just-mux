@@ -144,6 +144,7 @@ namespace ppbox
             oa << track_entry;
 
             assert(old_size + track_entry.byte_size() == buf.size());
+            (void)old_size;
         }
 
     } // namespace mux
