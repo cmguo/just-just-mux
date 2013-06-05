@@ -19,16 +19,19 @@ namespace ppbox
             virtual ~SegmentFilter();
 
         public:
-            virtual bool open(
-                MediaInfo const & media_info, 
-                std::vector<StreamInfo> const & streams, 
+            virtual bool put(
+                StreamInfo & stream, 
                 boost::system::error_code & ec);
 
-            virtual bool get_sample(
+            virtual bool put(
                 Sample & sample,
                 boost::system::error_code & ec);
 
-            virtual bool before_seek(
+            virtual bool put(
+                eos_t & eos, 
+                boost::system::error_code & ec);
+
+            virtual bool reset(
                 Sample & sample, 
                 boost::system::error_code & ec);
 
@@ -37,17 +40,15 @@ namespace ppbox
             void set_end_time(
                 boost::uint64_t time);
 
-            bool is_sequence()
+            bool is_eof() const
             {
-                return is_save_sample_ || is_eof_;
+                return is_eof_;
             }
 
         private:
             boost::uint32_t video_track_;
-            boost::uint64_t segent_end_time_;
-            bool is_save_sample_;
             bool is_eof_;
-            Sample sample_;
+            boost::uint64_t segent_end_time_;
         };
 
     } // namespace mux

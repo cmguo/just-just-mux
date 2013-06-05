@@ -29,7 +29,7 @@ namespace ppbox
             FlvFormat flv;
             CodecInfo const * codec = flv.codec_from_codec(info.type, info.sub_type);
             if (codec) {
-                header_.SoundFormat = (boost::uint8_t)codec->format;
+                header_.SoundFormat = (boost::uint8_t)codec->stream_type;
             }
 
             if (info.audio_format.sample_rate >= 44100 ) {

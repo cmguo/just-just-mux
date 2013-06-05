@@ -26,7 +26,7 @@ namespace ppbox
         protected:
             virtual void add_stream(
                 StreamInfo & info, 
-                std::vector<Transfer *> & transfers);
+                FilterPipe & pipe);
 
             virtual void file_header(
                 Sample & sample);

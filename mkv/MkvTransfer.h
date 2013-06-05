@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 #define _PPBOX_MUX_MKV_MKV_TRANSFER_H_
 
-#include "ppbox/mux/transfer/TimeScaleTransfer.h"
+#include "ppbox/mux/Transfer.h"
 
 #include <boost/asio/streambuf.hpp>
 
@@ -13,7 +13,7 @@ namespace ppbox
     {
 
         class MkvTransfer
-            : public TimeScaleTransfer
+            : public Transfer
         {
         public:
             MkvTransfer();

@@ -16,8 +16,7 @@ namespace ppbox
         static boost::uint32_t const TIME_SCALE = 1000;
 
         MkvTransfer::MkvTransfer()
-            : TimeScaleTransfer(TIME_SCALE)
-            , add_cluster_flag_(0)
+            : add_cluster_flag_(0)
             , time_code_(0)
         {
         }
@@ -29,28 +28,25 @@ namespace ppbox
         void MkvTransfer::transfer(
             StreamInfo & info)
         {
-            TimeScaleTransfer::transfer(info);
         }
 
         void MkvTransfer::transfer(
             Sample & sample)
         {
-            TimeScaleTransfer::transfer(sample);
-
             FormatBuffer buf(block_head_buf_, sizeof(block_head_buf_));
             MkvOArchive oa(buf);
 
             if (0 == add_cluster_flag_) {
                 MkvCluster cluster;
                 cluster.Size = framework::system::VariableNumber<boost::uint32_t>::unknown(1);
-                cluster.TimeCode = time_code_ = sample.dts;
+                cluster.TimeCode = time_code_ = sample.time;
                 oa << cluster;
                 add_cluster_flag_ = 100;
             }
 
             MkvSimpleBlock simple_block;
             simple_block.TrackNumber = sample.itrack + 1;
-            simple_block.TimeCode = (boost::uint16_t)(sample.dts - time_code_);
+            simple_block.TimeCode = (boost::uint16_t)(sample.time - time_code_);
             if (Sample::f_sync & sample.flags)
                 simple_block.Keyframe = 1;
             else
@@ -66,8 +62,6 @@ namespace ppbox
         void MkvTransfer::on_seek(
             boost::uint64_t time)
         {
-            TimeScaleTransfer::on_seek(time);
-
             add_cluster_flag_ = 0;
             time_code_ = 0;
         }
@@ -120,14 +114,14 @@ namespace ppbox
             track_entry.Language = "eng";
             if (info.type == StreamType::VIDE) {
                 track_entry.TrackType = MkvTrackType::VIDEO;
-                track_entry.CodecID = (char const *)codec->format;
+                track_entry.CodecID = MkvFormat::stream_type_str(codec->stream_type);
                 track_entry.CodecPrivate = info.format_data;
                 track_entry.Video.PixelWidth = info.video_format.width;
                 track_entry.Video.PixelHeight = info.video_format.height;
                 track_entry.Video.Size = track_entry.Video.data_size();
             } else if (info.type == StreamType::AUDI){
                 track_entry.TrackType = MkvTrackType::AUDIO;
-                track_entry.CodecID = (char const *)codec->format;
+                track_entry.CodecID = MkvFormat::stream_type_str(codec->stream_type);
                 track_entry.CodecPrivate = info.format_data;
                 track_entry.Audio.SamplingFrequency = 
                     (float)info.audio_format.sample_rate;

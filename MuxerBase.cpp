@@ -4,10 +4,12 @@
 #include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/Transfer.h"
 #include "ppbox/mux/MuxError.h"
-#include "ppbox/mux/filter/DemuxerFilter.h"
+#include "ppbox/mux/FilterManager.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
+#include "ppbox/mux/filter/CodecEncoderFilter.h"
 #include "ppbox/mux/transfer/CodecSplitterTransfer.h"
 #include "ppbox/mux/transfer/CodecAssemblerTransfer.h"
+#include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
 #include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/demux/base/DemuxError.h>
@@ -29,21 +31,25 @@ namespace ppbox
         {
             MuxerBase * muxer = factory_type::create(format);
             if (muxer) {
-                muxer->format_ = format;
-                std::string format_type = format;
-                format_type.resize(4, '\0');
-                memcpy(&muxer->format_type_, format_type.c_str(), 4);
+                if (muxer->format_str_.empty()) {
+                    muxer->format_str_ = format;
+                }
             }
             return muxer;
         }
 
         MuxerBase::MuxerBase()
             : demuxer_(NULL)
-            , format_type_(0)
+            , format_(NULL)
             , read_flag_(0)
             , head_step_(0)
         {
-            demux_filter_ = new DemuxerFilter;
+            config().register_module("Muxer")
+                << CONFIG_PARAM_NAME_RDWR("video_codec", video_codec_)
+                << CONFIG_PARAM_NAME_RDWR("audio_codec", audio_codec_)
+                ;
+
+            manager_ = new FilterManager;
             key_filter_ = new KeyFrameFilter;
         }
 
@@ -54,7 +60,9 @@ namespace ppbox
                 demuxer_ = NULL;
             }
             delete key_filter_;
-            delete demux_filter_;
+            delete manager_;
+            if (format_)
+                delete format_;
         }
 
         bool MuxerBase::open(
@@ -63,9 +71,6 @@ namespace ppbox
         {
             assert(demuxer != NULL);
             demuxer_ = demuxer;
-            demux_filter_->set_demuxer(demuxer_);
-            filters_.push_back(demux_filter_);
-            filters_.push_back(key_filter_);
             open(ec);
             if (ec) {
                 demuxer_ = NULL;
@@ -130,7 +135,7 @@ namespace ppbox
                 } else if (read_flag_ & f_seek) {
                     boost::uint64_t time = demuxer_->check_seek(ec);
                     if (!ec) {
-                        on_seek(time);
+                        after_seek(time);
                         read_flag_ &= ~f_seek;
                     } else {
                         return false;
@@ -154,7 +159,7 @@ namespace ppbox
                 read_flag_ |= f_head;
                 boost::uint64_t time = demuxer_->check_seek(ec);
                 if (!ec) {
-                    on_seek(time);
+                    after_seek(time);
                 }
             } else if (ec ==boost::asio::error::would_block) {
                 read_flag_ |= f_head;
@@ -173,7 +178,7 @@ namespace ppbox
             demuxer_->seek(time, ec);
             if (!ec) {
                 read_flag_ |= f_head;
-                on_seek(time);
+                after_seek(time);
             } else if (ec == boost::asio::error::would_block) {
                 stat_.time_range.beg = time;
                 read_flag_ |= f_head;
@@ -200,7 +205,7 @@ namespace ppbox
             if (read_flag_ & f_seek) {
                 boost::uint64_t time = demuxer_->check_seek(ec);
                 if (!ec) {
-                    on_seek(time);
+                    after_seek(time);
                     read_flag_ &= ~f_seek;
                 }
             } else {
@@ -215,7 +220,7 @@ namespace ppbox
             boost::system::error_code ec;
             demuxer_->get_media_info(info, ec);
             info.file_size = ppbox::data::invalid_size;
-            info.format = format_;
+            info.format = format_str_;
         }
 
         void MuxerBase::stream_info(
@@ -244,16 +249,23 @@ namespace ppbox
             return true;
         }
 
-        void MuxerBase::format_type(
-            boost::uint32_t t)
+        void MuxerBase::format(
+            std::string const & format)
         {
-            format_type_ = t;
+            format_ = Format::create(format);
+        }
+
+        void MuxerBase::format(
+            ppbox::avformat::Format * format)
+        {
+            format_ = format;
         }
 
         void MuxerBase::add_filter(
             Filter * filter)
         {
-            filters_.push_back(filter);
+            boost::system::error_code ec;
+            manager_->append_filter(filter, ec);
         }
 
         void MuxerBase::reset_header(
@@ -265,7 +277,7 @@ namespace ppbox
         }
 
         void MuxerBase::open(
-                error_code & ec)
+            boost::system::error_code & ec)
         {
             assert(demuxer_ != NULL);
             demuxer_->get_media_info(media_info_, ec);
@@ -274,38 +286,53 @@ namespace ppbox
             }
             do_open(media_info_);
             size_t stream_count = demuxer_->get_stream_count(ec);
-            transfers_.clear();
-            transfers_.resize(stream_count);
             streams_.resize(stream_count);
-            Format * format = NULL;
-            if (format_type_) {
-                format = Format::create(format_type_);
+            manager_->open(demuxer_, stream_count, ec);
+            manager_->append_filter(key_filter_, ec);
+            if (format_ == NULL) {
+                format_ = Format::create(format_str_);
             }
+            boost::uint32_t video_codec = StreamType::from_string(video_codec_);
+            boost::uint32_t audio_codec = StreamType::from_string(audio_codec_);
             for (size_t i = 0; i < stream_count; ++i) {
                 StreamInfo & stream = streams_[i];
+                FilterPipe & pipe = manager_->pipe(i);
                 demuxer_->get_stream_info(i, stream, ec);
                 if (ec) {
                     break;
                 }
-                if (format) {
-                    CodecInfo const * codec = format->codec_from_codec(stream.type, stream.sub_type);
-                    if (codec && codec->codec_format != stream.format_type) {
-                        if (stream.format_type) {
-                            transfers_[i].push_back(new CodecSplitterTransfer(stream.sub_type, stream.format_type));
+                StreamInfo info = stream;
+                CodecInfo const * codec = format_->codec_from_codec(info.type, info.sub_type);
+                if (stream.type == StreamType::VIDE && video_codec && video_codec != stream.sub_type) {
+                    info.sub_type = video_codec;
+                    codec = format_->codec_from_codec(info.type, info.sub_type);
+                    info.format_type = codec->codec_format;
+                    pipe.push_back(new CodecEncoderFilter(info));
+                    manager_->remove_filter(key_filter_, ec);
+                } else if (stream.type == StreamType::AUDI && audio_codec && audio_codec != stream.sub_type) {
+                    info.sub_type = audio_codec;
+                    codec = format_->codec_from_codec(info.type, info.sub_type);
+                    info.format_type = codec->codec_format;
+                    pipe.push_back(new CodecEncoderFilter(info));
+                } else {
+                    if (codec->codec_format != info.format_type) {
+                        if (info.format_type) {
+                            pipe.push_back(new CodecSplitterTransfer(stream.sub_type, info.format_type));
                         }
                         if (codec->codec_format) {
-                            transfers_[i].push_back(new CodecAssemblerTransfer(stream.sub_type, codec->codec_format));
+                            pipe.push_back(new CodecAssemblerTransfer(stream.sub_type, codec->codec_format));
                         }
+                        info.format_type = codec->codec_format;
                     }
                 }
-                add_stream(stream, transfers_[i]);
-                for(boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
-                    transfers_[i][j]->config(config_);
-                    transfers_[i][j]->transfer(stream);
+                if (info.time_scale != codec->time_scale && codec->time_scale != 1000) {
+                    pipe.push_back(new TimeScaleTransfer(codec->time_scale));
+                    info.time_scale = codec->time_scale;
                 }
+                add_stream(info, pipe);
             }
             if (!ec) {
-                filters_.last()->open(media_info_, streams_, ec);
+                manager_->complete(config_, streams_, ec);
             }
         }
 
@@ -316,36 +343,26 @@ namespace ppbox
         {
             Sample sample;
             sample.time = time;
-            for(size_t i = 0; i < transfers_.size(); ++i) {
-                std::vector<Transfer *> & transfers = transfers_[i];
-                for(boost::uint32_t j = 0; j < transfers.size(); ++j) {
-                    transfers[j]->before_seek(sample);
-                }
-            }
             sample.flags = reset ? sample.f_sync : 0;
-            return filters_.last()->before_seek(sample, ec);
+            return manager_->reset(sample, ec);
         }
 
-        void MuxerBase::on_seek(
+        void MuxerBase::after_seek(
             boost::uint64_t time)
         {
             stat_.time_range.beg = time;
             stat_.time_range.pos = time;
-            filters_.last()->on_seek(time);
-            for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
-                for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
-                    transfers_[i][j]->on_seek(time);
-                }
-            }
+            Sample sample;
+            sample.time = time;
+            boost::system::error_code ec;
+            manager_->reset(sample, ec);
         }
 
         void MuxerBase::get_sample(
             Sample & sample,
             error_code & ec)
         {
-            filters_.last()->get_sample(sample, ec);
-            if (!ec) {
-                sample.stream_info = &streams_[sample.itrack];
+            if (manager_->pull_one(sample, ec)) {
                 //if (sample.flags & Sample::stream_changed) {
                     //release_info();
                     //open_impl(ec);
@@ -353,14 +370,9 @@ namespace ppbox
                     //head_step_ = 1;
                 //}
                 stat_.time_range.pos = sample.time;
-                std::vector<Transfer *> & transfers = transfers_[sample.itrack];
-                for(boost::uint32_t i = 0; i < transfers.size(); ++i) {
-                    transfers[i]->transfer(sample);
-                }
                 stat_.byte_range.pos += sample.size;
-            } else if (ec == ppbox::demux::error::no_more_sample) {
+            } else if (ec == error::end_of_stream) {
                 stat_.byte_range.end = stat_.byte_range.pos;
-                ec = error::end_of_stream;
             }
         }
 
@@ -368,19 +380,10 @@ namespace ppbox
         {
             error_code ec;
             before_seek(true, 0, ec);
-            for (boost::uint32_t i = 0; i < transfers_.size(); ++i) {
-                for (boost::uint32_t j = 0; j < transfers_[i].size(); ++j) {
-                    delete transfers_[i][j];
-                }
-            }
-            demux_filter_->unlink();
-            key_filter_->unlink();
+            manager_->remove_filter(key_filter_, ec);
             do_close();
-            while (!filters_.empty()) {
-                delete filters_.last();
-            }
+            manager_->close(ec);
             streams_.clear();
-            transfers_.clear();
         }
 
     } // namespace mux

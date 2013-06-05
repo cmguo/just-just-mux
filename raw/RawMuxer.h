@@ -10,6 +10,8 @@ namespace ppbox
     namespace mux
     {
 
+        class RawFormat;
+
         class RawMuxer
             : public MuxerBase
         {
@@ -24,7 +26,7 @@ namespace ppbox
 
             virtual void add_stream(
                 StreamInfo & info, 
-                std::vector<Transfer *> & transfers);
+                FilterPipe & pipe);
 
             virtual void file_header(
                 Sample & sample);
@@ -34,10 +36,7 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            std::string real_format_;
-            boost::uint32_t time_scale_;
-            boost::uint32_t video_time_scale_;
-            boost::uint32_t audio_time_scale_;
+            RawFormat * format_;
         };
 
         PPBOX_REGISTER_MUXER("raw", RawMuxer);

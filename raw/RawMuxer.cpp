@@ -2,7 +2,7 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/raw/RawMuxer.h"
-#include "ppbox/mux/transfer/TimeScaleTransfer.h"
+#include "ppbox/mux/raw/RawFormat.h"
 
 namespace ppbox
 {
@@ -10,15 +10,13 @@ namespace ppbox
     {
 
         RawMuxer::RawMuxer()
-            : time_scale_(0)
-            , video_time_scale_(0)
-            , audio_time_scale_(0)
         {
+            format_ = new RawFormat;
             config().register_module("RawMuxer")
-                << CONFIG_PARAM_NAME_RDWR("real_format", real_format_)
-                << CONFIG_PARAM_NAME_RDWR("time_scale", time_scale_)
-                << CONFIG_PARAM_NAME_RDWR("video_time_scale", video_time_scale_)
-                << CONFIG_PARAM_NAME_RDWR("audio_time_scale", audio_time_scale_)
+                << CONFIG_PARAM_NAME_RDWR("real_format", format_->real_format_)
+                << CONFIG_PARAM_NAME_RDWR("time_scale", format_->time_scale_)
+                << CONFIG_PARAM_NAME_RDWR("video_time_scale", format_->video_time_scale_)
+                << CONFIG_PARAM_NAME_RDWR("audio_time_scale", format_->audio_time_scale_)
                 ;
         }
 
@@ -29,26 +27,14 @@ namespace ppbox
         void RawMuxer::do_open(
             MediaInfo & info)
         {
-            real_format_.resize(4, '\0');
-            format_type(*(boost::uint32_t const *)real_format_.c_str());
+            format_->open();
+            format(format_);
         }
 
         void RawMuxer::add_stream(
             StreamInfo & info, 
-            std::vector<Transfer *> & transfers)
+            FilterPipe & pipe)
         {
-            Transfer * transfer = NULL;
-            if (info.type == StreamType::VIDE) {
-                if (time_scale_ || video_time_scale_) {
-                    transfer = new TimeScaleTransfer(time_scale_ ? time_scale_ : video_time_scale_);
-                    transfers.push_back(transfer);
-                }
-            } else if (info.type == StreamType::AUDI) {
-                if (time_scale_ || audio_time_scale_) {
-                    transfer = new TimeScaleTransfer(time_scale_ ? time_scale_ : audio_time_scale_);
-                    transfers.push_back(transfer);
-                }
-            }
         }
 
         void RawMuxer::file_header(

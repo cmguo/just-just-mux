@@ -12,16 +12,15 @@ namespace ppbox
     namespace mux
     {
 
-        class DemuxerFilter
-            : public Filter
+        class FilterManager
         {
         public:
-            DemuxerFilter()
+            FilterManager()
                 : demuxer_(NULL)
             {
             }
 
-            ~DemuxerFilter()
+            ~FilterManager()
             {
                 demuxer_ = NULL;
             }
@@ -38,7 +37,6 @@ namespace ppbox
             }
 
             virtual bool get_sample(
-                Sample & sample,
                 boost::system::error_code & ec)
             {
                 assert(demuxer_);

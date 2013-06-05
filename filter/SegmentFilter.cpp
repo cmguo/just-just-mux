@@ -2,9 +2,8 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/filter/SegmentFilter.h"
+#include "ppbox/mux/filter/MergeFilter.h"
 #include "ppbox/mux/MuxError.h"
-
-#include <ppbox/demux/base/DemuxError.h>
 
 #include <ppbox/avbase/StreamType.h>
 using namespace ppbox::avbase;
@@ -17,7 +16,6 @@ namespace ppbox
         SegmentFilter::SegmentFilter()
             : video_track_(boost::uint32_t(-1))
             , segent_end_time_(0)
-            , is_save_sample_(false)
             , is_eof_(false)
         {
         }
@@ -26,66 +24,53 @@ namespace ppbox
         {
         }
 
-        bool SegmentFilter::open(
-            MediaInfo const & media_info, 
-            std::vector<StreamInfo> const & streams, 
+        bool SegmentFilter::put(
+            StreamInfo & info, 
             boost::system::error_code & ec)
         {
-            if (!Filter::open(media_info, streams, ec))
-                return false;
-            video_track_ = boost::uint32_t(-1);
-            for (size_t i = 0; i < streams.size(); ++i) {
-                if (streams[i].type == StreamType::VIDE) {
-                    video_track_ = i;
-                    break;
-                }
+            if (info.type == StreamType::VIDE) {
+                assert(video_track_ == boost::uint32_t(-1));
+                video_track_ = info.index;
             }
-            return true;
+            return Filter::put(info, ec);
         }
 
-        bool SegmentFilter::get_sample(
+        bool SegmentFilter::put(
             Sample & sample,
             boost::system::error_code & ec)
         {
-            if (is_save_sample_) {
-                sample = sample_;
-                is_save_sample_ = false;
-                ec.clear();
-            } else if (is_eof_) {
-                ec = ppbox::demux::error::no_more_sample;
-                return false;
-            } else {
-                if (!Filter::get_sample(sample, ec)) {
-                    is_eof_ = (ec == ppbox::demux::error::no_more_sample);
-                    return false;
-                }
-            }
-            //std::cout << "[SegmentFilter::get_sample] sample.time = " << sample.time << " segent_end_time_ = " << segent_end_time_ << std::endl;
             if (sample.time >= segent_end_time_
                 && (video_track_ == boost::uint32_t(-1)
-                    || (sample.itrack == video_track_
-                    && (sample.flags & Sample::f_sync)))) {
-                        ec = error::end_of_stream;
-                        is_save_sample_ = true;
-                        sample_ = sample;
-                        return false;
+                || (sample.itrack == video_track_
+                && (sample.flags & Sample::f_sync)))) {
+                    is_eof_ = true;
+                    MergeFilter::put_eof(this, ec);
+                    ec = error::end_of_stream;
+                    return false;
             }
-            return true;
+            return Filter::put(sample, ec);
         }
 
-        bool SegmentFilter::before_seek(
+        bool SegmentFilter::put(
+            Filter::eos_t & eos, 
+            boost::system::error_code & ec)
+        {
+            is_eof_ = true;
+            return Filter::put(eos, ec);
+        }
+
+        bool SegmentFilter::reset(
             Sample & sample, 
             boost::system::error_code & ec)
         {
-            is_save_sample_ = false;
             is_eof_ = false;
-            sample.append(sample_);
-            return Filter::before_seek(sample, ec);
+            return Filter::reset(sample, ec);
         }
 
         void SegmentFilter::set_end_time(
             boost::uint64_t time)
         {
+            is_eof_ = false;
             segent_end_time_ = time;
         }
 

@@ -13,8 +13,11 @@ namespace ppbox
 
         TimeScaleTransfer::TimeScaleTransfer(
             boost::uint32_t time_scale)
-            : time_adjust_mode_(1)
+            : time_adjust_mode_(ta_auto)
+            , scale_in_(0)
             , scale_out_(time_scale)
+            , time_adjust_(0)
+            , sample_per_frame_(0)
         {
         }
 
@@ -32,76 +35,66 @@ namespace ppbox
         void TimeScaleTransfer::transfer(
             StreamInfo & info)
         {
-            if (info.index >= items_.size()) {
-                items_.resize(info.index + 1);
-            }
-            Item & item = items_[info.index];
+            scale_in_ = info.time_scale;
             if (info.type == StreamType::VIDE) {
-                item.scale_.reset_scale(info.time_scale, scale_out_);
+                scale_.reset_scale(info.time_scale, scale_out_);
+            } else if (scale_out_ == 0) {
+                scale_out_ = scale_in_;
+                scale_.reset_scale(scale_in_, scale_out_);
             } else {
-                if ((time_adjust_mode_ == 2) || 
-                    (time_adjust_mode_ == 1 && info.time_scale < info.audio_format.sample_rate)) {
+                if ((time_adjust_mode_ == ta_enable) || 
+                    (time_adjust_mode_ == ta_auto && scale_in_ < info.audio_format.sample_rate)) {
                         if (scale_out_ == 1) {
                             scale_out_ = info.audio_format.sample_rate;
                         }
-                        item.scale_.reset_scale(info.audio_format.sample_rate, scale_out_);
-                        item.time_adjust_ = 1;
+                        scale_.reset_scale(info.audio_format.sample_rate, scale_out_);
+                        time_adjust_ = 1;
                          // TO DO:
-                        item.sample_per_frame_ = 1024;
+                        sample_per_frame_ = 1024;
                         //if (info.sub_type == AUDIO_TYPE_MP4A) {
                         //    AacConfigHelper const & config = ((AacCodec const *)info.codec.get())->config_helper();
                         //    if (config.get_extension_object_type() == 5) {
-                        //        item.sample_per_frame_ *= 2;
+                        //        sample_per_frame_ *= 2;
                         //    }
                         //}
                 } else {
                     if (scale_out_ == 1) {
-                        scale_out_ = info.time_scale;
+                        scale_out_ = scale_in_;
                     }
-                    item.scale_.reset_scale(info.time_scale, scale_out_);
+                    scale_.reset_scale(scale_in_, scale_out_);
                 }
             }
+            info.time_scale = scale_out_;
         }
 
         void TimeScaleTransfer::transfer(
             Sample & sample)
         {
-            StreamInfo const & info = 
-                *(StreamInfo const *)sample.stream_info;
             //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
-            Item & item = items_[info.index];
-            if (item.time_adjust_ == 0) {
-                sample.dts = item.scale_.transfer(sample.dts);
-                boost::uint64_t cts = item.scale_.inc(sample.cts_delta);
+            if (time_adjust_ == 0) {
+                sample.dts = scale_.transfer(sample.dts);
+                boost::uint64_t cts = scale_.inc(sample.cts_delta);
                 sample.cts_delta = (boost::uint32_t)(cts - sample.dts);
-            } else if (item.time_adjust_ == 1 || (sample.flags & sample.f_discontinuity)) {
-                sample.dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
-                item.scale_.last_out(sample.dts);
-                item.time_adjust_ = 2;
+            } else if (time_adjust_ == 1 || (sample.flags & sample.f_discontinuity)) {
+                sample.dts = scale_.static_transfer(scale_in_, scale_.scale_out(), sample.dts);
+                scale_.last_out(sample.dts);
+                time_adjust_ = 2;
             } else {
-                boost::uint64_t dts = item.scale_.static_transfer(info.time_scale, item.scale_.scale_out(), sample.dts);
-                sample.dts = item.scale_.inc(item.sample_per_frame_);
-                if (sample.dts > dts + item.scale_.scale_out() || sample.dts + item.scale_.scale_out() < dts) {
-                    sample.dts = dts;
-                    item.scale_.last_out(sample.dts);
-                }
+                //boost::uint64_t dts = scale_.static_transfer(scale_in_, scale_.scale_out(), sample.dts);
+                sample.dts = scale_.inc(sample_per_frame_);
+                //if (sample.dts > dts + scale_.scale_out() || sample.dts + scale_.scale_out() < dts) {
+                //    sample.dts = dts;
+                //    scale_.last_out(sample.dts);
+                //}
             }
             //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
         }
 
-        void TimeScaleTransfer::on_seek(
+        void TimeScaleTransfer::reset(
             boost::uint64_t time)
         {
-            for (size_t i = 0; i < items_.size(); ++i) {
-                Item & item = items_[i];
-                if (item.time_adjust_ == 2)
-                    item.time_adjust_ = 1;
-            }
-        }
-
-        boost::uint32_t TimeScaleTransfer::scale_out()
-        {
-            return scale_out_;
+            if (time_adjust_ == 2)
+                time_adjust_ = 1;
         }
 
     } // namespace mux

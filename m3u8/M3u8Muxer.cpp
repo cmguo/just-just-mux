@@ -36,9 +36,9 @@ namespace ppbox
 
         void M3u8Muxer::add_stream(
             StreamInfo & info, 
-            std::vector<Transfer *> & transfers)
+            FilterPipe & pipe)
         {
-            TsMuxer::add_stream(info, transfers);
+            TsMuxer::add_stream(info, pipe);
         }
 
         void M3u8Muxer::file_header(
@@ -66,7 +66,7 @@ namespace ppbox
         {
             ec.clear();
             boost::uint64_t index = time;
-            if (next_index_ != index || !segment_filter_->is_sequence()) {
+            if (next_index_ != index || !segment_filter_->is_eof()) {
                 time = index * m3u8_config_.interval * 1000;
                 TsMuxer::time_seek(time, ec);
             } else {

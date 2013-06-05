@@ -230,7 +230,7 @@ namespace ppbox
                 streams_object.Video_Media_Type.FormatData.ImageWidth  = info.video_format.width;
                 streams_object.Video_Media_Type.FormatData.ImageHeight = info.video_format.height;
                 streams_object.Video_Media_Type.FormatData.BitsPerPixelCount = 24;
-                streams_object.Video_Media_Type.FormatData.CompressionID = codec->format;
+                streams_object.Video_Media_Type.FormatData.CompressionID = codec->stream_type;
                 streams_object.Video_Media_Type.FormatData.CodecSpecificData = info.format_data;
                 streams_object.Video_Media_Type.FormatDataSize = 
                     (boost::uint16_t)streams_object.Video_Media_Type.FormatData.FormatDataSize;
@@ -238,7 +238,7 @@ namespace ppbox
                 streams_object.TypeSpecificDataLength =
                     11 + streams_object.Video_Media_Type.FormatDataSize;
             } else {
-                streams_object.Audio_Media_Type.CodecId = (boost::uint16_t)codec->format;
+                streams_object.Audio_Media_Type.CodecId = (boost::uint16_t)codec->stream_type;
                 streams_object.Audio_Media_Type.NumberOfChannels = (boost::uint16_t)info.audio_format.channel_count;
                 streams_object.Audio_Media_Type.SamplesPerSecond = info.audio_format.sample_rate;
                 //streams_object.Audio_Media_Type.AverageNumberOfBytesPerSecond = 4000;

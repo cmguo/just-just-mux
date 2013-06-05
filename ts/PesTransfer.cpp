@@ -44,8 +44,6 @@ namespace ppbox
         void PesTransfer::transfer(
             Sample & sample)
         {
-            TimeScaleTransfer::transfer(sample);
-
             FormatBuffer buf(pes_heaher_buffer_, sizeof(pes_heaher_buffer_));
             TsOArchive oa(buf);
             if (with_dts_) {

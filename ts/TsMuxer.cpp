@@ -22,17 +22,17 @@ namespace ppbox
 
         void TsMuxer::add_stream(
             StreamInfo & info, 
-            std::vector<Transfer *> & transfers)
+            FilterPipe & pipe)
         {
             Transfer * transfer = NULL;
             PmtSection & pmt_sec = pmt_.sections.front();
             TsFormat ts;
             CodecInfo const * codec = ts.codec_from_codec(info.type, info.sub_type);
             if (codec) {
-                pmt_sec.add_stream((boost::uint8_t)codec->format);
+                pmt_sec.add_stream((boost::uint8_t)codec->stream_type);
             }
             transfer = new PesTransfer(info.index);
-            transfers.push_back(transfer);
+            pipe.push_back(transfer);
         }
 
         void TsMuxer::file_header(

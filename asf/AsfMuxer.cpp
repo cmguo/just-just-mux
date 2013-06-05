@@ -3,7 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/asf/AsfMuxer.h"
 #include "ppbox/mux/asf/AsfTransfer.h"
-#include "ppbox/mux/transfer/MergeTransfer.h"
+#include "ppbox/mux/filter/MergeFilter.h"
 
 #include <util/archive/BigEndianBinaryOArchive.h>
 
@@ -23,12 +23,11 @@ namespace ppbox
 
         void AsfMuxer::add_stream(
             StreamInfo & info, 
-            std::vector<Transfer *> & transfers)
+            FilterPipe & pipe)
         {
              if (transfer_ == NULL)
                  transfer_ = new AsfTransfer;
-             Transfer * transfer =  new MergeTransfer(transfer_);
-             transfers.push_back(transfer);
+             pipe.push_back(new MergeFilter(transfer_));
 
              transfer_->stream_header(info, stream_buf_);
         }

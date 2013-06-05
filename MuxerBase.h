@@ -9,16 +9,20 @@
 #include <ppbox/common/ClassFactory.h>
 
 #include <framework/configure/Config.h>
-#include <framework/container/List.h>
 
 namespace ppbox
 {
+    namespace avformat
+    {
+        class Format;
+    }
+
     namespace mux
     {
 
-        class Transfer;
-        class DemuxerFilter;
+        class FilterManager;
         class KeyFrameFilter;
+        class MergeHook;
 
         class MuxerBase
             : public ppbox::common::ClassFactory<
@@ -88,7 +92,7 @@ namespace ppbox
 
             virtual void add_stream(
                 StreamInfo & info, 
-                std::vector<Transfer *> & transfers) = 0;
+                FilterPipe & pipe) = 0;
 
             virtual void file_header(
                 Sample & sample) = 0;
@@ -105,8 +109,11 @@ namespace ppbox
                 return *demuxer_;
             };
 
-            void format_type(
-                boost::uint32_t t);
+            void format(
+                ppbox::avformat::Format * format);
+
+            void format(
+                std::string const & format);
 
             void add_filter(
                 Filter * filter);
@@ -128,7 +135,7 @@ namespace ppbox
                 boost::uint64_t time,
                 boost::system::error_code & ec);
 
-            void on_seek(
+            void after_seek(
                 boost::uint64_t time);
 
             void close();
@@ -140,8 +147,7 @@ namespace ppbox
 
         private:
             ppbox::demux::DemuxerBase * demuxer_;
-            framework::container::List<Filter> filters_;
-            std::vector<std::vector<Transfer *> > transfers_;
+            FilterManager * manager_;
 
             enum FlagEnum
             {
@@ -149,11 +155,12 @@ namespace ppbox
                 f_seek = 2, // 拖动没有完成
             };
 
-            std::string format_;
-            boost::uint32_t format_type_;
+            std::string format_str_;
+            ppbox::avformat::Format * format_;
+            std::string video_codec_;
+            std::string audio_codec_;
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;
-            DemuxerFilter * demux_filter_;
             KeyFrameFilter * key_filter_;
 
             framework::configure::Config config_;

@@ -1,13 +1,9 @@
 // KeyFrameFilter.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/MuxerBase.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
-
-#include <ppbox/avbase/StreamType.h>
-using namespace ppbox::avbase;
-
-#include <boost/asio/error.hpp>
+#include "ppbox/mux/filter/MergeFilter.h"
+#include "ppbox/mux/MuxError.h"
 
 namespace ppbox
 {
@@ -19,36 +15,30 @@ namespace ppbox
         {
         }
 
-        bool KeyFrameFilter::open(
-            MediaInfo const & media_info, 
-            std::vector<StreamInfo> const & streams, 
+        bool KeyFrameFilter::put(
+            StreamInfo & info, 
             boost::system::error_code & ec)
         {
-            if (!Filter::open(media_info, streams, ec))
-                return false;
-            video_track_ = boost::uint32_t(-1);
-            for (size_t i = 0; i < streams.size(); ++i) {
-                if (streams[i].type == StreamType::VIDE) {
-                    video_track_ = i;
-                    break;
-                }
+            if (info.type == StreamType::VIDE) {
+                video_track_ = info.index;
             }
-            return true; 
+            return Filter::put(info, ec); 
         }
 
-        bool KeyFrameFilter::get_sample(
+        bool KeyFrameFilter::put(
             Sample & sample,
             boost::system::error_code & ec)
         {
-            while (Filter::get_sample(sample, ec)) {
-                if (video_track_ == boost::uint32_t(-1) 
-                    || (sample.itrack == video_track_
-                    && (sample.flags & Sample::f_sync))) {
-                        detach_self();
-                        return true;
-                }
+            if (video_track_ == boost::uint32_t(-1) 
+                || (sample.itrack == video_track_
+                && (sample.flags & Sample::f_sync))) {
+                    bool r = Filter::put(sample, ec);
+                    MergeFilter::detach(this);
+                    return r;
+            } else {
+                ec = error::need_more_sample;
+                return false;
             }
-            return false;
         }
 
     } // namespace mux

@@ -20,8 +20,7 @@ namespace ppbox
         TsTransfer::TsTransfer(
             boost::uint16_t pid, 
             bool with_pcr)
-            : TimeScaleTransfer(TsPacket::TIME_SCALE)
-            , pid_(pid)
+            : pid_(pid)
             , continuity_counter_(0)
             , with_pcr_(with_pcr)
         {

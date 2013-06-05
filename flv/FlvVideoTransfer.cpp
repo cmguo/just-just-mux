@@ -28,7 +28,7 @@ namespace ppbox
             FlvFormat flv;
             CodecInfo const * codec = flv.codec_from_codec(info.type, info.sub_type);
             if (codec) {
-                header_.CodecID = (boost::uint8_t)codec->format;
+                header_.CodecID = (boost::uint8_t)codec->stream_type;
             }
 
             if (header_.CodecID == FlvVideoCodec::H264) {

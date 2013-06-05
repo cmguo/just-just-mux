@@ -3,7 +3,7 @@
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/mkv/MkvMuxer.h"
 #include "ppbox/mux/mkv/MkvTransfer.h"
-#include "ppbox/mux/transfer/MergeTransfer.h"
+#include "ppbox/mux/filter/MergeFilter.h"
 
 namespace ppbox
 {
@@ -22,13 +22,13 @@ namespace ppbox
 
         void MkvMuxer::add_stream(
             StreamInfo & info, 
-            std::vector<Transfer *> & transfers)
+            FilterPipe & pipe)
         {
             stream_number_++;
 
             if (transfer_ == NULL)
                 transfer_ = new MkvTransfer();
-            transfers.push_back(new MergeTransfer(transfer_));
+            pipe.push_back(new MergeFilter(transfer_));
 
             transfer_->stream_header(info, track_buf_);
         }

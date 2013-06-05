@@ -3,9 +3,7 @@
 #ifndef _PPBOX_MUX_TS_TS_TRANSFER_H_
 #define _PPBOX_MUX_TS_TS_TRANSFER_H_
 
-#include "ppbox/mux/transfer/TimeScaleTransfer.h"
-
-#include <framework/system/ScaleTransform.h>
+#include "ppbox/mux/Transfer.h"
 
 namespace ppbox
 {
@@ -13,7 +11,7 @@ namespace ppbox
     {
 
         class TsTransfer
-            : public TimeScaleTransfer
+            : public Transfer
         {
         public:
             TsTransfer(
@@ -23,7 +21,7 @@ namespace ppbox
             ~TsTransfer();
 
         public:
-            using TimeScaleTransfer::transfer;
+            using Transfer::transfer;
 
             virtual void transfer(
                 Sample & sample);

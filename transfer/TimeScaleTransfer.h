@@ -16,8 +16,12 @@ namespace ppbox
             : public Transfer
         {
         public:
+            // scale_out = 0, meanings use scale in for scale out
+            // scale_out = 1, meanings use scale adjust for scale out
+            // if audio and time adjust mode enable, scale adjust is set to sample rate, 
+            // else scale adjust is scale in
             TimeScaleTransfer(
-                boost::uint32_t time_scale);
+                boost::uint32_t scale_out = 0);
 
             ~TimeScaleTransfer();
 
@@ -32,28 +36,22 @@ namespace ppbox
             virtual void transfer(
                 Sample & sample);
 
-            virtual void on_seek(
+            virtual void reset(
                 boost::uint64_t time);
 
         protected:
-            boost::uint32_t scale_out();
-
-        protected:
-            struct Item
+            enum TimeAdjustModeEnum
             {
-                Item()
-                    : time_adjust_(0)
-                    , sample_per_frame_(0)
-                {
-                }
-
-                boost::uint8_t time_adjust_;
-                boost::uint32_t sample_per_frame_;
-                framework::system::ScaleTransform scale_;
+                ta_auto, 
+                ta_disable, 
+                ta_enable, 
             };
-            int time_adjust_mode_; // 0 - auto, 1 - disable, 2 - enable
+            boost::uint32_t time_adjust_mode_;
+            boost::uint32_t scale_in_;
             boost::uint32_t scale_out_;
-            std::vector<Item> items_;
+            boost::uint32_t time_adjust_;
+            boost::uint32_t sample_per_frame_;
+            framework::system::ScaleTransform scale_;
         };
 
     } // namespace mux
