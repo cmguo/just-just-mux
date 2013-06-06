@@ -19,12 +19,17 @@ using namespace ppbox::avformat;
 
 #include <util/buffers/BuffersSize.h>
 
+#include <framework/logger/Logger.h>
+#include <framework/logger/StreamRecord.h>
+
 using namespace boost::system;
 
 namespace ppbox
 {
     namespace mux
     {
+
+        FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("ppbox.mux.MuxerBase", framework::logger::Debug);
 
         MuxerBase * MuxerBase::create(
             std::string const & format)
@@ -304,17 +309,29 @@ namespace ppbox
                 StreamInfo info = stream;
                 CodecInfo const * codec = format_->codec_from_codec(info.type, info.sub_type);
                 if (stream.type == StreamType::VIDE && video_codec && video_codec != stream.sub_type) {
+                    LOG_INFO("[open] change video codec from " << StreamType::to_string(stream.type) << " to " << video_codec_);
                     info.sub_type = video_codec;
                     codec = format_->codec_from_codec(info.type, info.sub_type);
-                    info.format_type = codec->codec_format;
-                    pipe.push_back(new CodecEncoderFilter(info));
-                    manager_->remove_filter(key_filter_, ec);
+                    if (codec) {
+                        info.format_type = codec->codec_format;
+                        pipe.push_back(new CodecEncoderFilter(info));
+                        manager_->remove_filter(key_filter_, ec);
+                    } else {
+                        LOG_ERROR("[open] video codec " << video_codec_ << " not supported by cantainer " << format_str_);
+                        ec = error::format_not_support;
+                    }
                 } else if (stream.type == StreamType::AUDI && audio_codec && audio_codec != stream.sub_type) {
+                    LOG_INFO("[open] change audio codec from " << StreamType::to_string(stream.type) << " to " << audio_codec_);
                     info.sub_type = audio_codec;
                     codec = format_->codec_from_codec(info.type, info.sub_type);
-                    info.format_type = codec->codec_format;
-                    pipe.push_back(new CodecEncoderFilter(info));
-                } else {
+                    if (codec) {
+                        info.format_type = codec->codec_format;
+                        pipe.push_back(new CodecEncoderFilter(info));
+                    } else {
+                        LOG_ERROR("[open] audio codec " << audio_codec_ << " not supported by cantainer " << format_str_);
+                        ec = error::format_not_support;
+                    }
+                } else if (codec) {
                     if (codec->codec_format != info.format_type) {
                         if (info.format_type) {
                             pipe.push_back(new CodecSplitterTransfer(stream.sub_type, info.format_type));
@@ -324,11 +341,16 @@ namespace ppbox
                         }
                         info.format_type = codec->codec_format;
                     }
+                } else {
+                    LOG_ERROR("[open] codec " << StreamType::to_string(info.sub_type) << " not supported by cantainer " << format_str_);
+                    ec = error::format_not_support;
                 }
-                if (info.time_scale != codec->time_scale && codec->time_scale != 1000) {
-                    pipe.push_back(new TimeScaleTransfer(codec->time_scale));
+                if (codec && info.time_scale != codec->time_scale && codec->time_scale != 1000) {
+                    LOG_INFO("[open] change time scale from " << info.time_scale << " to " << codec->time_scale);
                     info.time_scale = codec->time_scale;
+                    pipe.push_back(new TimeScaleTransfer(codec->time_scale));
                 }
+                if (ec) break;
                 add_stream(info, pipe);
             }
             if (!ec) {
