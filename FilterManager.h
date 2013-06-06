@@ -4,6 +4,7 @@
 #define _PPBOX_MUX_FILTER_MANAGER_H_
 
 #include "ppbox/mux/Filter.h"
+#include "ppbox/mux/FilterPipe.h"
 
 #include <ppbox/demux/base/DemuxerBase.h>
 
@@ -30,11 +31,13 @@ namespace ppbox
 
             bool append_filter(
                 Filter * filter, 
+                bool adopt, 
                 boost::system::error_code & ec);
 
             bool append_filter(
                 boost::uint32_t stream, 
                 Filter * filter, 
+                bool adopt, 
                 boost::system::error_code & ec);
 
             bool remove_filter(
@@ -50,8 +53,18 @@ namespace ppbox
                 Sample & sample,
                 boost::system::error_code & ec);
 
+            bool begin_reset(
+                boost::system::error_code & ec);
+
+            bool begin_seek(
+                boost::uint64_t time, 
+                boost::system::error_code & ec);
+
+            bool finish_seek(
+                boost::uint64_t time, 
+                boost::system::error_code & ec);
+
             bool reset(
-                Sample & sample,
                 boost::system::error_code & ec);
 
             bool close(

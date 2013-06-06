@@ -33,11 +33,7 @@ namespace ppbox
                 boost::system::error_code & ec);
 
             virtual bool put(
-                eos_t & eos, 
-                boost::system::error_code & ec);
-
-            virtual bool reset(
-                Sample & sample, 
+                MuxEvent const & event, 
                 boost::system::error_code & ec);
 
         private:

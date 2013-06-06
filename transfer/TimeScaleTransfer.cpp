@@ -90,10 +90,10 @@ namespace ppbox
             //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
         }
 
-        void TimeScaleTransfer::reset(
-            boost::uint64_t time)
+        void TimeScaleTransfer::on_event(
+            MuxEvent const & event)
         {
-            if (time_adjust_ == 2)
+            if (event.type == event.reset && time_adjust_ == 2)
                 time_adjust_ = 1;
         }
 

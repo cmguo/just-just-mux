@@ -22,8 +22,8 @@ namespace ppbox
             virtual void transfer(
                 Sample & sample) = 0;
 
-            virtual void reset(
-                boost::uint64_t time)
+            virtual void on_event(
+                MuxEvent const & event)
             {
             }
 
@@ -44,12 +44,12 @@ namespace ppbox
                 return Filter::put(sample, ec);
             }
 
-            virtual bool reset(
-                Sample & sample, 
+            virtual bool put(
+                MuxEvent const & event, 
                 boost::system::error_code & ec)
             {
-                reset(sample.time);
-                return Filter::reset(sample, ec);
+                on_event(event);
+                return Filter::put(event, ec);
             }
         };
 

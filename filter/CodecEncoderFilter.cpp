@@ -54,23 +54,27 @@ namespace ppbox
         }
 
         bool CodecEncoderFilter::put(
-            eos_t & eos, 
+            MuxEvent const & event, 
             boost::system::error_code & ec)
         {
-            Sample sample;
-            sample.stream_info = &out_info_;
-            while (encoder_->push(encoder_->eos(), ec) 
-                && encoder_->pop(sample, ec)) {
-                    Filter::put(sample, ec);
+            switch (event.type) {
+                case MuxEvent::end:
+                    {
+                        Sample sample;
+                        sample.stream_info = &out_info_;
+                        while (encoder_->push(encoder_->eos(), ec) 
+                            && encoder_->pop(sample, ec)) {
+                                Filter::put(sample, ec);
+                        }
+                    }
+                    break;
+                case MuxEvent::reset:
+                    encoder_->refresh(ec);
+                    break;
+                default:
+                    break;
             }
-            return true;
-        }
-
-        bool CodecEncoderFilter::reset(
-            Sample & sample, 
-            boost::system::error_code & ec)
-        {
-            return encoder_->refresh(ec);
+            return Filter::put(event, ec);
         }
 
     } // namespace mux

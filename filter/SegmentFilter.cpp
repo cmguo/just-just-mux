@@ -15,8 +15,8 @@ namespace ppbox
 
         SegmentFilter::SegmentFilter()
             : video_track_(boost::uint32_t(-1))
-            , segent_end_time_(0)
             , is_eof_(false)
+            , segent_end_time_(0)
         {
         }
 
@@ -52,19 +52,20 @@ namespace ppbox
         }
 
         bool SegmentFilter::put(
-            Filter::eos_t & eos, 
+            MuxEvent const & event, 
             boost::system::error_code & ec)
         {
-            is_eof_ = true;
-            return Filter::put(eos, ec);
-        }
-
-        bool SegmentFilter::reset(
-            Sample & sample, 
-            boost::system::error_code & ec)
-        {
-            is_eof_ = false;
-            return Filter::reset(sample, ec);
+            switch (event.type) {
+                case MuxEvent::end:
+                    is_eof_ = true;
+                    break;
+                case MuxEvent::reset:
+                    is_eof_ = false;
+                    break;
+                default:
+                    break;
+            }
+            return Filter::put(event, ec);
         }
 
         void SegmentFilter::set_end_time(

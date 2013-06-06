@@ -59,19 +59,11 @@ namespace ppbox
             }
 
             virtual bool put(
-                eos_t & eos, 
+                MuxEvent const & event, 
                 boost::system::error_code & ec)
             {
                 hook_->current(this);
-                return filter_->put(eos, ec);
-            }
-
-            virtual bool reset(
-                Sample & sample, 
-                boost::system::error_code & ec)
-            {
-                hook_->current(this);
-                return filter_->reset(sample, ec);
+                return filter_->put(event, ec);
             }
 
         public:
@@ -87,8 +79,6 @@ namespace ppbox
             static void detach(
                 Filter * filter)
             {
-                if (!filter->is_linked())
-                    return;
                 MergeHook * hook = (MergeHook *)filter->next();
                 filter->unlink();
                 hook->detach();

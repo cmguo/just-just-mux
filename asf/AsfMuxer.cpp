@@ -27,7 +27,7 @@ namespace ppbox
         {
              if (transfer_ == NULL)
                  transfer_ = new AsfTransfer;
-             pipe.push_back(new MergeFilter(transfer_));
+             pipe.insert(new MergeFilter(transfer_));
 
              transfer_->stream_header(info, stream_buf_);
         }

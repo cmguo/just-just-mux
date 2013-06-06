@@ -36,8 +36,8 @@ namespace ppbox
             virtual void transfer(
                 Sample & sample);
 
-            virtual void reset(
-                boost::uint64_t time);
+            virtual void on_event(
+                MuxEvent const & event);
 
         protected:
             enum TimeAdjustModeEnum

@@ -32,7 +32,7 @@ namespace ppbox
                 pmt_sec.add_stream((boost::uint8_t)codec->stream_type);
             }
             transfer = new PesTransfer(info.index);
-            pipe.push_back(transfer);
+            pipe.insert(transfer);
         }
 
         void TsMuxer::file_header(

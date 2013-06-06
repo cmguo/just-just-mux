@@ -30,7 +30,7 @@ namespace ppbox
             if (info.type == StreamType::VIDE) {
                 FlvVideoTransfer * transfer = new FlvVideoTransfer;
                 transfers_.push_back(transfer);
-                pipe.push_back(transfer);
+                pipe.insert(transfer);
                 flv_header_.TypeFlagsVideo = 1;
                 meta_data_.hasvideo = true;
                 meta_data_.width = info.video_format.width;
@@ -39,7 +39,7 @@ namespace ppbox
             } else if (info.type == StreamType::AUDI) {
                 FlvAudioTransfer * transfer = new FlvAudioTransfer;
                 transfers_.push_back(transfer);
-                pipe.push_back(transfer);
+                pipe.insert(transfer);
                 flv_header_.TypeFlagsAudio = 1;
                 meta_data_.hasaudio = true;
                 meta_data_.audiosamplerate = info.audio_format.sample_rate;

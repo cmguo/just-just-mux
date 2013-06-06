@@ -156,11 +156,12 @@ namespace ppbox
         bool MuxerBase::reset(
             error_code & ec)
         {
-            if (!before_seek(true, 0, ec)) {
+            if (!manager_->begin_reset(ec)) {
                 return false;
             }
             demuxer_->reset(ec);
             if (!ec) {
+                manager_->reset(ec);
                 read_flag_ |= f_head;
                 boost::uint64_t time = demuxer_->check_seek(ec);
                 if (!ec) {
@@ -177,14 +178,16 @@ namespace ppbox
             boost::uint64_t & time,
             error_code & ec)
         {
-            if (!before_seek(false, time, ec)) {
+            if (!manager_->begin_seek(time, ec)) {
                 return false;
             }
             demuxer_->seek(time, ec);
             if (!ec) {
+                manager_->reset(ec);
                 read_flag_ |= f_head;
                 after_seek(time);
             } else if (ec == boost::asio::error::would_block) {
+                manager_->reset(ec);
                 stat_.time_range.beg = time;
                 read_flag_ |= f_head;
                 read_flag_ |= f_seek;
@@ -267,10 +270,11 @@ namespace ppbox
         }
 
         void MuxerBase::add_filter(
-            Filter * filter)
+            Filter * filter, 
+            bool adopt)
         {
             boost::system::error_code ec;
-            manager_->append_filter(filter, ec);
+            manager_->append_filter(filter, adopt, ec);
         }
 
         void MuxerBase::reset_header(
@@ -293,7 +297,7 @@ namespace ppbox
             size_t stream_count = demuxer_->get_stream_count(ec);
             streams_.resize(stream_count);
             manager_->open(demuxer_, stream_count, ec);
-            manager_->append_filter(key_filter_, ec);
+            manager_->append_filter(key_filter_, false, ec);
             if (format_ == NULL) {
                 format_ = Format::create(format_str_);
             }
@@ -314,7 +318,7 @@ namespace ppbox
                     codec = format_->codec_from_codec(info.type, info.sub_type);
                     if (codec) {
                         info.format_type = codec->codec_format;
-                        pipe.push_back(new CodecEncoderFilter(info));
+                        pipe.insert(new CodecEncoderFilter(info));
                         manager_->remove_filter(key_filter_, ec);
                     } else {
                         LOG_ERROR("[open] video codec " << video_codec_ << " not supported by cantainer " << format_str_);
@@ -326,7 +330,7 @@ namespace ppbox
                     codec = format_->codec_from_codec(info.type, info.sub_type);
                     if (codec) {
                         info.format_type = codec->codec_format;
-                        pipe.push_back(new CodecEncoderFilter(info));
+                        pipe.insert(new CodecEncoderFilter(info));
                     } else {
                         LOG_ERROR("[open] audio codec " << audio_codec_ << " not supported by cantainer " << format_str_);
                         ec = error::format_not_support;
@@ -334,10 +338,10 @@ namespace ppbox
                 } else if (codec) {
                     if (codec->codec_format != info.format_type) {
                         if (info.format_type) {
-                            pipe.push_back(new CodecSplitterTransfer(stream.sub_type, info.format_type));
+                            pipe.insert(new CodecSplitterTransfer(stream.sub_type, info.format_type));
                         }
                         if (codec->codec_format) {
-                            pipe.push_back(new CodecAssemblerTransfer(stream.sub_type, codec->codec_format));
+                            pipe.insert(new CodecAssemblerTransfer(stream.sub_type, codec->codec_format));
                         }
                         info.format_type = codec->codec_format;
                     }
@@ -348,7 +352,7 @@ namespace ppbox
                 if (codec && info.time_scale != codec->time_scale && codec->time_scale != 1000) {
                     LOG_INFO("[open] change time scale from " << info.time_scale << " to " << codec->time_scale);
                     info.time_scale = codec->time_scale;
-                    pipe.push_back(new TimeScaleTransfer(codec->time_scale));
+                    pipe.insert(new TimeScaleTransfer(codec->time_scale));
                 }
                 if (ec) break;
                 add_stream(info, pipe);
@@ -358,26 +362,13 @@ namespace ppbox
             }
         }
 
-        bool MuxerBase::before_seek(
-            bool reset, 
-            boost::uint64_t time,
-            boost::system::error_code & ec)
-        {
-            Sample sample;
-            sample.time = time;
-            sample.flags = reset ? sample.f_sync : 0;
-            return manager_->reset(sample, ec);
-        }
-
         void MuxerBase::after_seek(
             boost::uint64_t time)
         {
             stat_.time_range.beg = time;
             stat_.time_range.pos = time;
-            Sample sample;
-            sample.time = time;
-            boost::system::error_code ec;
-            manager_->reset(sample, ec);
+            error_code ec;
+            manager_->finish_seek(time, ec);
         }
 
         void MuxerBase::get_sample(
@@ -401,7 +392,7 @@ namespace ppbox
         void MuxerBase::close()
         {
             error_code ec;
-            before_seek(true, 0, ec);
+            manager_->reset(ec);
             manager_->remove_filter(key_filter_, ec);
             do_close();
             manager_->close(ec);

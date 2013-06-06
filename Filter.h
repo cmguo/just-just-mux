@@ -4,6 +4,7 @@
 #define _PPBOX_MUX_FILTER_FILTER_H_
 
 #include "ppbox/mux/MuxBase.h"
+#include "ppbox/mux/MuxEvent.h"
 
 #include <framework/container/List.h>
 
@@ -16,14 +17,11 @@ namespace ppbox
             : public framework::container::ListHook<Filter>::type
         {
         public:
-            struct eos_t {};
-
-            static eos_t eos()
+            Filter()
+                : nref_(1)
             {
-                return eos_t();
             }
 
-        public:
             virtual ~Filter()
             {
             }
@@ -51,27 +49,28 @@ namespace ppbox
             }
 
             virtual bool put(
-                eos_t & eos, 
+                MuxEvent const & event, 
                 boost::system::error_code & ec)
             {
-                return next()->put(eos, ec);
+                return next()->put(event, ec);
             }
 
-            virtual bool reset(
-                Sample & sample, 
-                boost::system::error_code & ec)
+        public:
+            void attach()
             {
-                return next()->reset(sample, ec);
+                ++nref_;
             }
 
-        protected:
-            void detach_self()
+            void detach()
             {
-                unlink();
+                if (--nref_ == 0) {
+                    delete this;
+                }
             }
+
+        private:
+            size_t nref_;
         };
-
-        typedef framework::container::List<Filter> FilterPipe;
 
     } // namespace mux
 } // namespace ppbox

@@ -44,17 +44,10 @@ namespace ppbox
             }
 
             virtual bool put(
-                eos_t & eos, 
+                MuxEvent const & event, 
                 boost::system::error_code & ec)
             {
-                return next_->put(eos, ec);
-            }
-
-            virtual bool reset(
-                Sample & sample, 
-                boost::system::error_code & ec)
-            {
-                return next_->reset(sample, ec);
+                return next_->put(event, ec);
             }
 
         private:
@@ -73,7 +66,8 @@ namespace ppbox
                     std::find(wrappers_.begin(), wrappers_.end(), filter));
                 if (wrappers_.empty()) {
                     if (is_linked()) {
-                        delete next();
+                        next()->unlink();
+                        next()->detach();
                     }
                     delete this;
                 }
@@ -88,9 +82,8 @@ namespace ppbox
             bool put_eof(
                 boost::system::error_code & ec)
             {
-                eos_t eos;
                 for (size_t i = 0; i < wrappers_.size(); ++i) {
-                    wrappers_[i]->next()->put(eos, ec);
+                    wrappers_[i]->next()->put(MuxEvent::end, ec);
                 }
                 return true;
             }

@@ -5,6 +5,7 @@
 
 #include "ppbox/mux/MuxBase.h"
 #include "ppbox/mux/Filter.h"
+#include "ppbox/mux/FilterPipe.h"
 
 #include <ppbox/common/ClassFactory.h>
 
@@ -116,7 +117,8 @@ namespace ppbox
                 std::string const & format);
 
             void add_filter(
-                Filter * filter);
+                Filter * filter, 
+                bool adopt = true);
 
             void reset_header(
                 bool file_header = true, 
@@ -128,11 +130,6 @@ namespace ppbox
 
             void get_sample(
                 Sample & sample,
-                boost::system::error_code & ec);
-
-            bool before_seek(
-                bool reset, 
-                boost::uint64_t time,
                 boost::system::error_code & ec);
 
             void after_seek(
