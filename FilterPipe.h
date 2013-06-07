@@ -21,8 +21,9 @@ namespace ppbox
             ~FilterPipe()
             {
                 while (!empty()) {
-                    last()->unlink();
-                    last()->detach();
+                    Filter * filter = last();
+                    filter->unlink();
+                    filter->detach();
                 }
             }
 

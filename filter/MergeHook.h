@@ -66,8 +66,9 @@ namespace ppbox
                     std::find(wrappers_.begin(), wrappers_.end(), filter));
                 if (wrappers_.empty()) {
                     if (is_linked()) {
-                        next()->unlink();
-                        next()->detach();
+                        Filter * filter = next();
+                        filter->unlink();
+                        filter->detach();
                     }
                     delete this;
                 }

@@ -313,7 +313,7 @@ namespace ppbox
                 StreamInfo info = stream;
                 CodecInfo const * codec = format_->codec_from_codec(info.type, info.sub_type);
                 if (stream.type == StreamType::VIDE && video_codec && video_codec != stream.sub_type) {
-                    LOG_INFO("[open] change video codec from " << StreamType::to_string(stream.type) << " to " << video_codec_);
+                    LOG_INFO("[open] change video codec from " << StreamType::to_string(stream.sub_type) << " to " << video_codec_);
                     info.sub_type = video_codec;
                     codec = format_->codec_from_codec(info.type, info.sub_type);
                     if (codec) {
@@ -349,10 +349,12 @@ namespace ppbox
                     LOG_ERROR("[open] codec " << StreamType::to_string(info.sub_type) << " not supported by cantainer " << format_str_);
                     ec = error::format_not_support;
                 }
-                if (codec && info.time_scale != codec->time_scale && codec->time_scale != 1000) {
+                if (codec && info.time_scale != codec->time_scale) {
                     LOG_INFO("[open] change time scale from " << info.time_scale << " to " << codec->time_scale);
                     info.time_scale = codec->time_scale;
-                    pipe.insert(new TimeScaleTransfer(codec->time_scale));
+                    if (codec->time_scale != 1000) {
+                        pipe.insert(new TimeScaleTransfer(codec->time_scale));
+                    }
                 }
                 if (ec) break;
                 add_stream(info, pipe);
