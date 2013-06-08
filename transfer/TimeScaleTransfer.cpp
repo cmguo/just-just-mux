@@ -36,14 +36,12 @@ namespace ppbox
             StreamInfo & info)
         {
             scale_in_ = info.time_scale;
-            if (info.type == StreamType::VIDE) {
-                scale_.reset_scale(info.time_scale, scale_out_);
-            } else if (scale_out_ == 0) {
+            if (scale_out_ == 0) {
                 scale_out_ = scale_in_;
                 scale_.reset_scale(scale_in_, scale_out_);
-            } else {
-                if ((time_adjust_mode_ == ta_enable) || 
-                    (time_adjust_mode_ == ta_auto && scale_in_ < info.audio_format.sample_rate)) {
+            } else if (info.type == StreamType::AUDI
+                && ((time_adjust_mode_ == ta_enable) || 
+                    (time_adjust_mode_ == ta_auto && scale_in_ < info.audio_format.sample_rate))) {
                         if (scale_out_ == 1) {
                             scale_out_ = info.audio_format.sample_rate;
                         }
@@ -57,12 +55,11 @@ namespace ppbox
                         //        sample_per_frame_ *= 2;
                         //    }
                         //}
-                } else {
-                    if (scale_out_ == 1) {
-                        scale_out_ = scale_in_;
-                    }
-                    scale_.reset_scale(scale_in_, scale_out_);
+            } else {
+                if (scale_out_ == 1) {
+                    scale_out_ = scale_in_;
                 }
+                scale_.reset_scale(scale_in_, scale_out_);
             }
             info.time_scale = scale_out_;
         }
