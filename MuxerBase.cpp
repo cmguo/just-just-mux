@@ -9,6 +9,7 @@
 #include "ppbox/mux/filter/CodecEncoderFilter.h"
 #include "ppbox/mux/transfer/CodecSplitterTransfer.h"
 #include "ppbox/mux/transfer/CodecAssemblerTransfer.h"
+#include "ppbox/mux/transfer/CodecDebugerTransfer.h"
 #include "ppbox/mux/transfer/TimeScaleTransfer.h"
 
 #include <ppbox/demux/base/DemuxerBase.h>
@@ -52,6 +53,7 @@ namespace ppbox
             config().register_module("Muxer")
                 << CONFIG_PARAM_NAME_RDWR("video_codec", video_codec_)
                 << CONFIG_PARAM_NAME_RDWR("audio_codec", audio_codec_)
+                << CONFIG_PARAM_NAME_RDWR("debug_codec", debug_codec_)
                 ;
 
             manager_ = new FilterManager;
@@ -303,6 +305,7 @@ namespace ppbox
             }
             boost::uint32_t video_codec = StreamType::from_string(video_codec_);
             boost::uint32_t audio_codec = StreamType::from_string(audio_codec_);
+            boost::uint32_t debug_codec = StreamType::from_string(debug_codec_);
             for (size_t i = 0; i < stream_count; ++i) {
                 StreamInfo & stream = streams_[i];
                 FilterPipe & pipe = manager_->pipe(i);
@@ -336,11 +339,14 @@ namespace ppbox
                         ec = error::format_not_support;
                     }
                 } else if (codec) {
-                    if (codec->codec_format != info.format_type) {
+                    if (codec->codec_format != info.format_type || debug_codec == info.sub_type) {
                         if (info.format_type) {
                             pipe.insert(new CodecSplitterTransfer(stream.sub_type, info.format_type));
                         }
-                        if (codec->codec_format) {
+                        if (debug_codec == info.sub_type) {
+                            pipe.insert(new CodecDebugerTransfer(stream.sub_type));
+                        }
+                        if (codec->codec_format && codec->codec_format != info.format_type) {
                             pipe.insert(new CodecAssemblerTransfer(stream.sub_type, codec->codec_format));
                         }
                         info.format_type = codec->codec_format;

@@ -156,6 +156,7 @@ namespace ppbox
             ppbox::avformat::Format * format_;
             std::string video_codec_;
             std::string audio_codec_;
+            std::string debug_codec_;
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;
             KeyFrameFilter * key_filter_;
