@@ -16,7 +16,7 @@ namespace ppbox
                 already_open, 
                 format_not_support, 
                 end_of_stream, 
-                need_more_sample, 
+                codec_not_support, 
             };
 
             namespace detail {
@@ -46,8 +46,8 @@ namespace ppbox
                                 return "mux: format not support";
                             case end_of_stream:
                                 return "mux: end of stream";
-                            case need_more_sample:
-                                return "mux: need more sample";
+                            case codec_not_support:
+                                return "mux: codec not support";
                             default:
                                 return "mux: unknown error";
                         }

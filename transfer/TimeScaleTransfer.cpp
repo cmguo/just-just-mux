@@ -47,14 +47,7 @@ namespace ppbox
                         }
                         scale_.reset_scale(info.audio_format.sample_rate, scale_out_);
                         time_adjust_ = 1;
-                         // TO DO:
-                        sample_per_frame_ = 1024;
-                        //if (info.sub_type == AUDIO_TYPE_MP4A) {
-                        //    AacConfigHelper const & config = ((AacCodec const *)info.codec.get())->config_helper();
-                        //    if (config.get_extension_object_type() == 5) {
-                        //        sample_per_frame_ *= 2;
-                        //    }
-                        //}
+                        sample_per_frame_ = info.audio_format.sample_per_frame;
             } else {
                 if (scale_out_ == 1) {
                     scale_out_ = scale_in_;

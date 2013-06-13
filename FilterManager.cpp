@@ -144,12 +144,12 @@ namespace ppbox
                 }
                 FilterPipe & pipe = *filters_[sample.itrack];
                 if (pipe.put(sample, ec)) {
+                    if (out_samples_.empty()) {
+                        continue;
+                    }
                     sample = out_samples_.front();
                     out_samples_.pop_front();
                     return true;
-                }
-                if (ec == error::need_more_sample) {
-                    continue;
                 }
                 sample_ = sample;
                 is_save_sample_ = true;

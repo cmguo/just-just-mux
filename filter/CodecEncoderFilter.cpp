@@ -44,11 +44,13 @@ namespace ppbox
             Sample & sample, 
             boost::system::error_code & ec)
         {
-            encoder_->push(sample, ec);
-            if (encoder_->pop(sample, ec)) {
-                return Filter::put(sample, ec);
+            if (encoder_->push(sample, ec)) { 
+                if (encoder_->pop(sample, ec)) {
+                    return Filter::put(sample, ec);
+                } else {
+                    return true;
+                }
             } else {
-                ec = error::need_more_sample;
                 return false;
             }
         }

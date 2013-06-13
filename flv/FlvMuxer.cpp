@@ -35,7 +35,7 @@ namespace ppbox
                 meta_data_.hasvideo = true;
                 meta_data_.width = info.video_format.width;
                 meta_data_.height= info.video_format.height;
-                meta_data_.framerate = info.video_format.frame_rate;
+                meta_data_.framerate = info.video_format.frame_rate();
             } else if (info.type == StreamType::AUDI) {
                 FlvAudioTransfer * transfer = new FlvAudioTransfer;
                 transfers_.push_back(transfer);

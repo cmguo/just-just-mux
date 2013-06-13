@@ -328,7 +328,7 @@ namespace ppbox
                         ec = error::format_not_support;
                     }
                 } else if (stream.type == StreamType::AUDI && audio_codec && audio_codec != stream.sub_type) {
-                    LOG_INFO("[open] change audio codec from " << StreamType::to_string(stream.type) << " to " << audio_codec_);
+                    LOG_INFO("[open] change audio codec from " << StreamType::to_string(stream.sub_type) << " to " << audio_codec_);
                     info.sub_type = audio_codec;
                     codec = format_->codec_from_codec(info.type, info.sub_type);
                     if (codec) {
@@ -356,9 +356,9 @@ namespace ppbox
                     ec = error::format_not_support;
                 }
                 if (codec && info.time_scale != codec->time_scale) {
-                    LOG_INFO("[open] change time scale from " << info.time_scale << " to " << codec->time_scale);
                     info.time_scale = codec->time_scale;
-                    if (codec->time_scale != 1000) {
+                    if (codec->time_scale != 0 && codec->time_scale != 1000) {
+                        LOG_INFO("[open] change time scale from " << info.time_scale << " to " << codec->time_scale);
                         pipe.insert(new TimeScaleTransfer(codec->time_scale));
                     }
                 }

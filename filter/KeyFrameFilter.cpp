@@ -36,8 +36,7 @@ namespace ppbox
                     MergeFilter::detach(this);
                     return r;
             } else {
-                ec = error::need_more_sample;
-                return false;
+                return true;
             }
         }
 
