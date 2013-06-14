@@ -323,6 +323,10 @@ namespace ppbox
                         info.format_type = codec->codec_format;
                         pipe.insert(new CodecEncoderFilter(info));
                         manager_->remove_filter(key_filter_, ec);
+                        if (debug_codec == info.sub_type) {
+                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(info.sub_type));
+                            pipe.insert(new CodecDebugerTransfer(info.sub_type));
+                        }
                     } else {
                         LOG_ERROR("[open] video codec " << video_codec_ << " not supported by cantainer " << format_str_);
                         ec = error::format_not_support;
@@ -334,20 +338,26 @@ namespace ppbox
                     if (codec) {
                         info.format_type = codec->codec_format;
                         pipe.insert(new CodecEncoderFilter(info));
+                        if (debug_codec == info.sub_type) {
+                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(info.sub_type));
+                            pipe.insert(new CodecDebugerTransfer(info.sub_type));
+                        }
                     } else {
                         LOG_ERROR("[open] audio codec " << audio_codec_ << " not supported by cantainer " << format_str_);
                         ec = error::format_not_support;
                     }
                 } else if (codec) {
                     if (codec->codec_format != info.format_type || debug_codec == info.sub_type) {
+                        LOG_INFO("[open] change format of codec " << StreamType::to_string(info.sub_type) << " from " << info.format_type << " to " << codec->codec_format);
                         if (info.format_type) {
-                            pipe.insert(new CodecSplitterTransfer(stream.sub_type, info.format_type));
+                            pipe.insert(new CodecSplitterTransfer(info.sub_type, info.format_type));
                         }
                         if (debug_codec == info.sub_type) {
-                            pipe.insert(new CodecDebugerTransfer(stream.sub_type));
+                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(info.sub_type));
+                            pipe.insert(new CodecDebugerTransfer(info.sub_type));
                         }
                         if (codec->codec_format && codec->codec_format != info.format_type) {
-                            pipe.insert(new CodecAssemblerTransfer(stream.sub_type, codec->codec_format));
+                            pipe.insert(new CodecAssemblerTransfer(info.sub_type, codec->codec_format));
                         }
                         info.format_type = codec->codec_format;
                     }
