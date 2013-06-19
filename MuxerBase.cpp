@@ -400,6 +400,7 @@ namespace ppbox
                     //read_flag_ |= f_head;
                     //head_step_ = 1;
                 //}
+                LOG_TRACE("[get_sample] itrack: " << sample.itrack << " time: " << sample.time << " dts: " << sample.dts);
                 stat_.time_range.pos = sample.time;
                 stat_.byte_range.pos += sample.size;
             } else if (ec == error::end_of_stream) {
