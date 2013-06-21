@@ -74,7 +74,7 @@ namespace ppbox
             FilterPipe & pipe(
                 boost::uint32_t index)
             {
-                return *filters_[index];
+                return *streams_[index].pipe;
             }
 
         private:
@@ -84,16 +84,36 @@ namespace ppbox
                 Sample & sample,
                 boost::system::error_code & ec);
 
+            bool put(
+                MuxEvent const & event, 
+                boost::system::error_code & ec);
+
         private:
+            struct FilterStream
+            {
+                FilterStream()
+                    : info(NULL)
+                    , pipe(NULL)
+                    , end(false)
+                {
+                }
+
+                struct not_end;
+
+                StreamInfo * info;
+                FilterPipe * pipe;
+                bool end;
+            };
+
             ppbox::demux::DemuxerBase * demuxer_;
-            std::vector<FilterPipe *> filters_;
-            StreamInfo * streams_;
+            std::vector<FilterStream> streams_;
 
             bool is_save_sample_;
             Sample sample_;
 
             std::deque<Sample> out_samples_;
             bool is_eof_;
+            bool is_eof2_;
         };
 
     } // namespace mux

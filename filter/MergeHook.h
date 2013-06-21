@@ -84,7 +84,7 @@ namespace ppbox
                 boost::system::error_code & ec)
             {
                 for (size_t i = 0; i < wrappers_.size(); ++i) {
-                    wrappers_[i]->next()->put(MuxEvent::end, ec);
+                    wrappers_[i]->next()->put(MuxEvent(MuxEvent::end, i), ec);
                 }
                 return true;
             }

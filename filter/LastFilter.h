@@ -46,8 +46,7 @@ namespace ppbox
                 MuxEvent const & event, 
                 boost::system::error_code & ec)
             {
-                ec.clear();
-                return true;
+                return manager_.put(event, ec);
             }
 
         private:

@@ -155,6 +155,12 @@ namespace ppbox
             return !ec;
         }
 
+        /* reset from begin
+         * Events:
+         *   begin_reset (if false stop reset)
+         *   reset
+         *   finish_seek
+         */ 
         bool MuxerBase::reset(
             error_code & ec)
         {
@@ -176,6 +182,12 @@ namespace ppbox
             return !ec;
         }
 
+        /* seek to time
+         * Events:
+         *   begin_seek (if false stop reset)
+         *   reset
+         *   finish_seek
+         */ 
         bool MuxerBase::time_seek(
             boost::uint64_t & time,
             error_code & ec)
@@ -279,12 +291,18 @@ namespace ppbox
             manager_->append_filter(filter, adopt, ec);
         }
 
+        /* start new file from current
+         * Events:
+         *   reset
+         */ 
         void MuxerBase::reset_header(
             bool file_header, 
             bool stream_header)
         {
             read_flag_ |= f_head;
             head_step_ = file_header ? 0 : 1;
+            boost::system::error_code ec;
+            manager_->reset(ec);
         }
 
         void MuxerBase::open(

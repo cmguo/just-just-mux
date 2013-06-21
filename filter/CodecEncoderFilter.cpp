@@ -61,13 +61,11 @@ namespace ppbox
         {
             switch (event.type) {
                 case MuxEvent::end:
-                    {
+                    if (encoder_->push(encoder_->eos(), ec)) { 
                         Sample sample;
                         sample.stream_info = &out_info_;
-                        while (encoder_->push(encoder_->eos(), ec) 
-                            && encoder_->pop(sample, ec)) {
-                                Filter::put(sample, ec);
-                        }
+                        return encoder_->pop(sample, ec)
+                            && Filter::put(sample, ec);
                     }
                     break;
                 case MuxEvent::reset:

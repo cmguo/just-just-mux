@@ -9,6 +9,8 @@
 #include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/demux/base/DemuxError.h>
 
+#include <algorithm>
+
 namespace ppbox
 {
     namespace mux
@@ -19,6 +21,7 @@ namespace ppbox
             , streams_(NULL)
             , is_save_sample_(false)
             , is_eof_(false)
+            , is_eof2_(false)
         {
         }
 
@@ -33,9 +36,11 @@ namespace ppbox
             boost::system::error_code & ec)
         {
             demuxer_ = demuxer;
-            assert(filters_.empty());
+            assert(streams_.empty());
             for (boost::uint32_t i = 0; i < stream_count; ++i) {
-                filters_.push_back(new FilterPipe);
+                FilterStream stream;
+                stream.pipe = new FilterPipe;
+                streams_.push_back(stream);
             }
             ec.clear();
             return true;
@@ -49,8 +54,8 @@ namespace ppbox
             if (!adopt) {
                 filter->attach();
             }
-            for (size_t i = 0; i < filters_.size(); ++i) {
-                FilterPipe & pipe = *filters_[i];
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                FilterPipe & pipe = this->pipe(i);
                 pipe.insert(new MergeFilter(filter));
             }
             ec.clear();
@@ -63,7 +68,7 @@ namespace ppbox
             bool adopt, 
             boost::system::error_code & ec)
         {
-            FilterPipe & pipe = *filters_[stream];
+            FilterPipe & pipe = this->pipe(stream);
             pipe.insert(filter, adopt);
             ec.clear();
             return true;
@@ -87,10 +92,10 @@ namespace ppbox
             std::vector<StreamInfo> & streams, 
             boost::system::error_code & ec)
         {
-            streams_ = &streams.at(0);
-            for (size_t i = 0; i < filters_.size(); ++i) {
-                FilterPipe & pipe = *filters_[i];
+            for (size_t i = 0; i < streams_.size(); ++i) {
                 StreamInfo & stream = streams[i];
+                streams_[i].info = &stream;
+                FilterPipe & pipe = this->pipe(i);
                 pipe.insert(new LastFilter(*this));
                 pipe.config(conf);
                 pipe.put(stream, ec);
@@ -105,66 +110,53 @@ namespace ppbox
         {
             assert(demuxer_);
 
-            if (!out_samples_.empty()) {
-                sample = out_samples_.front();
-                out_samples_.pop_front();
-                ec.clear();
-                return true;
-            } else if (is_eof_) {
-                ec = error::end_of_stream;
-                return false;
-            }
-
-            while (true) {
-                if (is_save_sample_) {
-                    sample = sample_;
-                    is_save_sample_ = false;
-                } else {
-                    demuxer_->get_sample(sample, ec);
-                    if (ec) {
-                        if (ec == ppbox::demux::error::no_more_sample) {
-                            for (size_t i = 0; i < filters_.size(); ++i) {
-                                FilterPipe & pipe = *filters_[i];
-                                pipe.put(MuxEvent::end, ec);
-                            }
-                            is_eof_ = true;
-                            if (!out_samples_.empty()) {
-                                sample = out_samples_.front();
-                                out_samples_.pop_front();
-                                return true;
-                            } else {
-                                ec = error::end_of_stream;
-                                return false;
-                            }
+            while (out_samples_.empty()) {
+                if (is_eof_) {
+                    if (is_eof2_) {
+                        ec = error::end_of_stream;
+                        return false;
+                    }
+                    for (size_t i = 0; i < streams_.size(); ++i) {
+                        if (!streams_[i].end) {
+                            pipe(i).put(MuxEvent(MuxEvent::end, i), ec);
                         }
-                        break;
+                    }
+                } else {
+                    if (is_save_sample_) {
+                        sample = sample_;
+                        is_save_sample_ = false;
                     } else {
-                        sample.stream_info = streams_ + sample.itrack;
+                        demuxer_->get_sample(sample, ec);
+                        if (ec) {
+                            if (ec == ppbox::demux::error::no_more_sample) {
+                                is_eof_ = true;
+                                continue;
+                            }
+                            // get failed, return
+                            return false;
+                        }
+                        sample.stream_info = streams_[sample.itrack].info;
                     }
-                }
-                FilterPipe & pipe = *filters_[sample.itrack];
-                if (pipe.put(sample, ec)) {
-                    if (out_samples_.empty()) {
-                        continue;
+                    FilterPipe & pipe = this->pipe(sample.itrack);
+                    if (!pipe.put(sample, ec)) {
+                        // put failed, return
+                        sample_ = sample;
+                        is_save_sample_ = true;
+                        return false;
                     }
-                    sample = out_samples_.front();
-                    out_samples_.pop_front();
-                    return true;
-                }
-                sample_ = sample;
-                is_save_sample_ = true;
-                return false;
+               }
             }
 
-            return !ec;
+            sample = out_samples_.front();
+            out_samples_.pop_front();
+            return true;
         }
 
         bool FilterManager::begin_reset(
             boost::system::error_code & ec)
         {
-            for (size_t i = 0; i < filters_.size(); ++i) {
-                FilterPipe & pipe = *filters_[i];
-                if (!pipe.put(MuxEvent::begin_reset, ec))
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                if (!pipe(i).put(MuxEvent(MuxEvent::begin_reset, i), ec))
                     return false;
             }
             return true;
@@ -174,9 +166,8 @@ namespace ppbox
             boost::uint64_t time, 
             boost::system::error_code & ec)
         {
-            for (size_t i = 0; i < filters_.size(); ++i) {
-                FilterPipe & pipe = *filters_[i];
-                if (!pipe.put(MuxEvent(MuxEvent::begin_seek, time), ec))
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                if (!pipe(i).put(MuxEvent(MuxEvent::begin_seek, i, time), ec))
                     return false;
             }
             return true;
@@ -186,9 +177,8 @@ namespace ppbox
             boost::uint64_t time, 
             boost::system::error_code & ec)
         {
-            for (size_t i = 0; i < filters_.size(); ++i) {
-                FilterPipe & pipe = *filters_[i];
-                if (!pipe.put(MuxEvent(MuxEvent::finish_seek, time), ec))
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                if (!pipe(i).put(MuxEvent(MuxEvent::finish_seek, i, time), ec))
                     return false;
             }
             return true;
@@ -199,9 +189,10 @@ namespace ppbox
         {
             ec.clear();
             is_eof_ = false;
-            for (size_t i = 0; i < filters_.size(); ++i) {
-                FilterPipe & pipe = *filters_[i];
-                pipe.put(MuxEvent::reset, ec);
+            is_eof2_ = false;
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                streams_[i].end = false;
+                pipe(i).put(MuxEvent(MuxEvent::reset, i), ec);
             }
             Sample sample;
             if (is_save_sample_) {
@@ -218,14 +209,13 @@ namespace ppbox
         bool FilterManager::close(
             boost::system::error_code & ec)
         {
-            for (size_t i = 0; i < filters_.size(); ++i) {
-                delete filters_[i];
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                delete streams_[i].pipe;
             }
-            filters_.clear();
+            streams_.clear();
             ec.clear();
             return true;
         }
-
 
         bool FilterManager::put(
             Sample & sample,
@@ -236,6 +226,26 @@ namespace ppbox
             return true;
         }
 
+        struct FilterManager::FilterStream::not_end
+        {
+            bool operator()(
+                FilterManager::FilterStream const & s)
+            {
+                return !s.end;
+            }
+        };
+
+        bool FilterManager::put(
+            MuxEvent const & event, 
+            boost::system::error_code & ec)
+        {
+            if (event.type == MuxEvent::end) {
+                streams_[event.itrack].end = true;
+                is_eof2_ = std::find_if(streams_.begin(), streams_.end(), FilterStream::not_end()) == streams_.end();
+            }
+            ec.clear();
+            return true;
+        }
 
     } // namespace mux
 } // namespace ppbox

@@ -21,12 +21,15 @@ namespace ppbox
                 begin_seek, // begin_seek(time), already followed by a reset event
                 finish_seek, // finish_seek(time)
             } type;
+            boost::uint32_t itrack;
             boost::uint64_t time;
 
             MuxEvent(
                 EventType type, 
+                boost::uint32_t itrack, 
                 boost::uint64_t time = 0)
                 : type(type)
+                , itrack(itrack)
                 , time(time)
             {
             }
