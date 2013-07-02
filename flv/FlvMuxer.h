@@ -8,6 +8,8 @@
 #include <ppbox/avformat/flv/FlvTagType.h>
 #include <ppbox/avformat/flv/FlvMetaData.h>
 
+#include <util/buffers/StreamBuffer.h>
+
 namespace ppbox
 {
     namespace mux
@@ -39,7 +41,8 @@ namespace ppbox
             ppbox::avformat::FlvHeader flv_header_;
             ppbox::avformat::FlvMetaData meta_data_;
             boost::uint8_t header_buffer_[16];
-            boost::uint8_t meta_data_buffer_[256];
+            //boost::uint8_t meta_data_buffer_[256];
+            util::buffers::StreamBuffer<boost::uint8_t> meta_data_buffer_;
             FlvTransfer * meta_data_transfer_;
             std::vector<FlvTransfer *> transfers_;
         };

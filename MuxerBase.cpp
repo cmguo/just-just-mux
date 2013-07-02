@@ -49,11 +49,13 @@ namespace ppbox
             , format_(NULL)
             , read_flag_(0)
             , head_step_(0)
+            , pseudo_seek_(false)
         {
             config().register_module("Muxer")
                 << CONFIG_PARAM_NAME_RDWR("video_codec", video_codec_)
                 << CONFIG_PARAM_NAME_RDWR("audio_codec", audio_codec_)
                 << CONFIG_PARAM_NAME_RDWR("debug_codec", debug_codec_)
+                << CONFIG_PARAM_NAME_RDWR("pseudo_seek", pseudo_seek_)
                 ;
 
             manager_ = new FilterManager;
@@ -303,6 +305,22 @@ namespace ppbox
             head_step_ = file_header ? 0 : 1;
             boost::system::error_code ec;
             manager_->reset(ec);
+        }
+
+        void MuxerBase::get_seek_points(
+            std::vector<ppbox::avformat::SeekPoint> & points)
+        {
+            if (pseudo_seek_ && media_info_.bitrate && media_info_.duration != ppbox::data::invalid_size) {
+                boost::uint64_t time_interval = 10 * 1000; // 10 seconds
+                boost::uint64_t offset_interval = time_interval * media_info_.bitrate / 8 / 1000;
+                points.resize((size_t)(media_info_.duration / time_interval + 1));
+                boost::uint64_t time = 0;
+                boost::uint64_t offset = 0;
+                for (size_t i = 0; time < media_info_.duration; time += time_interval, offset += offset_interval, ++i) {
+                    points[i].time = time;
+                    points[i].offset = offset;
+                }
+            }
         }
 
         void MuxerBase::open(

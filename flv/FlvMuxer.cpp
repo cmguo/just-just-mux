@@ -60,18 +60,20 @@ namespace ppbox
             meta_data_.description = media_info_.name;
 
             if (media_info_.duration != ppbox::data::invalid_size) {
-                //meta_data_.duration = media_info_.duration;
+                meta_data_.duration = media_info_.duration;
             }
 
+            get_seek_points(meta_data_.keyframes);
+
             {
-                FormatBuffer buf(meta_data_buffer_, sizeof(meta_data_buffer_));
-                ppbox::avformat::FlvOArchive archive(buf);
+                //FormatBuffer buf(meta_data_buffer_, sizeof(meta_data_buffer_));
+                ppbox::avformat::FlvOArchive archive(meta_data_buffer_);
                 FlvDataTag tag;
                 tag.Name = "onMetaData";
                 meta_data_.to_data(tag.Value);
                 archive << tag;
-                sample.data.push_back(buf.data());
-                sample.size = buf.size();
+                sample.data.push_back(meta_data_buffer_.data());
+                sample.size = meta_data_buffer_.size();
                 meta_data_transfer_->transfer(sample);
             }
 

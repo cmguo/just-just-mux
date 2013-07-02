@@ -7,6 +7,8 @@
 #include "ppbox/mux/Filter.h"
 #include "ppbox/mux/FilterPipe.h"
 
+#include <ppbox/avformat/SeekPoint.h>
+
 #include <ppbox/common/ClassFactory.h>
 
 #include <framework/configure/Config.h>
@@ -124,6 +126,9 @@ namespace ppbox
                 bool file_header = true, 
                 bool stream_header = true);
 
+            void get_seek_points(
+                std::vector<ppbox::avformat::SeekPoint> & points);
+
         private:
             void open(
                 boost::system::error_code & ec);
@@ -157,6 +162,7 @@ namespace ppbox
             std::string video_codec_;
             std::string audio_codec_;
             std::string debug_codec_;
+            bool pseudo_seek_;
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;
             KeyFrameFilter * key_filter_;
