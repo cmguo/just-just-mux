@@ -3,10 +3,7 @@
 #ifndef _PPBOX_MUX_MUX_BASE_H_
 #define _PPBOX_MUX_MUX_BASE_H_
 
-#include <ppbox/demux/base/DemuxerBase.h>
-
-#include <ppbox/data/base/MediaInfo.h>
-#include <ppbox/data/base/StreamStatus.h>
+#include <ppbox/demux/base/DemuxBase.h>
 
 namespace ppbox
 {

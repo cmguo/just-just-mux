@@ -6,6 +6,8 @@
 #include "ppbox/mux/filter/MergeFilter.h"
 #include "ppbox/mux/filter/LastFilter.h"
 
+using namespace ppbox::avformat::error;
+
 #include <ppbox/demux/base/DemuxerBase.h>
 #include <ppbox/demux/base/DemuxError.h>
 
@@ -113,7 +115,7 @@ namespace ppbox
             while (out_samples_.empty()) {
                 if (is_eof_) {
                     if (is_eof2_) {
-                        ec = error::end_of_stream;
+                        ec = end_of_stream;
                         return false;
                     }
                     for (size_t i = 0; i < streams_.size(); ++i) {
@@ -128,7 +130,7 @@ namespace ppbox
                     } else {
                         demuxer_->get_sample(sample, ec);
                         if (ec) {
-                            if (ec == ppbox::demux::error::no_more_sample) {
+                            if (ec == end_of_stream) {
                                 is_eof_ = true;
                                 continue;
                             }

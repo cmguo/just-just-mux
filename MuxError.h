@@ -3,6 +3,8 @@
 #ifndef _PPBOX_MUX_MUX_ERROR_H_
 #define _PPBOX_MUX_MUX_ERROR_H_
 
+#include <ppbox/avformat/Error.h>
+
 namespace ppbox
 {
     namespace mux
@@ -14,9 +16,7 @@ namespace ppbox
             {
                 not_open = 1, 
                 already_open, 
-                format_not_support, 
-                end_of_stream, 
-                codec_not_support, 
+                format_not_support
             };
 
             namespace detail {
@@ -42,12 +42,6 @@ namespace ppbox
                                 return "mux: not open";
                             case already_open:
                                 return "mux: already open";
-                            case format_not_support:
-                                return "mux: format not support";
-                            case end_of_stream:
-                                return "mux: end of stream";
-                            case codec_not_support:
-                                return "mux: codec not support";
                             default:
                                 return "mux: unknown error";
                         }

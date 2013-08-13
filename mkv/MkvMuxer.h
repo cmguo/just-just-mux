@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_MKV_MKV_MUXER_H_
 #define _PPBOX_MUX_MKV_MKV_MUXER_H_
 
-#include  "ppbox/mux/MuxerBase.h"
+#include  "ppbox/mux/Muxer.h"
 
 #include <boost/asio/streambuf.hpp>
 
@@ -15,7 +15,7 @@ namespace ppbox
         class MkvTransfer;
 
         class MkvMuxer
-            : public MuxerBase
+            : public Muxer
         {
         public:
             MkvMuxer();

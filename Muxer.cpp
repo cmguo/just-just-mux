@@ -1,7 +1,7 @@
 // Muxer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/Muxer.h"
 #include "ppbox/mux/Transfer.h"
 #include "ppbox/mux/MuxError.h"
 #include "ppbox/mux/FilterManager.h"
@@ -30,12 +30,12 @@ namespace ppbox
     namespace mux
     {
 
-        FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("ppbox.mux.MuxerBase", framework::logger::Debug);
+        FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("ppbox.mux.Muxer", framework::logger::Debug);
 
-        MuxerBase * MuxerBase::create(
+        Muxer * Muxer::create(
             std::string const & format)
         {
-            MuxerBase * muxer = factory_type::create(format);
+            Muxer * muxer = factory_type::create(format);
             if (muxer) {
                 if (muxer->format_str_.empty()) {
                     muxer->format_str_ = format;
@@ -44,7 +44,7 @@ namespace ppbox
             return muxer;
         }
 
-        MuxerBase::MuxerBase()
+        Muxer::Muxer()
             : demuxer_(NULL)
             , format_(NULL)
             , read_flag_(0)
@@ -62,7 +62,7 @@ namespace ppbox
             key_filter_ = new KeyFrameFilter;
         }
 
-        MuxerBase::~MuxerBase()
+        Muxer::~Muxer()
         {
             if (demuxer_ != NULL) {
                 // demuxer具体的析构不在mux内里实现
@@ -74,7 +74,7 @@ namespace ppbox
                 delete format_;
         }
 
-        bool MuxerBase::open(
+        bool Muxer::open(
             ppbox::demux::DemuxerBase * demuxer,
             error_code & ec)
         {
@@ -94,7 +94,7 @@ namespace ppbox
             return !ec;
         }
 
-        bool MuxerBase::setup(
+        bool Muxer::setup(
             boost::uint32_t index, 
             boost::system::error_code & ec)
         {
@@ -106,7 +106,7 @@ namespace ppbox
             return !ec;
         }
 
-        bool MuxerBase::read(
+        bool Muxer::read(
             Sample & sample,
             error_code & ec)
         {
@@ -163,7 +163,7 @@ namespace ppbox
          *   reset
          *   finish_seek
          */ 
-        bool MuxerBase::reset(
+        bool Muxer::reset(
             error_code & ec)
         {
             if (!manager_->begin_reset(ec)) {
@@ -190,7 +190,7 @@ namespace ppbox
          *   reset
          *   finish_seek
          */ 
-        bool MuxerBase::time_seek(
+        bool Muxer::time_seek(
             boost::uint64_t & time,
             error_code & ec)
         {
@@ -215,7 +215,7 @@ namespace ppbox
             return !ec;
         }
 
-        bool MuxerBase::byte_seek(
+        bool Muxer::byte_seek(
             boost::uint64_t & offset,
             boost::system::error_code & ec)
         {
@@ -223,7 +223,7 @@ namespace ppbox
             return time_seek(seek_time, ec);
         }
 
-        boost::uint64_t MuxerBase::check_seek(
+        boost::uint64_t Muxer::check_seek(
             boost::system::error_code & ec)
         {
             if (read_flag_ & f_seek) {
@@ -238,7 +238,7 @@ namespace ppbox
             return stat_.time_range.beg;
         }
 
-        void MuxerBase::media_info(
+        void Muxer::media_info(
             MediaInfo & info) const
         {
             boost::system::error_code ec;
@@ -247,13 +247,13 @@ namespace ppbox
             info.format = format_str_;
         }
 
-        void MuxerBase::stream_info(
+        void Muxer::stream_info(
             std::vector<StreamInfo> & streams) const
         {
             streams = streams_;
         }
 
-        void MuxerBase::stream_status(
+        void Muxer::stream_status(
             StreamStatus & status) const
         {
             boost::system::error_code ec;
@@ -264,7 +264,7 @@ namespace ppbox
             status = status1;
         }
 
-        bool MuxerBase::close(
+        bool Muxer::close(
             boost::system::error_code & ec)
         {
             close();
@@ -273,19 +273,19 @@ namespace ppbox
             return true;
         }
 
-        void MuxerBase::format(
+        void Muxer::format(
             std::string const & format)
         {
             format_ = Format::create(format);
         }
 
-        void MuxerBase::format(
+        void Muxer::format(
             ppbox::avformat::Format * format)
         {
             format_ = format;
         }
 
-        void MuxerBase::add_filter(
+        void Muxer::add_filter(
             Filter * filter, 
             bool adopt)
         {
@@ -297,7 +297,7 @@ namespace ppbox
          * Events:
          *   reset
          */ 
-        void MuxerBase::reset_header(
+        void Muxer::reset_header(
             bool file_header, 
             bool stream_header)
         {
@@ -307,7 +307,7 @@ namespace ppbox
             manager_->reset(ec);
         }
 
-        void MuxerBase::get_seek_points(
+        void Muxer::get_seek_points(
             std::vector<ppbox::avformat::SeekPoint> & points)
         {
             if (pseudo_seek_ && media_info_.bitrate && media_info_.duration != ppbox::data::invalid_size) {
@@ -323,7 +323,7 @@ namespace ppbox
             }
         }
 
-        void MuxerBase::open(
+        void Muxer::open(
             boost::system::error_code & ec)
         {
             assert(demuxer_ != NULL);
@@ -365,7 +365,7 @@ namespace ppbox
                         }
                     } else {
                         LOG_ERROR("[open] video codec " << video_codec_ << " not supported by cantainer " << format_str_);
-                        ec = error::format_not_support;
+                        ec = avformat::error::format_not_support;
                     }
                 } else if (stream.type == StreamType::AUDI && audio_codec && audio_codec != stream.sub_type) {
                     LOG_INFO("[open] change audio codec from " << StreamType::to_string(stream.sub_type) << " to " << audio_codec_);
@@ -380,7 +380,7 @@ namespace ppbox
                         }
                     } else {
                         LOG_ERROR("[open] audio codec " << audio_codec_ << " not supported by cantainer " << format_str_);
-                        ec = error::format_not_support;
+                        ec = avformat::error::format_not_support;
                     }
                 } else if (codec) {
                     if (codec->codec_format != info.format_type || debug_codec == info.sub_type) {
@@ -399,7 +399,7 @@ namespace ppbox
                     }
                 } else {
                     LOG_ERROR("[open] codec " << StreamType::to_string(info.sub_type) << " not supported by cantainer " << format_str_);
-                    ec = error::format_not_support;
+                    ec = avformat::error::format_not_support;
                 }
                 if (codec && info.time_scale != codec->time_scale) {
                     info.time_scale = codec->time_scale;
@@ -416,7 +416,7 @@ namespace ppbox
             }
         }
 
-        void MuxerBase::after_seek(
+        void Muxer::after_seek(
             boost::uint64_t time)
         {
             stat_.time_range.beg = time;
@@ -425,7 +425,7 @@ namespace ppbox
             manager_->finish_seek(time, ec);
         }
 
-        void MuxerBase::get_sample(
+        void Muxer::get_sample(
             Sample & sample,
             error_code & ec)
         {
@@ -439,12 +439,12 @@ namespace ppbox
                 LOG_TRACE("[get_sample] itrack: " << sample.itrack << " time: " << sample.time << " dts: " << sample.dts);
                 stat_.time_range.pos = sample.time;
                 stat_.byte_range.pos += sample.size;
-            } else if (ec == error::end_of_stream) {
+            } else if (ec == avformat::error::end_of_stream) {
                 stat_.byte_range.end = stat_.byte_range.pos;
             }
         }
 
-        void MuxerBase::close()
+        void Muxer::close()
         {
             error_code ec;
             manager_->reset(ec);

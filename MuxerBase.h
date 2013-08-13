@@ -4,84 +4,60 @@
 #define _PPBOX_MUX_MUXER_BASE_H_
 
 #include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/Filter.h"
-#include "ppbox/mux/FilterPipe.h"
-
-#include <ppbox/avformat/SeekPoint.h>
-
-#include <ppbox/common/ClassFactory.h>
 
 #include <framework/configure/Config.h>
 
 namespace ppbox
 {
-    namespace avformat
-    {
-        class Format;
-    }
-
     namespace mux
     {
 
-        class FilterManager;
-        class KeyFrameFilter;
-        class MergeHook;
-
         class MuxerBase
-            : public ppbox::common::ClassFactory<
-                MuxerBase, 
-                std::string, 
-                MuxerBase * ()
-            >
         {
         public:
-            MuxerBase();
+            MuxerBase() {};
 
-            virtual ~MuxerBase();
-
-        public:
-            static MuxerBase * create(
-                std::string const & foramt);
+            virtual ~MuxerBase() {};
 
         public:
-            bool open(
+            virtual bool open(
                 ppbox::demux::DemuxerBase * demuxer, 
-                boost::system::error_code & ec);
+                boost::system::error_code & ec) = 0;
 
             virtual bool setup(
                 boost::uint32_t index, 
-                boost::system::error_code & ec);
+                boost::system::error_code & ec) = 0;
 
-            bool read(
+            virtual bool read(
                 Sample & sample,
-                boost::system::error_code & ec);
+                boost::system::error_code & ec) = 0;
 
-            bool reset(
-                boost::system::error_code & ec);
+            virtual bool reset(
+                boost::system::error_code & ec) = 0;
 
             virtual bool time_seek(
                 boost::uint64_t & offset,
-                boost::system::error_code & ec);
+                boost::system::error_code & ec) = 0;
 
             virtual bool byte_seek(
                 boost::uint64_t & offset,
-                boost::system::error_code & ec);
+                boost::system::error_code & ec) = 0;
 
             virtual boost::uint64_t check_seek(
-                boost::system::error_code & ec);
+                boost::system::error_code & ec) = 0;
 
-            bool close(
-                boost::system::error_code & ec);
+            virtual bool close(
+                boost::system::error_code & ec) = 0;
 
         public:
             virtual void media_info(
-                MediaInfo & info) const;
+                MediaInfo & info) const = 0;
 
             virtual void stream_info(
-                std::vector<StreamInfo> & streams) const;
+                std::vector<StreamInfo> & streams) const = 0;
 
             virtual void stream_status(
-                StreamStatus & info) const;
+                StreamStatus & info) const = 0;
 
         public:
             framework::configure::Config & config()
@@ -89,84 +65,7 @@ namespace ppbox
                 return config_;
             }
 
-        protected:
-            virtual void do_open(
-                MediaInfo & info) {};
-
-            virtual void add_stream(
-                StreamInfo & info, 
-                FilterPipe & pipe) = 0;
-
-            virtual void file_header(
-                Sample & sample) = 0;
-
-            virtual void stream_header(
-                boost::uint32_t index, 
-                Sample & sample) = 0;
-
-            virtual void do_close() {};
-
-        protected:
-            ppbox::demux::DemuxerBase const & demuxer() const
-            {
-                return *demuxer_;
-            };
-
-            void format(
-                ppbox::avformat::Format * format);
-
-            void format(
-                std::string const & format);
-
-            void add_filter(
-                Filter * filter, 
-                bool adopt = true);
-
-            void reset_header(
-                bool file_header = true, 
-                bool stream_header = true);
-
-            void get_seek_points(
-                std::vector<ppbox::avformat::SeekPoint> & points);
-
         private:
-            void open(
-                boost::system::error_code & ec);
-
-            void get_sample(
-                Sample & sample,
-                boost::system::error_code & ec);
-
-            void after_seek(
-                boost::uint64_t time);
-
-            void close();
-
-        protected:
-            MediaInfo media_info_;
-            std::vector<StreamInfo> streams_;
-            StreamStatus stat_;
-
-        private:
-            ppbox::demux::DemuxerBase * demuxer_;
-            FilterManager * manager_;
-
-            enum FlagEnum
-            {
-                f_head = 1, // 头部没有输出
-                f_seek = 2, // 拖动没有完成
-            };
-
-            std::string format_str_;
-            ppbox::avformat::Format * format_;
-            std::string video_codec_;
-            std::string audio_codec_;
-            std::string debug_codec_;
-            bool pseudo_seek_;
-            boost::uint32_t read_flag_;
-            boost::uint32_t head_step_;
-            KeyFrameFilter * key_filter_;
-
             framework::configure::Config config_;
         };
 

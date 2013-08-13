@@ -5,6 +5,8 @@
 #include "ppbox/mux/filter/MergeFilter.h"
 #include "ppbox/mux/MuxError.h"
 
+using namespace ppbox::avformat::error;
+
 #include <ppbox/avbase/StreamType.h>
 using namespace ppbox::avbase;
 
@@ -45,7 +47,7 @@ namespace ppbox
                 && (sample.flags & Sample::f_sync)))) {
                     is_eof_ = true;
                     MergeFilter::put_eof(this, ec);
-                    ec = error::end_of_stream;
+                    ec = end_of_stream;
                     return false;
             }
             return Filter::put(sample, ec);

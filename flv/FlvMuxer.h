@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_FLV_FLV_MUXER_H_
 #define _PPBOX_MUX_FLV_FLV_MUXER_H_
 
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/Muxer.h"
 
 #include <ppbox/avformat/flv/FlvTagType.h>
 #include <ppbox/avformat/flv/FlvMetaData.h>
@@ -18,7 +18,7 @@ namespace ppbox
         class FlvTransfer;
 
         class FlvMuxer
-            : public MuxerBase
+            : public Muxer
         {
         public:
             FlvMuxer();

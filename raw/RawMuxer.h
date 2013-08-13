@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_RAW_RAW_MUXER_H_
 #define _PPBOX_MUX_RAW_RAW_MUXER_H_
 
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/Muxer.h"
 
 namespace ppbox
 {
@@ -13,7 +13,7 @@ namespace ppbox
         class RawFormat;
 
         class RawMuxer
-            : public MuxerBase
+            : public Muxer
         {
         public:
             RawMuxer();

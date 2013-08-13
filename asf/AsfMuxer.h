@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_ASF_ASF_MUXER_H_
 #define _PPBOX_MUX_ASF_ASF_MUXER_H_
 
-#include "ppbox/mux/MuxerBase.h"
+#include "ppbox/mux/Muxer.h"
 
 #include <boost/asio/streambuf.hpp>
 
@@ -15,7 +15,7 @@ namespace ppbox
         class AsfTransfer;
 
         class AsfMuxer
-            : public MuxerBase
+            : public Muxer
         {
         public:
             AsfMuxer();
