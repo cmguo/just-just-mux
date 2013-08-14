@@ -16,11 +16,11 @@ namespace ppbox
             : next_index_(0)
             , segment_filter_(NULL)
         {
+            format("ts");
             config().register_module("M3u8Protocol")
                 << CONFIG_PARAM_NAME_RDWR("interval", m3u8_config_.interval)
                 << CONFIG_PARAM_NAME_RDWR("live_delay", m3u8_config_.live_delay)
                 << CONFIG_PARAM_NAME_RDWR("url_format", m3u8_config_.url_format);
-
         }
 
         M3u8Muxer::~M3u8Muxer()
