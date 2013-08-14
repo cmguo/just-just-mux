@@ -85,12 +85,6 @@ namespace ppbox
             virtual void stream_status(
                 StreamStatus & info) const;
 
-        public:
-            framework::configure::Config & config()
-            {
-                return config_;
-            }
-
         protected:
             virtual void do_open(
                 MediaInfo & info) {};
@@ -168,8 +162,6 @@ namespace ppbox
             boost::uint32_t read_flag_;
             boost::uint32_t head_step_;
             KeyFrameFilter * key_filter_;
-
-            framework::configure::Config config_;
         };
 
     } // namespace mux

@@ -412,7 +412,7 @@ namespace ppbox
                 add_stream(info, pipe);
             }
             if (!ec) {
-                manager_->complete(config_, streams_, ec);
+                manager_->complete(config(), streams_, ec);
             }
         }
 
