@@ -27,7 +27,8 @@ namespace ppbox
             Transfer * transfer = NULL;
             PmtSection & pmt_sec = pmt_.sections.front();
             TsFormat ts;
-            CodecInfo const * codec = ts.codec_from_codec(info.type, info.sub_type);
+            boost::system::error_code ec;
+            CodecInfo const * codec = ts.codec_from_codec(info.type, info.sub_type, ec);
             if (codec) {
                 pmt_sec.add_stream((boost::uint8_t)codec->stream_type);
             }

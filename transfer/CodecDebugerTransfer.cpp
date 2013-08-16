@@ -11,8 +11,8 @@ namespace ppbox
         CodecDebugerTransfer::CodecDebugerTransfer(
             boost::uint32_t codec)
         {
-            ppbox::avcodec::Debuger::init();
-            debuger_ = ppbox::avcodec::Debuger::create(codec);
+            boost::system::error_code ec;
+            debuger_ = ppbox::avcodec::Debuger::create(codec, ec);
         }
 
         void CodecDebugerTransfer::transfer(

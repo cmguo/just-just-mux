@@ -16,7 +16,7 @@ namespace ppbox
             {
                 not_open = 1, 
                 already_open, 
-                format_not_support
+                not_support
             };
 
             namespace detail {
@@ -42,6 +42,8 @@ namespace ppbox
                                 return "mux: not open";
                             case already_open:
                                 return "mux: already open";
+                            case not_support:
+                                return "mux: not support";
                             default:
                                 return "mux: unknown error";
                         }

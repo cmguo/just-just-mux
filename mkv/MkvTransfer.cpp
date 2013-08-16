@@ -104,7 +104,8 @@ namespace ppbox
             boost::asio::streambuf & buf)
         {
             MkvFormat mkv;
-            CodecInfo const * codec = mkv.codec_from_codec(info.type, info.sub_type);
+            boost::system::error_code ec;
+            CodecInfo const * codec = mkv.codec_from_codec(info.type, info.sub_type, ec);
             if (codec == NULL) {
                 return;
             }

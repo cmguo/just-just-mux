@@ -213,7 +213,8 @@ namespace ppbox
             boost::asio::streambuf & buf)
         {
             AsfFormat asf;
-            CodecInfo const * codec = asf.codec_from_codec(info.type, info.sub_type);
+            boost::system::error_code ec;
+            CodecInfo const * codec = asf.codec_from_codec(info.type, info.sub_type, ec);
             if (codec == NULL) {
                 return;
             }

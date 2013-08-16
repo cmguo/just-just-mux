@@ -2,7 +2,6 @@
 
 #include "ppbox/mux/Common.h"
 #include "ppbox/mux/filter/CodecEncoderFilter.h"
-#include "ppbox/mux/MuxError.h"
 
 #include <framework/string/ParseStl.h>
 
@@ -16,7 +15,8 @@ namespace ppbox
             : encoder_(NULL)
             , out_info_(out_info)
         {
-            encoder_ = ppbox::avcodec::Encoder::create(out_info_.sub_type);
+            boost::system::error_code ec;
+            encoder_ = ppbox::avcodec::Encoder::create(out_info_.sub_type, ec);
         }
 
         void CodecEncoderFilter::config(

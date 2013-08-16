@@ -35,20 +35,22 @@ namespace ppbox
         public:
             void open()
             {
-                stun_ = Format::create(real_format_);
+                boost::system::error_code ec;
+                stun_ = Format::create(real_format_, ec);
             }
 
         private:
             virtual CodecInfo const * codec_from_codec(
                 boost::uint32_t category, 
-                boost::uint32_t codec_type)
+                boost::uint32_t codec_type, 
+                boost::system::error_code & ec)
             {
                 codec_.category = category;
                 codec_.stream_type = 0;
                 codec_.codec_type = codec_type;
                 codec_.codec_format = 0;
                 if (stun_) {
-                    CodecInfo const * codec = stun_->codec_from_codec(category, codec_type);
+                    CodecInfo const * codec = stun_->codec_from_codec(category, codec_type, ec);
                     if (codec) {
                         codec_ = *codec;
                     }
@@ -58,10 +60,11 @@ namespace ppbox
             }
 
             virtual bool finish_from_codec(
-                StreamInfo & info)
+                StreamInfo & info, 
+                boost::system::error_code & ec)
             {
                 if (stun_) {
-                    stun_->finish_from_codec(info);
+                    stun_->finish_from_codec(info, ec);
                 }
                 info.time_scale = time_scale(info.type);
                 return true;

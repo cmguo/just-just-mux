@@ -27,7 +27,8 @@ namespace ppbox
             StreamInfo & info)
         {
             FlvFormat flv;
-            CodecInfo const * codec = flv.codec_from_codec(info.type, info.sub_type);
+            boost::system::error_code ec;
+            CodecInfo const * codec = flv.codec_from_codec(info.type, info.sub_type, ec);
             if (codec) {
                 header_.SoundFormat = (boost::uint8_t)codec->stream_type;
             }

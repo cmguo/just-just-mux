@@ -42,8 +42,11 @@ namespace ppbox
             virtual ~Muxer();
 
         public:
+            static boost::system::error_code error_not_found();
+
             static Muxer * create(
-                std::string const & foramt);
+                std::string const & foramt, 
+                boost::system::error_code & ec);
 
         public:
             bool open(

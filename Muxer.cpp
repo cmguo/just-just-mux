@@ -32,10 +32,16 @@ namespace ppbox
 
         FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("ppbox.mux.Muxer", framework::logger::Debug);
 
-        Muxer * Muxer::create(
-            std::string const & format)
+        boost::system::error_code Muxer::error_not_found()
         {
-            Muxer * muxer = factory_type::create(format);
+            return error::not_support;
+        }
+
+        Muxer * Muxer::create(
+            std::string const & format, 
+            boost::system::error_code & ec)
+        {
+            Muxer * muxer = factory_type::create(format, ec);
             if (muxer) {
                 if (muxer->format_str_.empty()) {
                     muxer->format_str_ = format;
@@ -276,7 +282,8 @@ namespace ppbox
         void Muxer::format(
             std::string const & format)
         {
-            format_ = Format::create(format);
+            boost::system::error_code ec;
+            format_ = Format::create(format, ec);
         }
 
         void Muxer::format(
@@ -337,7 +344,7 @@ namespace ppbox
             manager_->open(demuxer_, stream_count, ec);
             manager_->append_filter(key_filter_, false, ec);
             if (format_ == NULL) {
-                format_ = Format::create(format_str_);
+                format_ = Format::create(format_str_, ec);
             }
             boost::uint32_t video_codec = StreamType::from_string(video_codec_);
             boost::uint32_t audio_codec = StreamType::from_string(audio_codec_);
@@ -350,11 +357,11 @@ namespace ppbox
                     break;
                 }
                 StreamInfo info = stream;
-                CodecInfo const * codec = format_->codec_from_codec(info.type, info.sub_type);
+                CodecInfo const * codec = format_->codec_from_codec(info.type, info.sub_type, ec);
                 if (stream.type == StreamType::VIDE && video_codec && video_codec != stream.sub_type) {
                     LOG_INFO("[open] change video codec from " << StreamType::to_string(stream.sub_type) << " to " << video_codec_);
                     info.sub_type = video_codec;
-                    codec = format_->codec_from_codec(info.type, info.sub_type);
+                    codec = format_->codec_from_codec(info.type, info.sub_type, ec);
                     if (codec) {
                         info.format_type = codec->codec_format;
                         pipe.insert(new CodecEncoderFilter(info));
@@ -365,12 +372,11 @@ namespace ppbox
                         }
                     } else {
                         LOG_ERROR("[open] video codec " << video_codec_ << " not supported by cantainer " << format_str_);
-                        ec = avformat::error::format_not_support;
                     }
                 } else if (stream.type == StreamType::AUDI && audio_codec && audio_codec != stream.sub_type) {
                     LOG_INFO("[open] change audio codec from " << StreamType::to_string(stream.sub_type) << " to " << audio_codec_);
                     info.sub_type = audio_codec;
-                    codec = format_->codec_from_codec(info.type, info.sub_type);
+                    codec = format_->codec_from_codec(info.type, info.sub_type, ec);
                     if (codec) {
                         info.format_type = codec->codec_format;
                         pipe.insert(new CodecEncoderFilter(info));
@@ -380,7 +386,6 @@ namespace ppbox
                         }
                     } else {
                         LOG_ERROR("[open] audio codec " << audio_codec_ << " not supported by cantainer " << format_str_);
-                        ec = avformat::error::format_not_support;
                     }
                 } else if (codec) {
                     if (codec->codec_format != info.format_type || debug_codec == info.sub_type) {
@@ -399,7 +404,6 @@ namespace ppbox
                     }
                 } else {
                     LOG_ERROR("[open] codec " << StreamType::to_string(info.sub_type) << " not supported by cantainer " << format_str_);
-                    ec = avformat::error::format_not_support;
                 }
                 if (codec && info.time_scale != codec->time_scale) {
                     info.time_scale = codec->time_scale;

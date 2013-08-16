@@ -45,14 +45,10 @@ namespace ppbox
             boost::system::error_code & ec)
         {
             std::string format = config.param("format");
-            MuxerBase * muxer = Muxer::create(format);
-            if (muxer == NULL) {
-                ec = avformat::error::format_not_support;
-            } else {
+            MuxerBase * muxer = Muxer::create(format, ec);
+            if (muxer) {
                 ppbox::common::apply_config(muxer->config(), config, "mux.");
                 muxer->open(demuxer, ec);
-            }
-            if (muxer) {
                 boost::mutex::scoped_lock lock(mutex_);
                 muxers_.push_back(muxer);
             }

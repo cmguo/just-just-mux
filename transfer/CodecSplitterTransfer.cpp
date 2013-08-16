@@ -12,7 +12,8 @@ namespace ppbox
             boost::uint32_t codec, 
             boost::uint32_t format)
         {
-            splitter_ = ppbox::avcodec::Splitter::create(codec, format);
+            boost::system::error_code ec;
+            splitter_ = ppbox::avcodec::Splitter::create(codec, format, ec);
         }
 
         void CodecSplitterTransfer::transfer(
