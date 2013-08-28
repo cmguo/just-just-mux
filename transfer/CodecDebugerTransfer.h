@@ -28,6 +28,7 @@ namespace ppbox
 
         private:
             ppbox::avcodec::Debuger * debuger_;
+            boost::uint64_t num_;
         };
 
     } // namespace mux
