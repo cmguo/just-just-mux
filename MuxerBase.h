@@ -72,6 +72,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#define PPBOX_REGISTER_MUXER(k, c) PPBOX_REGISTER_CLASS(k, c)
-
 #endif // _PPBOX_MUX_MUXER_BASE_H_

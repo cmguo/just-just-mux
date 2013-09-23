@@ -12,7 +12,7 @@
 #include <ppbox/data/base/MediaInfo.h>
 #include <ppbox/data/base/StreamStatus.h>
 
-#include <ppbox/common/ClassFactory.h>
+#include <util/tools/ClassFactory.h>
 
 namespace ppbox
 {
@@ -30,7 +30,7 @@ namespace ppbox
 
         class Muxer
             : public MuxerBase
-            , public ppbox::common::ClassFactory<
+            , public util::tools::ClassFactory<
                 Muxer, 
                 std::string, 
                 Muxer * ()
@@ -170,6 +170,6 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#define PPBOX_REGISTER_MUXER(k, c) PPBOX_REGISTER_CLASS(k, c)
+#define PPBOX_REGISTER_MUXER(k, c) UTIL_REGISTER_CLASS(k, c)
 
 #endif // _PPBOX_MUX_MUXER_BASE_H_
