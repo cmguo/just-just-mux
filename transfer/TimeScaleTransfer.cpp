@@ -40,6 +40,7 @@ namespace ppbox
                 scale_out_ = scale_in_;
                 scale_.reset_scale(scale_in_, scale_out_);
             } else if (info.type == StreamType::AUDI
+                && info.audio_format.sample_per_frame > 0
                 && ((time_adjust_mode_ == ta_enable) || 
                     (time_adjust_mode_ == ta_auto && scale_in_ < info.audio_format.sample_rate))) {
                         if (scale_out_ == 1) {

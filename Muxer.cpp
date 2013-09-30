@@ -451,7 +451,6 @@ namespace ppbox
         void Muxer::close()
         {
             error_code ec;
-            manager_->reset(ec);
             manager_->remove_filter(key_filter_, ec);
             do_close();
             manager_->close(ec);
