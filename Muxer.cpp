@@ -356,64 +356,64 @@ namespace ppbox
                 if (ec) {
                     break;
                 }
-                StreamInfo info = stream;
-                CodecInfo const * codec = format_->codec_from_codec(info.type, info.sub_type, ec);
+                StreamInfo tempstream = stream;
+                CodecInfo const * codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
                 if (stream.type == StreamType::VIDE && video_codec && video_codec != stream.sub_type) {
                     LOG_INFO("[open] change video codec from " << StreamType::to_string(stream.sub_type) << " to " << video_codec_);
-                    info.sub_type = video_codec;
-                    codec = format_->codec_from_codec(info.type, info.sub_type, ec);
+                    tempstream.sub_type = video_codec;
+                    codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
                     if (codec) {
-                        info.format_type = codec->codec_format;
-                        pipe.insert(new CodecEncoderFilter(info));
+                        tempstream.format_type = codec->codec_format;
+                        pipe.insert(new CodecEncoderFilter(tempstream));
                         manager_->remove_filter(key_filter_, ec);
-                        if (debug_codec == info.sub_type) {
-                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(info.sub_type));
-                            pipe.insert(new CodecDebugerTransfer(info.sub_type));
+                        if (debug_codec == tempstream.sub_type) {
+                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(tempstream.sub_type));
+                            pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
                     } else {
                         LOG_ERROR("[open] video codec " << video_codec_ << " not supported by cantainer " << format_str_);
                     }
                 } else if (stream.type == StreamType::AUDI && audio_codec && audio_codec != stream.sub_type) {
                     LOG_INFO("[open] change audio codec from " << StreamType::to_string(stream.sub_type) << " to " << audio_codec_);
-                    info.sub_type = audio_codec;
-                    codec = format_->codec_from_codec(info.type, info.sub_type, ec);
+                    tempstream.sub_type = audio_codec;
+                    codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
                     if (codec) {
-                        info.format_type = codec->codec_format;
-                        pipe.insert(new CodecEncoderFilter(info));
-                        if (debug_codec == info.sub_type) {
-                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(info.sub_type));
-                            pipe.insert(new CodecDebugerTransfer(info.sub_type));
+                        tempstream.format_type = codec->codec_format;
+                        pipe.insert(new CodecEncoderFilter(tempstream));
+                        if (debug_codec == tempstream.sub_type) {
+                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(tempstream.sub_type));
+                            pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
                     } else {
                         LOG_ERROR("[open] audio codec " << audio_codec_ << " not supported by cantainer " << format_str_);
                     }
                 } else if (codec) {
-                    if (codec->codec_format != info.format_type || debug_codec == info.sub_type) {
-                        LOG_INFO("[open] change format of codec " << StreamType::to_string(info.sub_type) << " from " << info.format_type << " to " << codec->codec_format);
-                        if (info.format_type) {
-                            pipe.insert(new CodecSplitterTransfer(info.sub_type, info.format_type));
+                    if (codec->codec_format != tempstream.format_type || debug_codec == tempstream.sub_type) {
+                        LOG_INFO("[open] change format of codec " << StreamType::to_string(tempstream.sub_type) << " from " << tempstream.format_type << " to " << codec->codec_format);
+                        if (tempstream.format_type) {
+                            pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
                         }
-                        if (debug_codec == info.sub_type) {
-                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(info.sub_type));
-                            pipe.insert(new CodecDebugerTransfer(info.sub_type));
+                        if (debug_codec == tempstream.sub_type) {
+                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(tempstream.sub_type));
+                            pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
-                        if (codec->codec_format && codec->codec_format != info.format_type) {
-                            pipe.insert(new CodecAssemblerTransfer(info.sub_type, codec->codec_format));
+                        if (codec->codec_format && codec->codec_format != tempstream.format_type) {
+                            pipe.insert(new CodecAssemblerTransfer(tempstream.sub_type, codec->codec_format));
                         }
-                        info.format_type = codec->codec_format;
+                        tempstream.format_type = codec->codec_format;
                     }
                 } else {
-                    LOG_ERROR("[open] codec " << StreamType::to_string(info.sub_type) << " not supported by cantainer " << format_str_);
+                    LOG_ERROR("[open] codec " << StreamType::to_string(tempstream.sub_type) << " not supported by cantainer " << format_str_);
                 }
-                if (codec && info.time_scale != codec->time_scale) {
-                    info.time_scale = codec->time_scale;
+                if (codec && tempstream.time_scale != codec->time_scale) {
+                    tempstream.time_scale = codec->time_scale;
                     if (codec->time_scale != 0 && codec->time_scale != 1000) {
-                        LOG_INFO("[open] change time scale from " << info.time_scale << " to " << codec->time_scale);
+                        LOG_INFO("[open] change time scale from " << stream.time_scale << " to " << codec->time_scale);
                         pipe.insert(new TimeScaleTransfer(codec->time_scale));
                     }
                 }
                 if (ec) break;
-                add_stream(info, pipe);
+                add_stream(tempstream, pipe);
             }
             if (!ec) {
                 manager_->complete(config(), streams_, ec);
