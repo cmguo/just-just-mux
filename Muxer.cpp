@@ -32,23 +32,6 @@ namespace ppbox
 
         FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("ppbox.mux.Muxer", framework::logger::Debug);
 
-        boost::system::error_code Muxer::error_not_found()
-        {
-            return error::not_support;
-        }
-
-        Muxer * Muxer::create(
-            std::string const & format, 
-            boost::system::error_code & ec)
-        {
-            Muxer * muxer = factory_type::create(format, ec);
-            if (muxer) {
-                if (muxer->format_str_.empty()) {
-                    muxer->format_str_ = format;
-                }
-            }
-            return muxer;
-        }
 
         Muxer::Muxer()
             : demuxer_(NULL)
@@ -283,7 +266,7 @@ namespace ppbox
             std::string const & format)
         {
             boost::system::error_code ec;
-            format_ = Format::create(format, ec);
+            format_ = FormatFactory::create(format, ec);
         }
 
         void Muxer::format(
@@ -344,7 +327,7 @@ namespace ppbox
             manager_->open(demuxer_, stream_count, ec);
             manager_->append_filter(key_filter_, false, ec);
             if (format_ == NULL) {
-                format_ = Format::create(format_str_, ec);
+                format_ = FormatFactory::create(format_str_, ec);
             }
             boost::uint32_t video_codec = StreamType::from_string(video_codec_);
             boost::uint32_t audio_codec = StreamType::from_string(audio_codec_);
@@ -457,5 +440,22 @@ namespace ppbox
             streams_.clear();
         }
 
+        boost::system::error_code MuxerTraits::error_not_found()
+        {
+            return error::not_support;
+        }
+
+        Muxer * MuxerFactory::create(
+            std::string const & format, 
+            boost::system::error_code & ec)
+        {
+            Muxer * muxer = factory_type::create(format, ec);
+            if (muxer) {
+                if (muxer->format_str_.empty()) {
+                    muxer->format_str_ = format;
+                }
+            }
+            return muxer;
+        }
     } // namespace mux
 } // namespace ppbox

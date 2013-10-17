@@ -36,7 +36,7 @@ namespace ppbox
             void open()
             {
                 boost::system::error_code ec;
-                stun_ = Format::create(real_format_, ec);
+                stun_ = ppbox::avformat::FormatFactory::create(real_format_, ec);
             }
 
         private:

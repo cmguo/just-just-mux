@@ -16,7 +16,7 @@ namespace ppbox
             , out_info_(out_info)
         {
             boost::system::error_code ec;
-            encoder_ = ppbox::avcodec::Encoder::create(out_info_.sub_type, ec);
+            encoder_ = ppbox::avcodec::EncoderFactory::create(out_info_.sub_type, ec);
         }
 
         void CodecEncoderFilter::config(

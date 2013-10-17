@@ -13,7 +13,7 @@ namespace ppbox
             boost::uint32_t format)
         {
             boost::system::error_code ec;
-            assembler_ = ppbox::avcodec::Assembler::create(codec, format, ec);
+            assembler_ = ppbox::avcodec::AssemblerFactory::create(codec, format, ec);
         }
 
         void CodecAssemblerTransfer::transfer(

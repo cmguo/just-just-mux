@@ -27,26 +27,15 @@ namespace ppbox
         class FilterManager;
         class KeyFrameFilter;
         class MergeHook;
+        class MuxerFactory;
 
         class Muxer
             : public MuxerBase
-            , public util::tools::ClassFactory<
-                Muxer, 
-                std::string, 
-                Muxer * ()
-            >
         {
         public:
             Muxer();
 
             virtual ~Muxer();
-
-        public:
-            static boost::system::error_code error_not_found();
-
-            static Muxer * create(
-                std::string const & foramt, 
-                boost::system::error_code & ec);
 
         public:
             bool open(
@@ -147,6 +136,8 @@ namespace ppbox
             StreamStatus stat_;
 
         private:
+            friend class MuxerFactory;
+
             ppbox::demux::DemuxerBase * demuxer_;
             FilterManager * manager_;
 
@@ -167,9 +158,27 @@ namespace ppbox
             KeyFrameFilter * key_filter_;
         };
 
+        struct MuxerTraits
+            : util::tools::ClassFactoryTraits
+        {
+            typedef std::string key_type;
+            typedef Muxer * (create_proto)();
+
+            static boost::system::error_code error_not_found();
+        };
+
+        class MuxerFactory
+            : public util::tools::ClassFactory<MuxerTraits>
+        {
+        public:
+            static Muxer * create(
+                std::string const & foramt, 
+                boost::system::error_code & ec);
+        };
+
     } // namespace mux
 } // namespace ppbox
 
-#define PPBOX_REGISTER_MUXER(k, c) UTIL_REGISTER_CLASS(k, c)
+#define PPBOX_REGISTER_MUXER(k, c) UTIL_REGISTER_CLASS(ppbox::mux::MuxerFactory, k, c)
 
 #endif // _PPBOX_MUX_MUXER_BASE_H_

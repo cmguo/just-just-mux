@@ -13,7 +13,7 @@ namespace ppbox
             : num_(0)
         {
             boost::system::error_code ec;
-            debuger_ = ppbox::avcodec::Debuger::create(codec, ec);
+            debuger_ = ppbox::avcodec::DebugerFactory::create(codec, ec);
         }
 
         void CodecDebugerTransfer::transfer(
