@@ -54,6 +54,7 @@ namespace ppbox
                     if (codec) {
                         codec_ = *codec;
                     }
+                    ec.clear();
                 }
                 codec_.time_scale = time_scale(category);
                 return &codec_;

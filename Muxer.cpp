@@ -6,7 +6,7 @@
 #include "ppbox/mux/MuxError.h"
 #include "ppbox/mux/FilterManager.h"
 #include "ppbox/mux/filter/KeyFrameFilter.h"
-#include "ppbox/mux/filter/CodecEncoderFilter.h"
+#include "ppbox/mux/filter/TranscodeFilter.h"
 #include "ppbox/mux/transfer/CodecSplitterTransfer.h"
 #include "ppbox/mux/transfer/CodecAssemblerTransfer.h"
 #include "ppbox/mux/transfer/CodecDebugerTransfer.h"
@@ -20,6 +20,7 @@ using namespace ppbox::avformat;
 
 #include <util/buffers/BuffersSize.h>
 
+#include <framework/string/Slice.h>
 #include <framework/logger/Logger.h>
 #include <framework/logger/StreamRecord.h>
 
@@ -313,6 +314,25 @@ namespace ppbox
             }
         }
 
+        static std::vector<boost::uint32_t> codecs_from_string(
+            std::string const & codecs_str)
+        {
+            std::vector<std::string> codec_strs;
+            framework::string::slice<std::string>(codecs_str, std::back_inserter(codec_strs));
+            std::vector<boost::uint32_t> codecs;
+            for (size_t i = 0; i < codec_strs.size(); ++i) {
+                codecs.push_back(StreamType::from_string(codec_strs[i]));
+            }
+            return codecs;
+        }
+
+        static bool codec_in(
+            boost::uint32_t codec, 
+            std::vector<boost::uint32_t> const & codecs)
+        {
+            return std::find(codecs.begin(), codecs.end(), codec) != codecs.end();
+        }
+
         void Muxer::open(
             boost::system::error_code & ec)
         {
@@ -329,56 +349,53 @@ namespace ppbox
             if (format_ == NULL) {
                 format_ = FormatFactory::create(format_str_, ec);
             }
-            boost::uint32_t video_codec = StreamType::from_string(video_codec_);
-            boost::uint32_t audio_codec = StreamType::from_string(audio_codec_);
-            boost::uint32_t debug_codec = StreamType::from_string(debug_codec_);
+            std::vector<boost::uint32_t> video_codecs = codecs_from_string(video_codec_);
+            std::vector<boost::uint32_t> audio_codecs = codecs_from_string(audio_codec_);
+            std::vector<boost::uint32_t> debug_codecs = codecs_from_string(debug_codec_);
+            std::vector<boost::uint32_t> empty_codecs;
             for (size_t i = 0; i < stream_count; ++i) {
                 StreamInfo & stream = streams_[i];
-                FilterPipe & pipe = manager_->pipe(i);
                 demuxer_->get_stream_info(i, stream, ec);
                 if (ec) {
                     break;
                 }
+                LOG_INFO("[open] stream index: " << i 
+                    << " type: " << StreamType::to_string(stream.type)
+                    << " sub_type: " << StreamType::to_string(stream.sub_type));
+                FilterPipe & pipe = manager_->pipe(i);
                 StreamInfo tempstream = stream;
-                CodecInfo const * codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
-                if (stream.type == StreamType::VIDE && video_codec && video_codec != stream.sub_type) {
-                    LOG_INFO("[open] change video codec from " << StreamType::to_string(stream.sub_type) << " to " << video_codec_);
-                    tempstream.sub_type = video_codec;
-                    codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
-                    if (codec) {
-                        tempstream.format_type = codec->codec_format;
-                        pipe.insert(new CodecEncoderFilter(tempstream));
+                std::vector<boost::uint32_t> const & output_codecs = 
+                    stream.type == StreamType::VIDE ? video_codecs : 
+                    (stream.type == StreamType::AUDI ? audio_codecs : empty_codecs);
+                if (!output_codecs.empty() && !codec_in(stream.sub_type, output_codecs)) {
+                    if (tempstream.format_type != ppbox::avbase::StreamFormatType::none) {
+                        LOG_INFO("[open] change format of codec " << StreamType::to_string(tempstream.sub_type) 
+                            << " from " << tempstream.format_type);
+                        pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
+                        tempstream.format_type = ppbox::avbase::StreamFormatType::none;
+                    }
+                    std::auto_ptr<TranscodeFilter> tf(new TranscodeFilter(stream, output_codecs));
+                    tempstream.sub_type = tf->output_codec();
+                    if (tempstream.sub_type == ppbox::avbase::StreamSubType::NONE) {
+                        LOG_INFO("[open] can't change codec");
+                    } else {
+                        LOG_INFO("[open] change codec from " << 
+                            StreamType::to_string(stream.sub_type) << " to " << StreamType::to_string(tempstream.sub_type));
+                        pipe.insert(tf.release());
                         manager_->remove_filter(key_filter_, ec);
-                        if (debug_codec == tempstream.sub_type) {
+                        if (codec_in(tempstream.sub_type, debug_codecs)) {
                             LOG_INFO("[open] add debuger of codec " << StreamType::to_string(tempstream.sub_type));
                             pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
-                    } else {
-                        LOG_ERROR("[open] video codec " << video_codec_ << " not supported by cantainer " << format_str_);
                     }
-                } else if (stream.type == StreamType::AUDI && audio_codec && audio_codec != stream.sub_type) {
-                    LOG_INFO("[open] change audio codec from " << StreamType::to_string(stream.sub_type) << " to " << audio_codec_);
-                    tempstream.sub_type = audio_codec;
-                    codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
-                    if (codec) {
-                        tempstream.format_type = codec->codec_format;
-                        pipe.insert(new CodecEncoderFilter(tempstream));
-                        if (debug_codec == tempstream.sub_type) {
-                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(tempstream.sub_type));
-                            pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
-                        }
-                    } else {
-                        LOG_ERROR("[open] audio codec " << audio_codec_ << " not supported by cantainer " << format_str_);
-                    }
-                } else if (codec) {
-                    if (codec->codec_format != tempstream.format_type || debug_codec == tempstream.sub_type) {
-                        LOG_INFO("[open] change format of codec " << StreamType::to_string(tempstream.sub_type) << " from " << tempstream.format_type << " to " << codec->codec_format);
+                }
+                CodecInfo const * codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
+                if (codec) {
+                    if (codec->codec_format != tempstream.format_type || codec_in(tempstream.sub_type, debug_codecs)) {
+                        LOG_INFO("[open] change format of codec " << StreamType::to_string(tempstream.sub_type) 
+                            << " from " << tempstream.format_type << " to " << codec->codec_format);
                         if (tempstream.format_type) {
                             pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
-                        }
-                        if (debug_codec == tempstream.sub_type) {
-                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(tempstream.sub_type));
-                            pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
                         if (codec->codec_format && codec->codec_format != tempstream.format_type) {
                             pipe.insert(new CodecAssemblerTransfer(tempstream.sub_type, codec->codec_format));
