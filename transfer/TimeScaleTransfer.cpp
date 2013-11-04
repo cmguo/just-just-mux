@@ -18,6 +18,8 @@ namespace ppbox
             , scale_out_(time_scale)
             , time_adjust_(0)
             , sample_per_frame_(0)
+            , duration_in_(0)
+            , duration_out_(0)
         {
         }
 
@@ -56,6 +58,17 @@ namespace ppbox
                 scale_.reset_scale(scale_in_, scale_out_);
             }
             info.time_scale = scale_out_;
+            if (info.type == StreamType::VIDE && info.video_format.frame_rate_num) {
+                duration_in_ = (boost::uint32_t)(
+                    (boost::uint64_t)scale_in_ * info.video_format.frame_rate_den / info.video_format.frame_rate_num);
+                duration_out_ = (boost::uint32_t)(
+                    (boost::uint64_t)scale_out_ * info.video_format.frame_rate_den / info.video_format.frame_rate_num);
+            } else if (info.type == StreamType::AUDI && info.audio_format.sample_rate) {
+                duration_in_ = (boost::uint32_t)(
+                    (boost::uint64_t)scale_in_ * info.audio_format.sample_per_frame / info.audio_format.sample_rate);
+                duration_out_ = (boost::uint32_t)(
+                    (boost::uint64_t)scale_out_ * info.audio_format.sample_per_frame / info.audio_format.sample_rate);
+            }
         }
 
         void TimeScaleTransfer::transfer(
@@ -77,6 +90,12 @@ namespace ppbox
                 //    sample.dts = dts;
                 //    scale_.last_out(sample.dts);
                 //}
+            }
+            if (sample.duration == duration_in_ || sample.duration == 0) {
+                sample.duration = duration_out_;
+            } else {
+                sample.duration = (boost::uint32_t)(
+                    (boost::uint64_t)scale_out_ * sample.duration / scale_in_);
             }
             //std::cout << "sample track = " << sample.itrack << ", dts = " << sample.dts << ", cts_delta = " << sample.cts_delta << std::endl;
         }

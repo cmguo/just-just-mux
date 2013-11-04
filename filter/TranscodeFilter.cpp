@@ -48,9 +48,11 @@ namespace ppbox
             StreamInfo & info, 
             boost::system::error_code & ec)
         {
-            StreamInfo info2 = info; 
+            StreamInfo info2 = info;
             for (size_t i = 0; i < transcoders_.size(); ++i) {
                 info2.sub_type = transcoders_[i].codec;
+                info2.format_type = 0;
+                info2.format_data.clear();
                 if (!transcoders_[i].transcoder->open(info, info2, ec))
                     return false;
                 info = info2;

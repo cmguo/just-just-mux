@@ -52,6 +52,8 @@ namespace ppbox
             boost::uint32_t time_adjust_;
             boost::uint32_t sample_per_frame_;
             framework::system::ScaleTransform scale_;
+            boost::uint32_t duration_in_;
+            boost::uint32_t duration_out_;
         };
 
     } // namespace mux
