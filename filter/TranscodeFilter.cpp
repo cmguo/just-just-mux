@@ -15,14 +15,25 @@ namespace ppbox
             std::vector<boost::uint32_t> const & output_codecs)
             : out_info_(info)
         {
+            std::vector<boost::uint32_t>::const_iterator iter = 
+                std::find(output_codecs.begin(), output_codecs.end(), info.sub_type);
+            if (iter != output_codecs.end()) {
+                out_info_.sub_type = info.sub_type;
+                return;
+            }
+
             out_info_.sub_type = ppbox::avbase::StreamSubType::NONE;
             out_info_.format_type = ppbox::avbase::StreamFormatType::none;
+
             boost::system::error_code ec;
-            for (size_t i = 0; i < output_codecs.size(); ++i) {
-                if (ppbox::avcodec::TranscoderFactory::create_transcodes(
-                    info.type, info.sub_type, output_codecs[i], transcoders_, ec))
-                        out_info_.sub_type = output_codecs[i];
-                        return;
+            if (ppbox::avcodec::TranscoderFactory::create_transcodes(
+                info.type, 
+                info.sub_type, 
+                output_codecs, 
+                transcoders_, 
+                4, 
+                ec)) {
+                    out_info_.sub_type = transcoders_.back().codec;
             }
         }
 
