@@ -4,85 +4,47 @@
 #define _PPBOX_MUX_FILTER_MERGE_FILTER_H_
 
 #include "ppbox/mux/Filter.h"
-#include "ppbox/mux/filter/MergeHook.h"
 
 namespace ppbox
 {
     namespace mux
     {
 
+        class MergeHook;
+
         class MergeFilter
             : public Filter
         {
         public:
             MergeFilter(
-                Filter * filter)
-                : filter_(filter)
-            {
-                if (filter_->is_linked()) {
-                    hook_ = (MergeHook *)filter_->next();
-                } else {
-                    hook_ = new MergeHook;
-                    filter->insert(filter, hook_);
-                }
-                hook_->wrapper(this);
-            }
+                Filter * filter);
 
-            ~MergeFilter()
-            {
-                hook_->unwrapper(this);
-            }
+            virtual ~MergeFilter();
 
         public:
             virtual void config(
-                framework::configure::Config & conf)
-            {
-                hook_->current(this);
-                filter_->config(conf);
-            }
+                framework::configure::Config & conf);
 
         public:
             virtual bool put(
                 StreamInfo & info, 
-                boost::system::error_code & ec)
-            {
-                hook_->current(this);
-                return filter_->put(info, ec);
-            }
+                boost::system::error_code & ec);
 
             virtual bool put(
                 Sample & sample, 
-                boost::system::error_code & ec)
-            {
-                hook_->current(this);
-                return filter_->put(sample, ec);
-            }
+                boost::system::error_code & ec);
 
             virtual bool put(
                 MuxEvent const & event, 
-                boost::system::error_code & ec)
-            {
-                hook_->current(this);
-                return filter_->put(event, ec);
-            }
+                boost::system::error_code & ec);
 
         public:
             static bool put_eof(
                 Filter * filter, 
-                boost::system::error_code & ec)
-            {
-                assert(filter->is_linked());
-                MergeHook * hook = (MergeHook *)filter->next();
-                return hook->put_eof(ec);
-            }
+                boost::system::error_code & ec);
 
             static void detach(
-                Filter * filter)
-            {
-                MergeHook * hook = (MergeHook *)filter->next();
-                filter->unlink();
-                hook->detach();
-            }
+                Filter * filter);
 
         private:
             Filter * filter_;

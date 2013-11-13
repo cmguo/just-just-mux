@@ -64,14 +64,6 @@ namespace ppbox
             {
                 wrappers_.erase(
                     std::find(wrappers_.begin(), wrappers_.end(), filter));
-                if (wrappers_.empty()) {
-                    if (is_linked()) {
-                        Filter * filter = next();
-                        filter->unlink();
-                        filter->detach();
-                    }
-                    delete this;
-                }
             }
 
             void current(
@@ -89,10 +81,11 @@ namespace ppbox
                 return true;
             }
 
-            void detach()
+            void detach_wrappers()
             {
                 while (!wrappers_.empty()) {
-                    delete wrappers_[0];
+                    wrappers_[0]->unlink();
+                    wrappers_[0]->detach();
                 }
             }
 

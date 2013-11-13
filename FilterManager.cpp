@@ -84,7 +84,6 @@ namespace ppbox
                 return false;
             }
             MergeFilter::detach(filter);
-            filter->detach();
             ec.clear();
             return true;
         }
