@@ -30,7 +30,16 @@ namespace ppbox
             boost::system::error_code ec;
             CodecInfo const * codec = ts.codec_from_codec(info.type, info.sub_type, ec);
             if (codec) {
-                pmt_sec.add_stream((boost::uint8_t)codec->stream_type);
+                if (codec->stream_type <= 0x80) {
+                    pmt_sec.add_stream((boost::uint8_t)codec->stream_type);
+                } else {
+                    PmtStream stream(0x80);
+                    std::vector<boost::uint8_t> descriptor(
+                        (boost::uint8_t *)&codec->stream_type, 
+                        (boost::uint8_t *)&codec->stream_type + 4);
+                    stream.add_descriptor(0x05, descriptor);
+                    pmt_sec.add_stream(stream);
+                }
             }
             transfer = new PesTransfer(info.index);
             pipe.insert(transfer);
