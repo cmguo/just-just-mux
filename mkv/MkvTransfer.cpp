@@ -117,14 +117,14 @@ namespace ppbox
             track_entry.Language = "eng";
             if (info.type == StreamType::VIDE) {
                 track_entry.TrackType = MkvTrackType::VIDEO;
-                track_entry.CodecID = MkvFormat::stream_type_str(codec->stream_type);
+                track_entry.CodecID = (char const *)codec->context;
                 track_entry.CodecPrivate = info.format_data;
                 track_entry.Video.PixelWidth = info.video_format.width;
                 track_entry.Video.PixelHeight = info.video_format.height;
                 track_entry.Video.Size = track_entry.Video.data_size();
             } else if (info.type == StreamType::AUDI){
                 track_entry.TrackType = MkvTrackType::AUDIO;
-                track_entry.CodecID = MkvFormat::stream_type_str(codec->stream_type);
+                track_entry.CodecID = (char const *)codec->context;
                 track_entry.CodecPrivate = info.format_data;
                 track_entry.Audio.SamplingFrequency = 
                     (float)info.audio_format.sample_rate;

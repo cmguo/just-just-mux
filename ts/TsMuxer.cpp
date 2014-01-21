@@ -30,15 +30,28 @@ namespace ppbox
             boost::system::error_code ec;
             CodecInfo const * codec = ts.codec_from_codec(info.type, info.sub_type, ec);
             if (codec) {
-                if (codec->stream_type <= 0x80) {
-                    pmt_sec.add_stream((boost::uint8_t)codec->stream_type);
-                } else {
-                    PmtStream stream(0x80);
-                    std::vector<boost::uint8_t> descriptor(
-                        (boost::uint8_t *)&codec->stream_type, 
-                        (boost::uint8_t *)&codec->stream_type + 4);
-                    stream.add_descriptor(0x05, descriptor);
+                TsContext const * ctx = (TsContext const *)codec->context;
+                if (ctx) {
+                    PmtStream stream(0);
+                    if (ctx->regd_type) {
+                        std::vector<boost::uint8_t> descriptor(
+                            (boost::uint8_t *)&ctx->regd_type, 
+                            (boost::uint8_t *)&ctx->regd_type + 4);
+                        stream.add_descriptor(0x05, descriptor);
+                    }
+                    if (ctx->hdmv_type) {
+                        stream.stream_type = ctx->hdmv_type;
+                        if (pmt_sec.descriptor.empty()) {
+                            boost::uint8_t format[4] = {'H', 'D', 'M', 'V'};
+                            std::vector<boost::uint8_t> descriptor(format, format + 4);
+                            pmt_sec.add_descriptor(0x05, descriptor);
+                        }
+                    } else if (ctx->misc_type) {
+                        stream.stream_type = ctx->misc_type;
+                    }
                     pmt_sec.add_stream(stream);
+                } else {
+                    pmt_sec.add_stream((boost::uint8_t)codec->stream_type);
                 }
             }
             transfer = new PesTransfer(info.index);
