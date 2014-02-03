@@ -321,7 +321,7 @@ namespace ppbox
             framework::string::slice<std::string>(codecs_str, std::back_inserter(codec_strs));
             std::vector<boost::uint32_t> codecs;
             for (size_t i = 0; i < codec_strs.size(); ++i) {
-                codecs.push_back(StreamType::from_string(codec_strs[i]));
+                codecs.push_back(ppbox::avbase::FourCC::from_string(codec_strs[i]));
             }
             return codecs;
         }
@@ -336,6 +336,8 @@ namespace ppbox
         void Muxer::open(
             boost::system::error_code & ec)
         {
+            using ppbox::avbase::FourCC;
+
             assert(demuxer_ != NULL);
             demuxer_->get_media_info(media_info_, ec);
             if (ec) {
@@ -360,8 +362,8 @@ namespace ppbox
                     break;
                 }
                 LOG_INFO("[open] stream index: " << i 
-                    << " type: " << StreamType::to_string(stream.type)
-                    << " sub_type: " << StreamType::to_string(stream.sub_type));
+                    << " type: " << FourCC::to_string(stream.type)
+                    << " sub_type: " << FourCC::to_string(stream.sub_type));
                 FilterPipe & pipe = manager_->pipe(i);
                 StreamInfo tempstream = stream;
                 std::vector<boost::uint32_t> const & output_codecs = 
@@ -369,7 +371,7 @@ namespace ppbox
                     (stream.type == StreamType::AUDI ? audio_codecs : empty_codecs);
                 if (!output_codecs.empty() && !codec_in(stream.sub_type, output_codecs)) {
                     if (tempstream.format_type != ppbox::avbase::StreamFormatType::none) {
-                        LOG_INFO("[open] change format of codec " << StreamType::to_string(tempstream.sub_type) 
+                        LOG_INFO("[open] change format of codec " << FourCC::to_string(tempstream.sub_type) 
                             << " from " << tempstream.format_type);
                         pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
                         tempstream.format_type = ppbox::avbase::StreamFormatType::none;
@@ -379,12 +381,12 @@ namespace ppbox
                     if (tempstream.sub_type == ppbox::avbase::StreamSubType::NONE) {
                         LOG_INFO("[open] can't change codec");
                     } else {
-                        LOG_INFO("[open] change codec from " << 
-                            StreamType::to_string(stream.sub_type) << " to " << StreamType::to_string(tempstream.sub_type));
+                        LOG_INFO("[open] change codec from " << FourCC::to_string(stream.sub_type) 
+                            << " to " << FourCC::to_string(tempstream.sub_type));
                         pipe.insert(tf.release());
                         manager_->remove_filter(key_filter_, ec);
                         if (codec_in(tempstream.sub_type, debug_codecs)) {
-                            LOG_INFO("[open] add debuger of codec " << StreamType::to_string(tempstream.sub_type));
+                            LOG_INFO("[open] add debuger of codec " << FourCC::to_string(tempstream.sub_type));
                             pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
                     }
@@ -392,7 +394,7 @@ namespace ppbox
                 CodecInfo const * codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
                 if (codec) {
                     if (codec->codec_format != tempstream.format_type || codec_in(tempstream.sub_type, debug_codecs)) {
-                        LOG_INFO("[open] change format of codec " << StreamType::to_string(tempstream.sub_type) 
+                        LOG_INFO("[open] change format of codec " << FourCC::to_string(tempstream.sub_type) 
                             << " from " << tempstream.format_type << " to " << codec->codec_format);
                         if (tempstream.format_type) {
                             pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
@@ -403,7 +405,8 @@ namespace ppbox
                         tempstream.format_type = codec->codec_format;
                     }
                 } else {
-                    LOG_ERROR("[open] codec " << StreamType::to_string(tempstream.sub_type) << " not supported by cantainer " << format_str_);
+                    LOG_ERROR("[open] codec " << FourCC::to_string(tempstream.sub_type) 
+                        << " not supported by cantainer " << format_str_);
                 }
                 if (codec && tempstream.time_scale != codec->time_scale) {
                     tempstream.time_scale = codec->time_scale;
