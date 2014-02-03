@@ -37,9 +37,9 @@ namespace ppbox
         Muxer::Muxer()
             : demuxer_(NULL)
             , format_(NULL)
+            , pseudo_seek_(false)
             , read_flag_(0)
             , head_step_(0)
-            , pseudo_seek_(false)
         {
             config().register_module("Muxer")
                 << CONFIG_PARAM_NAME_RDWR("video_codec", video_codec_)
