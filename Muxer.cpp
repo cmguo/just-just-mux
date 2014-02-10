@@ -447,6 +447,20 @@ namespace ppbox
                 stat_.time_range.pos = sample.time;
                 stat_.byte_range.pos += sample.size;
             } else if (ec == avformat::error::end_of_stream) {
+                if ((read_flag_ & f_tail) == 0) {
+                    read_flag_ |= f_tail;
+                    sample.itrack = (boost::uint32_t)-1;
+                    sample.time = 0;
+                    sample.dts = 0;
+                    sample.cts_delta = 0;
+                    sample.duration = 0;
+                    sample.size = 0;
+                    sample.stream_info = NULL;
+                    file_tail(sample);
+                    if (sample.size) {
+                        ec.clear();
+                    }
+                }
                 stat_.byte_range.end = stat_.byte_range.pos;
             }
         }

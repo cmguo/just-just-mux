@@ -92,6 +92,9 @@ namespace ppbox
                 boost::uint32_t index, 
                 Sample & sample) = 0;
 
+            virtual void file_tail(
+                Sample & sample) {};
+
             virtual void do_close() {};
 
         protected:
@@ -145,6 +148,7 @@ namespace ppbox
             {
                 f_head = 1, // 头部没有输出
                 f_seek = 2, // 拖动没有完成
+                f_tail = 4, // 尾部已经完成
             };
 
             std::string format_str_;
