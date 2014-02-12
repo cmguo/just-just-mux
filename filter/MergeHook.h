@@ -97,4 +97,4 @@ namespace ppbox
     } // namespace mux
 } // namespace ppbox
 
-#endif // End _PPBOX_MUX_FILTER_MERGE_HOOK_H_
+#endif // _PPBOX_MUX_FILTER_MERGE_HOOK_H_

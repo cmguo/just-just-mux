@@ -16,12 +16,19 @@ namespace ppbox
     namespace mux
     {
 
-        Mp4DataContext::Mp4DataContext(
-            boost::uint32_t block_size)
-            : block_size_(block_size)
+        Mp4DataContext::Mp4DataContext()
+            : block_size_(0)
             , offset_(0)
-            , block_end_(block_size)
+            , block_end_(0)
         {
+        }
+
+        void Mp4DataContext::open(
+            boost::uint32_t block_size)
+        {
+            block_size_ = block_size;
+            block_end_ = block_size;
+
             Mp4BoxHeader mdat;
             mdat.type = Mp4BoxType::mdat;
             mdat.largesize = mdat.size = block_size_;

@@ -12,13 +12,17 @@ namespace ppbox
     namespace mux
     {
 
+        class Mp4Muxer;
+
         class Mp4DataContext
         {
         public:
-            Mp4DataContext(
-                boost::uint32_t block_size);
+            Mp4DataContext();
 
         public:
+            void open(
+                boost::uint32_t block_size);
+
             void put_header(
                 Sample & sample);
 
@@ -33,6 +37,8 @@ namespace ppbox
                 Sample & sample);
 
         private:
+            friend class Mp4Muxer;
+
             boost::uint32_t block_size_;
             boost::uint64_t offset_;
             boost::uint64_t block_end_;

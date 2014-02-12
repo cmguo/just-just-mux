@@ -13,8 +13,10 @@ namespace ppbox
     {
 
         Mp4Muxer::Mp4Muxer()
-            : context_(100 * 1024)
+            : block_size(1000 * 1024)
         {
+            config().register_module("Mp4Muxer")
+                << CONFIG_PARAM_RDONLY(block_size);
         }
 
         Mp4Muxer::~Mp4Muxer()
@@ -24,10 +26,12 @@ namespace ppbox
         void Mp4Muxer::do_open(
             MediaInfo & info)
         {
+            context_.open(block_size);
             boost::system::error_code ec;
             file_.create(ec);
             file_.movie().time_scale(1000);
-            file_.movie().duration(media_info_.duration);
+            if (media_info_.duration != (boost::uint64_t)-1)
+                file_.movie().duration(media_info_.duration);
         }
 
         void Mp4Muxer::add_stream(
@@ -40,7 +44,8 @@ namespace ppbox
             } else {
                 transfer = new Mp4Transfer(file_.movie().create_track(Mp4HandlerType::soun), &context_);
             }
-            pipe.insert(transfer);
+            if (transfer)
+                pipe.insert(transfer);
         }
 
         void Mp4Muxer::file_header(
@@ -62,6 +67,8 @@ namespace ppbox
         void Mp4Muxer::file_tail(
             Sample & sample)
         {
+            boost::system::error_code ec;
+            file_.fixup(ec);
             context_.pad_block(sample);
             Mp4BoxContext ctx;
             Mp4BoxOArchive oa(tail_buffer_);

@@ -46,14 +46,14 @@ namespace ppbox
             if (info.type == StreamType::VIDE) {
                 track_->width(info.video_format.width);
                 track_->height(info.video_format.height);
-                Mp4VisualSampleEntryBox & visual = static_cast<Mp4VisualSampleEntry *>(entry)->data();
-                visual.width = info.video_format.width;
-                visual.height = info.video_format.height;
+                Mp4VisualSampleEntry & visual = static_cast<Mp4VisualSampleEntry &>(*entry);
+                visual.width(info.video_format.width);
+                visual.height(info.video_format.height);
             } else {
-                Mp4AudioSampleEntryBox & audio = static_cast<Mp4AudioSampleEntry *>(entry)->data();
-                audio.channelcount = info.audio_format.channel_count;
-                audio.samplesize = info.audio_format.sample_size;
-                audio.samplerate = info.audio_format.sample_rate;
+                Mp4AudioSampleEntry & audio = static_cast<Mp4AudioSampleEntry &>(*entry);
+                audio.channel_count(info.audio_format.channel_count);
+                audio.sample_size(info.audio_format.sample_size);
+                audio.sample_rate(info.audio_format.sample_rate);
             }
 
             if (codec->context) {
@@ -61,6 +61,11 @@ namespace ppbox
                     Mp4EsDescription * es_desc = entry->create_es_description();
                     Mp4DecoderConfigDescriptor * config = es_desc->decoder_config();
                     config->ObjectTypeIndication = (boost::uint8_t)(intptr_t)codec->context;
+                    if (info.type == StreamType::VIDE) {
+                        config->StreamType = MpegStreamType::VISUAL;
+                    } else {
+                        config->StreamType = MpegStreamType::AUDIO;
+                    }
                     config->AverageBitrate = info.bitrate;
                     Mp4DecoderSpecificInfoDescriptor * dinfo = es_desc->decoder_info();
                     dinfo->Info = info.format_data;

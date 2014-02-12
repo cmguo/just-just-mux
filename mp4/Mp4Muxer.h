@@ -44,6 +44,9 @@ namespace ppbox
                 Sample & sample);
 
         private:
+            boost::uint32_t block_size;
+
+        private:
             ppbox::avformat::Mp4File file_;
             util::buffers::StreamBuffer<boost::uint8_t> head_buffer_;
             util::buffers::StreamBuffer<boost::uint8_t> tail_buffer_;
