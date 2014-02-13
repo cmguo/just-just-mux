@@ -70,8 +70,10 @@ namespace ppbox
                     Mp4DecoderSpecificInfoDescriptor * dinfo = es_desc->decoder_info();
                     dinfo->Info = info.format_data;
                 } else {
-                    Mp4Box * config = entry->create_item((boost::uint32_t)(intptr_t)codec->context);
-                    config->raw_data(Mp4Box::raw_data_t(&info.format_data.at(0), info.format_data.size()));
+                    if (!info.format_data.empty()) {
+                        Mp4Box * config = entry->create_item((boost::uint32_t)(intptr_t)codec->context);
+                        config->raw_data(Mp4Box::raw_data_t(&info.format_data.at(0), info.format_data.size()));
+                    }
                 }
             }
         }
