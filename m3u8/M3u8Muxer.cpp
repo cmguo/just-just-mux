@@ -86,8 +86,8 @@ namespace ppbox
             if (info.type == MediaInfo::live || m3u8_cache_.empty()) {
                 if (info.type == MediaInfo::live && info.delay == 0) {
                     info.delay = m3u8_config_.live_delay * m3u8_config_.interval * 1000;
-                    info.duration = info.delay;
-                    info.current += info.duration;
+                    info.shift = info.delay;
+                    info.current += info.delay;
                 }
                 boost::system::error_code ec;
                 std::ostringstream oss;
