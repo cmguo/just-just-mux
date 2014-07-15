@@ -385,10 +385,6 @@ namespace ppbox
                             << " to " << FourCC::to_string(tempstream.sub_type));
                         pipe.insert(tf.release());
                         manager_->remove_filter(key_filter_, ec);
-                        if (codec_in(tempstream.sub_type, debug_codecs)) {
-                            LOG_INFO("[open] add debuger of codec " << FourCC::to_string(tempstream.sub_type));
-                            pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
-                        }
                     }
                 }
                 CodecInfo const * codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
@@ -398,6 +394,10 @@ namespace ppbox
                             << " from " << tempstream.format_type << " to " << codec->codec_format);
                         if (tempstream.format_type) {
                             pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
+                        }
+                        if (codec_in(tempstream.sub_type, debug_codecs)) {
+                            LOG_INFO("[open] add debuger of codec " << FourCC::to_string(tempstream.sub_type));
+                            pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
                         if (codec->codec_format && codec->codec_format != tempstream.format_type) {
                             pipe.insert(new CodecAssemblerTransfer(tempstream.sub_type, codec->codec_format));
