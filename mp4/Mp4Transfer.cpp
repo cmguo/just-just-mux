@@ -62,9 +62,9 @@ namespace ppbox
                     Mp4DecoderConfigDescriptor * config = es_desc->decoder_config();
                     config->ObjectTypeIndication = (boost::uint8_t)(intptr_t)codec->context;
                     if (info.type == StreamType::VIDE) {
-                        config->StreamType = MpegStreamType::VISUAL;
+                        config->StreamType = Mp4StreamType::VISUAL;
                     } else {
-                        config->StreamType = MpegStreamType::AUDIO;
+                        config->StreamType = Mp4StreamType::AUDIO;
                     }
                     config->AverageBitrate = info.bitrate;
                     Mp4DecoderSpecificInfoDescriptor * dinfo = es_desc->decoder_info();

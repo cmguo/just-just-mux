@@ -9,7 +9,7 @@
 #include "ppbox/mux/flv/FlvMuxer.h"
 #include "ppbox/mux/asf/AsfMuxer.h"
 #include "ppbox/mux/mkv/MkvMuxer.h"
-#include "ppbox/mux/ts/TsMuxer.h"
+#include "ppbox/mux/mp2/TsMuxer.h"
 #include "ppbox/mux/mp4/Mp4Muxer.h"
 #include "ppbox/mux/m3u8/M3u8Muxer.h"
 

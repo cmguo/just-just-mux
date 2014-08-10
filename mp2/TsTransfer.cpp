@@ -1,10 +1,10 @@
 // TsTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/ts/TsTransfer.h"
+#include "ppbox/mux/mp2/TsTransfer.h"
 
-#include <ppbox/avformat/ts/TsPacket.h>
-#include <ppbox/avformat/ts/TsArchive.h>
+#include <ppbox/avformat/mp2/TsPacket.h>
+#include <ppbox/avformat/mp2/Mp2Archive.h>
 using namespace ppbox::avformat;
 
 #include <ppbox/avbase/stream/SampleBuffers.h>
@@ -52,7 +52,7 @@ namespace ppbox
             if (ts_head_pad_size > header_buffer_.size())
                 header_buffer_.resize(ts_head_pad_size);
             FormatBuffer buf(&header_buffer_[0], header_buffer_.size());
-            TsOArchive oa(buf);
+            Mp2OArchive oa(buf);
 
             while (frame_size) {
                 boost::uint32_t payload_size = frame_size;

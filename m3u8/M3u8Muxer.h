@@ -3,7 +3,7 @@
 #ifndef _PPBOX_MUX_M3U8_M3U8_MUXER_H_
 #define _PPBOX_MUX_M3U8_M3U8_MUXER_H_
 
-#include "ppbox/mux/ts/TsMuxer.h"
+#include "ppbox/mux/mp2/TsMuxer.h"
 #include "ppbox/mux/m3u8/M3u8Protocol.h"
 
 namespace ppbox

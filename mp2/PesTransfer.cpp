@@ -1,11 +1,11 @@
 // PesTransfer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/ts/PesTransfer.h"
+#include "ppbox/mux/mp2/PesTransfer.h"
 
-#include <ppbox/avformat/ts/PesPacket.h>
-#include <ppbox/avformat/ts/TsEnum.h>
-#include <ppbox/avformat/ts/TsArchive.h>
+#include <ppbox/avformat/mp2/PesPacket.h>
+#include <ppbox/avformat/mp2/Mp2Enum.h>
+#include <ppbox/avformat/mp2/Mp2Archive.h>
 #include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
 
@@ -34,10 +34,10 @@ namespace ppbox
             TsTransfer::transfer(info);
 
             if (info.type == StreamType::VIDE) {
-                stream_id_ = TsStreamId::video_base + (boost::uint16_t)info.index;
+                stream_id_ = Mp2StreamId::video_base + (boost::uint16_t)info.index;
                 with_dts_ = true;
             } else {
-                stream_id_ = TsStreamId::audio_base + (boost::uint16_t)info.index;
+                stream_id_ = Mp2StreamId::audio_base + (boost::uint16_t)info.index;
             }
         }
 
@@ -45,7 +45,7 @@ namespace ppbox
             Sample & sample)
         {
             FormatBuffer buf(pes_heaher_buffer_, sizeof(pes_heaher_buffer_));
-            TsOArchive oa(buf);
+            Mp2OArchive oa(buf);
             if (with_dts_) {
                 PesPacket pes_packet(stream_id_, sample.size, sample.dts + sample.cts_delta, sample.dts);
                 oa << pes_packet;

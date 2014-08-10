@@ -1,10 +1,10 @@
 // TsMuxer.cpp
 
 #include "ppbox/mux/Common.h"
-#include "ppbox/mux/ts/TsMuxer.h"
-#include "ppbox/mux/ts/PesTransfer.h"
+#include "ppbox/mux/mp2/TsMuxer.h"
+#include "ppbox/mux/mp2/PesTransfer.h"
 
-#include <ppbox/avformat/ts/TsFormat.h>
+#include <ppbox/avformat/mp2/Mp2Format.h>
 using namespace ppbox::avformat;
 
 namespace ppbox
@@ -26,11 +26,11 @@ namespace ppbox
         {
             Transfer * transfer = NULL;
             PmtSection & pmt_sec = pmt_.sections.front();
-            TsFormat ts;
+            Mp2Format ts;
             boost::system::error_code ec;
             CodecInfo const * codec = ts.codec_from_codec(info.type, info.sub_type, ec);
             if (codec) {
-                TsContext const * ctx = (TsContext const *)codec->context;
+                Mp2Context const * ctx = (Mp2Context const *)codec->context;
                 if (ctx) {
                     PmtStream stream(0);
                     if (ctx->regd_type) {
@@ -64,7 +64,7 @@ namespace ppbox
             pmt_.complete();
 
             FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
-            TsOArchive oa(buf);
+            Mp2OArchive oa(buf);
             oa << pat_;
             oa << pmt_;
             assert(buf.size() == TsPacket::PACKET_SIZE * 2);
