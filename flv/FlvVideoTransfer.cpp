@@ -63,7 +63,7 @@ namespace ppbox
         {
             sample.flags |= Sample::f_sync;
             sample.stream_info = &info;
-            if (info.sub_type == VideoSubType::AVC1) {
+            if (info.sub_type == VideoSubType::AVC || info.sub_type == VideoSubType::HEVC) {
                 header_.AVCPacketType = 0;
                 sample.data.push_back(boost::asio::buffer(info.format_data));
                 sample.size += info.format_data.size();

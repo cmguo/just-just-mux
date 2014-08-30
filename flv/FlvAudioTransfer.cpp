@@ -58,7 +58,7 @@ namespace ppbox
                 header_.SoundType = 1;
             }
 
-            if (info.sub_type == AudioSubType::MP4A) {
+            if (info.sub_type == AudioSubType::AAC) {
                 // for aac always 1;
                 header_.SoundType = 1;
                 // for aac always 3;
@@ -84,7 +84,7 @@ namespace ppbox
             Sample & sample)
         {
             sample.stream_info = &info;
-            if (info.sub_type == AudioSubType::MP4A) {
+            if (info.sub_type == AudioSubType::AAC) {
                 header_.AACPacketType = 0;
                 sample.data.push_back(boost::asio::buffer(info.format_data));
                 sample.size += info.format_data.size();
