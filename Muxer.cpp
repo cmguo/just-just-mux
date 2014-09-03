@@ -390,19 +390,22 @@ namespace ppbox
                 CodecInfo const * codec = format_->codec_from_codec(tempstream.type, tempstream.sub_type, ec);
                 if (codec) {
                     if (codec->codec_format != tempstream.format_type || codec_in(tempstream.sub_type, debug_codecs)) {
-                        LOG_INFO("[open] change format of codec " << FourCC::to_string(tempstream.sub_type) 
-                            << " from " << tempstream.format_type << " to " << codec->codec_format);
                         if (tempstream.format_type) {
+                            LOG_INFO("[open] change format of codec " << FourCC::to_string(tempstream.sub_type) 
+                                << " from " << tempstream.format_type);
                             pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
+                            tempstream.format_type = ppbox::avbase::StreamFormatType::none;
                         }
                         if (codec_in(tempstream.sub_type, debug_codecs)) {
                             LOG_INFO("[open] add debuger of codec " << FourCC::to_string(tempstream.sub_type));
                             pipe.insert(new CodecDebugerTransfer(tempstream.sub_type));
                         }
                         if (codec->codec_format && codec->codec_format != tempstream.format_type) {
+                            LOG_INFO("[open] change format of codec " << FourCC::to_string(tempstream.sub_type) 
+                                << " to " << codec->codec_format);
                             pipe.insert(new CodecAssemblerTransfer(tempstream.sub_type, codec->codec_format));
+                            tempstream.format_type = codec->codec_format;
                         }
-                        tempstream.format_type = codec->codec_format;
                     }
                 } else {
                     LOG_ERROR("[open] codec " << FourCC::to_string(tempstream.sub_type) 
