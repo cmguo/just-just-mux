@@ -13,7 +13,9 @@ namespace ppbox
     namespace mux
     {
 
-        FlvMuxer::FlvMuxer()
+        FlvMuxer::FlvMuxer(
+            boost::asio::io_service & io_svc)
+            : Muxer(io_svc)
         {
             meta_data_transfer_ = new FlvTransfer(FlvTagType::DATA);
         }

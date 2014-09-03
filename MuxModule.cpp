@@ -45,7 +45,7 @@ namespace ppbox
             boost::system::error_code & ec)
         {
             std::string format = config.param("format");
-            MuxerBase * muxer = MuxerFactory::create(format, ec);
+            MuxerBase * muxer = MuxerFactory::create(io_svc(), format, ec);
             if (muxer) {
                 ppbox::common::apply_config(muxer->config(), config, "mux.");
                 muxer->open(demuxer, ec);

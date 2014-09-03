@@ -10,8 +10,10 @@ namespace ppbox
     namespace mux
     {
 
-        MkvMuxer::MkvMuxer()
-            : stream_number_(0)
+        MkvMuxer::MkvMuxer(
+            boost::asio::io_service & io_svc)
+            : Muxer(io_svc)
+            , stream_number_(0)
             , transfer_(NULL)
         {
         }

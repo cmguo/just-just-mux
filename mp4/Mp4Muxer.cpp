@@ -12,8 +12,10 @@ namespace ppbox
     namespace mux
     {
 
-        Mp4Muxer::Mp4Muxer()
-            : block_size(1000 * 1024)
+        Mp4Muxer::Mp4Muxer(
+            boost::asio::io_service & io_svc)
+            : Muxer(io_svc)
+            , block_size(1000 * 1024)
         {
             config().register_module("Mp4Muxer")
                 << CONFIG_PARAM_RDONLY(block_size);

@@ -34,8 +34,10 @@ namespace ppbox
         FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("ppbox.mux.Muxer", framework::logger::Debug);
 
 
-        Muxer::Muxer()
-            : demuxer_(NULL)
+        Muxer::Muxer(
+            boost::asio::io_service & io_svc)
+            : MuxerBase(io_svc)
+            , demuxer_(NULL)
             , format_(NULL)
             , pseudo_seek_(false)
             , read_flag_(0)
@@ -483,10 +485,11 @@ namespace ppbox
         }
 
         Muxer * MuxerFactory::create(
+            boost::asio::io_service & io_svc, 
             std::string const & format, 
             boost::system::error_code & ec)
         {
-            Muxer * muxer = factory_type::create(format, ec);
+            Muxer * muxer = factory_type::create(format, io_svc, ec);
             if (muxer) {
                 if (muxer->format_str_.empty()) {
                     muxer->format_str_ = format;

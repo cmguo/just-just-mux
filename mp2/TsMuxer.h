@@ -17,7 +17,8 @@ namespace ppbox
             : public Muxer
         {
         public:
-            TsMuxer();
+            TsMuxer(
+                boost::asio::io_service & io_svc);
 
             virtual ~TsMuxer();
 

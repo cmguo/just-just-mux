@@ -9,7 +9,9 @@ namespace ppbox
     namespace mux
     {
 
-        RawMuxer::RawMuxer()
+        RawMuxer::RawMuxer(
+            boost::asio::io_service & io_svc)
+            : Muxer(io_svc)
         {
             format_ = new RawFormat;
             config().register_module("RawMuxer")

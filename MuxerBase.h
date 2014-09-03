@@ -15,9 +15,10 @@ namespace ppbox
         class MuxerBase
         {
         public:
-            MuxerBase() {};
+            MuxerBase(
+                boost::asio::io_service & io_svc);
 
-            virtual ~MuxerBase() {};
+            virtual ~MuxerBase();
 
         public:
             virtual bool open(

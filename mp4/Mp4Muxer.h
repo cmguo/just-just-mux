@@ -21,7 +21,8 @@ namespace ppbox
             : public Muxer
         {
         public:
-            Mp4Muxer();
+            Mp4Muxer(
+                boost::asio::io_service & io_svc);
 
             ~Mp4Muxer();
 

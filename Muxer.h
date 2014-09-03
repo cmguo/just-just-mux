@@ -33,7 +33,8 @@ namespace ppbox
             : public MuxerBase
         {
         public:
-            Muxer();
+            Muxer(
+                boost::asio::io_service & io_svc);
 
             virtual ~Muxer();
 
@@ -166,7 +167,8 @@ namespace ppbox
             : util::tools::ClassFactoryTraits
         {
             typedef std::string key_type;
-            typedef Muxer * (create_proto)();
+            typedef Muxer * (create_proto)(
+                boost::asio::io_service &);
 
             static boost::system::error_code error_not_found();
         };
@@ -176,6 +178,7 @@ namespace ppbox
         {
         public:
             static Muxer * create(
+                boost::asio::io_service & io_svc, 
                 std::string const & foramt, 
                 boost::system::error_code & ec);
         };

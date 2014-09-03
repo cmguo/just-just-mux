@@ -12,8 +12,10 @@ namespace ppbox
     namespace mux
     {
 
-        AsfMuxer::AsfMuxer()
-            : transfer_(NULL)
+        AsfMuxer::AsfMuxer(
+            boost::asio::io_service & io_svc)
+            : Muxer(io_svc)
+            , transfer_(NULL)
         {
         }
 

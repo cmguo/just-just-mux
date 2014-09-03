@@ -18,7 +18,8 @@ namespace ppbox
             : public Muxer
         {
         public:
-            AsfMuxer();
+            AsfMuxer(
+                boost::asio::io_service & io_svc);
 
             ~AsfMuxer();
 

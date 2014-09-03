@@ -18,7 +18,8 @@ namespace ppbox
             : public Muxer
         {
         public:
-            MkvMuxer();
+            MkvMuxer(
+                boost::asio::io_service & io_svc);
 
             virtual ~MkvMuxer();
 

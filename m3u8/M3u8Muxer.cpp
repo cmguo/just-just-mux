@@ -12,8 +12,10 @@ namespace ppbox
     namespace mux
     {
 
-        M3u8Muxer::M3u8Muxer()
-            : next_index_(0)
+        M3u8Muxer::M3u8Muxer(
+            boost::asio::io_service & io_svc)
+            : TsMuxer(io_svc)
+            , next_index_(0)
             , segment_filter_(NULL)
         {
             format("ts");

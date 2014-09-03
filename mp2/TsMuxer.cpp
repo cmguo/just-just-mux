@@ -12,7 +12,9 @@ namespace ppbox
     namespace mux
     {
 
-        TsMuxer::TsMuxer()
+        TsMuxer::TsMuxer(
+            boost::asio::io_service & io_svc)
+            : Muxer(io_svc)
         {
         }
 
