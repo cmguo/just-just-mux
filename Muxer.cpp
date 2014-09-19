@@ -476,8 +476,10 @@ namespace ppbox
         void Muxer::close()
         {
             error_code ec;
-            manager_->remove_filter(key_filter_, ec);
+            // free cached samples
+            manager_->before_reset(ec);
             do_close();
+            manager_->remove_filter(key_filter_, ec);
             manager_->close(ec);
             streams_.clear();
         }
