@@ -53,18 +53,18 @@ namespace ppbox
                 Sample & sample,
                 boost::system::error_code & ec);
 
-            bool begin_reset(
-                boost::system::error_code & ec);
-
-            bool begin_seek(
+            bool before_seek(
                 boost::uint64_t time, 
                 boost::system::error_code & ec);
 
-            bool finish_seek(
-                boost::uint64_t time, 
+            bool before_reset(
                 boost::system::error_code & ec);
 
-            bool reset(
+            bool after_reset(
+                boost::system::error_code & ec);
+
+            bool after_seek(
+                boost::uint64_t time, 
                 boost::system::error_code & ec);
 
             bool close(

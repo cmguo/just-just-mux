@@ -61,7 +61,7 @@ namespace ppbox
                 case MuxEvent::end:
                     is_eof_ = true;
                     break;
-                case MuxEvent::reset:
+                case MuxEvent::after_reset:
                     is_eof_ = false;
                     break;
                 default:

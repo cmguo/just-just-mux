@@ -103,7 +103,7 @@ namespace ppbox
         void TimeScaleTransfer::on_event(
             MuxEvent const & event)
         {
-            if (event.type == event.reset && time_adjust_ == 2)
+            if (event.type == event.after_reset && time_adjust_ == 2)
                 time_adjust_ = 1;
         }
 

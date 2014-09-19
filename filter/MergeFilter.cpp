@@ -10,7 +10,8 @@ namespace ppbox
     {
 
         MergeFilter::MergeFilter(
-            Filter * filter)
+            Filter * filter, 
+            bool adopt)
             : filter_(filter)
         {
             if (filter_->is_linked()) {
@@ -20,6 +21,8 @@ namespace ppbox
             } else {
                 hook_ = new MergeHook;
                 filter_->insert(filter_, hook_);
+                if (!adopt)
+                    filter_->attach();
             }
             hook_->wrapper(this);
         }

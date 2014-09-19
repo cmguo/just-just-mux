@@ -151,19 +151,19 @@ namespace ppbox
 
         /* reset from begin
          * Events:
-         *   begin_reset (if false stop reset)
-         *   reset
-         *   finish_seek
+         *   before_reset (if false stop reset)
+         *   after_reset
+         *   after_seek
          */ 
         bool Muxer::reset(
             error_code & ec)
         {
-            if (!manager_->begin_reset(ec)) {
+            if (!manager_->before_reset(ec)) {
                 return false;
             }
             demuxer_->reset(ec);
             if (!ec) {
-                manager_->reset(ec);
+                manager_->after_reset(ec);
                 read_flag_ |= f_head;
                 boost::uint64_t time = demuxer_->check_seek(ec);
                 if (!ec) {
@@ -178,24 +178,26 @@ namespace ppbox
 
         /* seek to time
          * Events:
-         *   begin_seek (if false stop reset)
-         *   reset
-         *   finish_seek
+         *   before_seek (if false stop seek)
+         *   before_reset (if false stop reset)
+         *   after_reset
+         *   after_seek
          */ 
         bool Muxer::time_seek(
             boost::uint64_t & time,
             error_code & ec)
         {
-            if (!manager_->begin_seek(time, ec)) {
-                return false;
+            if (!manager_->before_seek(time, ec) 
+                || !manager_->before_reset(ec)) {
+                    return false;
             }
             demuxer_->seek(time, ec);
             if (!ec) {
-                manager_->reset(ec);
+                manager_->after_reset(ec);
                 read_flag_ |= f_head;
                 after_seek(time);
             } else if (ec == boost::asio::error::would_block) {
-                manager_->reset(ec);
+                manager_->after_reset(ec);
                 stat_.time_range.beg = time;
                 read_flag_ |= f_head;
                 read_flag_ |= f_seek;
@@ -205,6 +207,15 @@ namespace ppbox
             stat_.byte_range.pos = 0;
             stat_.byte_range.buf = 0;
             return !ec;
+        }
+
+        void Muxer::after_seek(
+            boost::uint64_t time)
+        {
+            stat_.time_range.beg = time;
+            stat_.time_range.pos = time;
+            error_code ec;
+            manager_->after_seek(time, ec);
         }
 
         bool Muxer::byte_seek(
@@ -296,8 +307,8 @@ namespace ppbox
         {
             read_flag_ |= f_head;
             head_step_ = file_header ? 0 : 1;
-            boost::system::error_code ec;
-            manager_->reset(ec);
+            //boost::system::error_code ec;
+            //manager_->reset(ec);
         }
 
         void Muxer::get_seek_points(
@@ -345,11 +356,11 @@ namespace ppbox
             if (ec) {
                 return;
             }
-            do_open(media_info_);
             size_t stream_count = demuxer_->get_stream_count(ec);
             streams_.resize(stream_count);
             manager_->open(demuxer_, stream_count, ec);
             manager_->append_filter(key_filter_, false, ec);
+            do_open(media_info_);
             if (format_ == NULL) {
                 format_ = FormatFactory::create(format_str_, ec);
             }
@@ -412,6 +423,7 @@ namespace ppbox
                 } else {
                     LOG_ERROR("[open] codec " << FourCC::to_string(tempstream.sub_type) 
                         << " not supported by cantainer " << format_str_);
+                    ec.clear();
                 }
                 if (codec && tempstream.time_scale != codec->time_scale) {
                     tempstream.time_scale = codec->time_scale;
@@ -426,15 +438,6 @@ namespace ppbox
             if (!ec) {
                 manager_->complete(config(), streams_, ec);
             }
-        }
-
-        void Muxer::after_seek(
-            boost::uint64_t time)
-        {
-            stat_.time_range.beg = time;
-            stat_.time_range.pos = time;
-            error_code ec;
-            manager_->finish_seek(time, ec);
         }
 
         void Muxer::get_sample(

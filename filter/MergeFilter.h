@@ -17,7 +17,8 @@ namespace ppbox
         {
         public:
             MergeFilter(
-                Filter * filter);
+                Filter * filter, 
+                bool adopt = true);
 
             virtual ~MergeFilter();
 

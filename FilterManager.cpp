@@ -53,12 +53,9 @@ namespace ppbox
             bool adopt, 
             boost::system::error_code & ec)
         {
-            if (!adopt) {
-                filter->attach();
-            }
             for (size_t i = 0; i < streams_.size(); ++i) {
                 FilterPipe & pipe = this->pipe(i);
-                pipe.insert(new MergeFilter(filter));
+                pipe.insert(new MergeFilter(filter, adopt));
             }
             ec.clear();
             return true;
@@ -153,47 +150,24 @@ namespace ppbox
             return true;
         }
 
-        bool FilterManager::begin_reset(
-            boost::system::error_code & ec)
-        {
-            for (size_t i = 0; i < streams_.size(); ++i) {
-                if (!pipe(i).put(MuxEvent(MuxEvent::begin_reset, i), ec))
-                    return false;
-            }
-            return true;
-        }
-
-        bool FilterManager::begin_seek(
+        bool FilterManager::before_seek(
             boost::uint64_t time, 
-            boost::system::error_code & ec)
-        {
-            for (size_t i = 0; i < streams_.size(); ++i) {
-                if (!pipe(i).put(MuxEvent(MuxEvent::begin_seek, i, time), ec))
-                    return false;
-            }
-            return true;
-        }
-
-        bool FilterManager::finish_seek(
-            boost::uint64_t time, 
-            boost::system::error_code & ec)
-        {
-            for (size_t i = 0; i < streams_.size(); ++i) {
-                if (!pipe(i).put(MuxEvent(MuxEvent::finish_seek, i, time), ec))
-                    return false;
-            }
-            return true;
-        }
-
-        bool FilterManager::reset(
             boost::system::error_code & ec)
         {
             ec.clear();
-            is_eof_ = false;
-            is_eof2_ = false;
             for (size_t i = 0; i < streams_.size(); ++i) {
-                streams_[i].end = false;
-                pipe(i).put(MuxEvent(MuxEvent::reset, i), ec);
+                if (!pipe(i).put(MuxEvent(MuxEvent::before_seek, i, time), ec))
+                    return false;
+            }
+            return !ec;
+        }
+
+        bool FilterManager::before_reset(
+            boost::system::error_code & ec)
+        {
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                if (!pipe(i).put(MuxEvent(MuxEvent::before_reset, i), ec))
+                    return false;
             }
             Sample sample;
             if (is_save_sample_) {
@@ -205,6 +179,31 @@ namespace ppbox
             }
             out_samples_.clear();
             return demuxer_->free_sample(sample, ec);
+        }
+
+        bool FilterManager::after_reset(
+            boost::system::error_code & ec)
+        {
+            ec.clear();
+            is_eof_ = false;
+            is_eof2_ = false;
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                streams_[i].end = false;
+                pipe(i).put(MuxEvent(MuxEvent::after_reset, i), ec);
+            }
+            return true;
+        }
+
+        bool FilterManager::after_seek(
+            boost::uint64_t time, 
+            boost::system::error_code & ec)
+        {
+            ec.clear();
+            for (size_t i = 0; i < streams_.size(); ++i) {
+                if (!pipe(i).put(MuxEvent(MuxEvent::after_seek, i, time), ec))
+                    return false;
+            }
+            return true;
         }
 
         bool FilterManager::close(

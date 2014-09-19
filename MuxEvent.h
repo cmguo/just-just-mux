@@ -15,11 +15,10 @@ namespace ppbox
                 begin, 		// the first event, it's safe to ignore it
                 discontinuity, 
                 end, 
-                reset, 
-                begin_reset, 
-                // if care about time, handle following events
-                begin_seek, // begin_seek(time), already followed by a reset event
-                finish_seek, // finish_seek(time)
+                before_seek, // before_seek(time), followed by reset events
+                before_reset, 
+                after_reset, 
+                after_seek, // after_seek(time)
             } type;
             boost::uint32_t itrack;
             boost::uint64_t time;

@@ -120,7 +120,7 @@ namespace ppbox
                         }
                     }
                     break;
-                case MuxEvent::reset:
+                case MuxEvent::after_reset:
                     for (size_t i = 0; i < transcoders_.size(); ++i) {
                         if (!transcoders_[i].transcoder->refresh(ec))
                             return false;
