@@ -58,7 +58,7 @@ namespace ppbox
 
         void M3u8Muxer::do_close()
         {
-            delete segment_filter_;
+            // auto delete by Muxer
             segment_filter_ = NULL;
         }
 
