@@ -11,8 +11,6 @@ using namespace ppbox::avformat;
 #include <ppbox/avbase/stream/SampleBuffers.h>
 using namespace ppbox::avbase;
 
-#include <ppbox/data/base/MediaInfo.h>
-
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/BuffersCopy.h>
 

@@ -9,9 +9,6 @@
 
 #include <ppbox/avformat/SeekPoint.h>
 
-#include <ppbox/data/base/MediaInfo.h>
-#include <ppbox/data/base/StreamStatus.h>
-
 #include <util/tools/ClassFactory.h>
 
 namespace ppbox

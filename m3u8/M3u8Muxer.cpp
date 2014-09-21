@@ -97,7 +97,7 @@ namespace ppbox
                 assert(!ec);
                 m3u8_cache_ = oss.str();
             }
-            info.format = "ts";
+            info.format_type = "ts";
             info.format_data = m3u8_cache_;
         }
 

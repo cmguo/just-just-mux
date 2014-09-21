@@ -10,8 +10,8 @@ namespace ppbox
     namespace mux
     {
 
-        using ppbox::data::MediaInfo;
-        using ppbox::data::StreamStatus;
+        using ppbox::avbase::MediaInfo;
+        using ppbox::avbase::StreamStatus;
 
         using ppbox::avbase::StreamType;
         using ppbox::avbase::StreamInfo;

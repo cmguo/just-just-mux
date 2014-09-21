@@ -17,6 +17,7 @@
 
 #include <ppbox/avformat/Format.h>
 using namespace ppbox::avformat;
+using namespace ppbox::avbase;
 
 #include <util/buffers/BuffersSize.h>
 
@@ -246,8 +247,8 @@ namespace ppbox
         {
             boost::system::error_code ec;
             demuxer_->get_media_info(info, ec);
-            info.file_size = ppbox::data::invalid_size;
-            info.format = format_str_;
+            info.file_size = invalid_size;
+            info.format_type = format_str_;
         }
 
         void Muxer::stream_info(

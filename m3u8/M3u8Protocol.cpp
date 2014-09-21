@@ -4,8 +4,6 @@
 #include "ppbox/mux/m3u8/M3u8Protocol.h"
 #include "ppbox/mux/m3u8/UrlFormator.h"
 
-#include <ppbox/data/base/MediaInfo.h>
-
 namespace ppbox
 {
     namespace mux

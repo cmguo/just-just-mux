@@ -8,8 +8,6 @@
 #include <ppbox/avformat/mkv/MkvFormat.h>
 using namespace ppbox::avformat;
 
-#include <ppbox/data/base/MediaInfo.h>
-
 namespace ppbox
 {
     namespace mux
