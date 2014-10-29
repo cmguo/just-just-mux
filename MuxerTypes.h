@@ -11,6 +11,7 @@
 #include "ppbox/mux/mkv/MkvMuxer.h"
 #include "ppbox/mux/mp2/TsMuxer.h"
 #include "ppbox/mux/mp4/Mp4Muxer.h"
+#include "ppbox/mux/avi/AviMuxer.h"
 #include "ppbox/mux/m3u8/M3u8Muxer.h"
 
 #endif // _PPBOX_MUX_MUXER_TYPES_H_
