@@ -16,6 +16,11 @@ namespace ppbox
             splitter_ = ppbox::avcodec::SplitterFactory::create(codec, format, ec);
         }
 
+        void CodecSplitterTransfer::~CodecSplitterTransfer()
+        {
+            delete splitter_;
+        }
+
         void CodecSplitterTransfer::transfer(
             StreamInfo & info)
         {

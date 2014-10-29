@@ -16,6 +16,11 @@ namespace ppbox
             assembler_ = ppbox::avcodec::AssemblerFactory::create(codec, format, ec);
         }
 
+        CodecAssemblerTransfer::~CodecAssemblerTransfer()
+        {
+            delete assembler_;
+        }
+
         void CodecAssemblerTransfer::transfer(
             StreamInfo & info)
         {

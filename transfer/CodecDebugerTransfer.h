@@ -19,6 +19,8 @@ namespace ppbox
             CodecDebugerTransfer(
                 boost::uint32_t codec);
 
+            virtual ~CodecDebugerTransfer();
+
         public:
             virtual void transfer(
                 StreamInfo & media);

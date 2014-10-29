@@ -20,6 +20,8 @@ namespace ppbox
                 boost::uint32_t codec, 
                 boost::uint32_t format);
 
+            virtual ~CodecAssemblerTransfer();
+
         public:
             virtual void transfer(
                 StreamInfo & info);
