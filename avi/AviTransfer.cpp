@@ -55,6 +55,7 @@ namespace ppbox
                 audio.nChannels = info.audio_format.channel_count;
                 audio.nSamplesPerSec = info.audio_format.sample_rate;
                 audio.nBlockAlign = info.audio_format.sample_per_frame;
+                audio.cbSize = info.format_data.size();
                 audio.cbData = info.format_data;
             }
             if (stream_->sample_duration())
