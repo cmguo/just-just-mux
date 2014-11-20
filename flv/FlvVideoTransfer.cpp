@@ -7,7 +7,7 @@
 #include <ppbox/avformat/flv/FlvEnum.h>
 using namespace ppbox::avformat;
 
-#include <ppbox/avcodec/CodecType.h>
+#include <ppbox/avcodec/VideoType.h>
 using namespace ppbox::avcodec;
 
 using namespace framework::system;
@@ -63,7 +63,7 @@ namespace ppbox
         {
             sample.flags |= Sample::f_sync;
             sample.stream_info = &info;
-            if (info.sub_type == VideoSubType::AVC || info.sub_type == VideoSubType::HEVC) {
+            if (info.sub_type == VideoType::AVC || info.sub_type == VideoType::HEVC) {
                 header_.AVCPacketType = 0;
                 sample.data.push_back(boost::asio::buffer(info.format_data));
                 sample.size += info.format_data.size();
