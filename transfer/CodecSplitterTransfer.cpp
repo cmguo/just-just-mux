@@ -1,9 +1,9 @@
 // CodecSplitterTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/CodecSplitterTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/transfer/CodecSplitterTransfer.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -13,7 +13,7 @@ namespace ppbox
             boost::uint32_t format)
         {
             boost::system::error_code ec;
-            splitter_ = ppbox::avcodec::SplitterFactory::create(codec, format, ec);
+            splitter_ = just::avcodec::SplitterFactory::create(codec, format, ec);
         }
 
         CodecSplitterTransfer::~CodecSplitterTransfer()
@@ -36,4 +36,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

@@ -1,19 +1,19 @@
 // FilterManager.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/FilterManager.h"
-#include "ppbox/mux/MuxError.h"
-#include "ppbox/mux/filter/MergeFilter.h"
-#include "ppbox/mux/filter/LastFilter.h"
+#include "just/mux/Common.h"
+#include "just/mux/FilterManager.h"
+#include "just/mux/MuxError.h"
+#include "just/mux/filter/MergeFilter.h"
+#include "just/mux/filter/LastFilter.h"
 
-using namespace ppbox::avformat::error;
+using namespace just::avformat::error;
 
-#include <ppbox/demux/base/DemuxerBase.h>
-#include <ppbox/demux/base/DemuxError.h>
+#include <just/demux/base/DemuxerBase.h>
+#include <just/demux/base/DemuxError.h>
 
 #include <algorithm>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -33,7 +33,7 @@ namespace ppbox
         }
 
         bool FilterManager::open(
-            ppbox::demux::DemuxerBase * demuxer, 
+            just::demux::DemuxerBase * demuxer, 
             boost::uint32_t stream_count, 
             boost::system::error_code & ec)
         {
@@ -248,4 +248,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

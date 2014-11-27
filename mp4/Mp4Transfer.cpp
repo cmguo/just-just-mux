@@ -1,18 +1,18 @@
 // Mp4Transfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mp4/Mp4Transfer.h"
-#include "ppbox/mux/mp4/Mp4DataContext.h"
+#include "just/mux/Common.h"
+#include "just/mux/mp4/Mp4Transfer.h"
+#include "just/mux/mp4/Mp4DataContext.h"
 
-#include <ppbox/avformat/mp4/Mp4Format.h>
-using namespace ppbox::avformat;
-#include <ppbox/avbase/object/Object.hpp>
-using namespace ppbox::avbase;
+#include <just/avformat/mp4/Mp4Format.h>
+using namespace just::avformat;
+#include <just/avbase/object/Object.hpp>
+using namespace just::avbase;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -93,4 +93,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

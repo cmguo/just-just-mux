@@ -1,11 +1,11 @@
 // RawFormat.h
 
-#ifndef _PPBOX_MUX_RAW_RAW_FORMAT_H_
-#define _PPBOX_MUX_RAW_RAW_FORMAT_H_
+#ifndef _JUST_MUX_RAW_RAW_FORMAT_H_
+#define _JUST_MUX_RAW_RAW_FORMAT_H_
 
-#include <ppbox/avformat/Format.h>
+#include <just/avformat/Format.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -13,10 +13,10 @@ namespace ppbox
         class RawMuxer;
 
         class RawFormat
-            : public ppbox::avformat::Format
+            : public just::avformat::Format
         {
         public:
-            typedef ppbox::avformat::CodecInfo CodecInfo;
+            typedef just::avformat::CodecInfo CodecInfo;
 
         public:
             RawFormat()
@@ -36,7 +36,7 @@ namespace ppbox
             void open()
             {
                 boost::system::error_code ec;
-                stun_ = ppbox::avformat::FormatFactory::create(real_format_, ec);
+                stun_ = just::avformat::FormatFactory::create(real_format_, ec);
             }
 
         private:
@@ -83,7 +83,7 @@ namespace ppbox
             }
 
         private:
-            ppbox::avformat::Format * stun_;
+            just::avformat::Format * stun_;
             CodecInfo codec_;
 
         private:
@@ -96,7 +96,7 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
 
-#endif // _PPBOX_MUX_RAW_RAW_FORMAT_H_
+#endif // _JUST_MUX_RAW_RAW_FORMAT_H_

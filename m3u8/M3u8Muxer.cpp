@@ -1,13 +1,13 @@
 // M3U8Mux.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/m3u8/M3u8Muxer.h"
-#include "ppbox/mux/m3u8/M3u8Protocol.h"
-#include "ppbox/mux/filter/SegmentFilter.h"
+#include "just/mux/Common.h"
+#include "just/mux/m3u8/M3u8Muxer.h"
+#include "just/mux/m3u8/M3u8Protocol.h"
+#include "just/mux/filter/SegmentFilter.h"
 
 using namespace boost::system;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -102,4 +102,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

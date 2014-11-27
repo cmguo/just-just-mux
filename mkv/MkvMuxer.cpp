@@ -1,11 +1,11 @@
 // MkvMuxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mkv/MkvMuxer.h"
-#include "ppbox/mux/mkv/MkvTransfer.h"
-#include "ppbox/mux/filter/MergeFilter.h"
+#include "just/mux/Common.h"
+#include "just/mux/mkv/MkvMuxer.h"
+#include "just/mux/mkv/MkvTransfer.h"
+#include "just/mux/filter/MergeFilter.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -36,7 +36,7 @@ namespace ppbox
         }
 
         void MkvMuxer::file_header(
-            ppbox::demux::Sample & sample)
+            just::demux::Sample & sample)
         {
             if(header_buf_.size() == 0) {
                 transfer_->file_header(media_info_, track_buf_.size(), header_buf_);
@@ -48,9 +48,9 @@ namespace ppbox
 
         void MkvMuxer::stream_header(
             boost::uint32_t index, 
-            ppbox::demux::Sample & sample)
+            just::demux::Sample & sample)
         {
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

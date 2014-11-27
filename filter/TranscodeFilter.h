@@ -1,13 +1,13 @@
 // TranscodeFilter.h
 
-#ifndef _PPBOX_MUX_TRANSFER_CODEC_TRANSCODE_FILTER_H_
-#define _PPBOX_MUX_TRANSFER_CODEC_TRANSCODE_FILTER_H_
+#ifndef _JUST_MUX_TRANSFER_CODEC_TRANSCODE_FILTER_H_
+#define _JUST_MUX_TRANSFER_CODEC_TRANSCODE_FILTER_H_
 
-#include "ppbox/mux/Filter.h"
+#include "just/mux/Filter.h"
 
-#include <ppbox/avcodec/Transcoder.h>
+#include <just/avcodec/Transcoder.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -43,11 +43,11 @@ namespace ppbox
         private:
             std::string encoder_param_;
             StreamInfo out_info_;
-            typedef ppbox::avcodec::TranscoderFactory::transcoder_chain_t transcoder_chain_t;
+            typedef just::avcodec::TranscoderFactory::transcoder_chain_t transcoder_chain_t;
             transcoder_chain_t transcoders_;
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_TRANSFER_CODEC_TRANSCODE_FILTER_H_
+#endif // _JUST_MUX_TRANSFER_CODEC_TRANSCODE_FILTER_H_

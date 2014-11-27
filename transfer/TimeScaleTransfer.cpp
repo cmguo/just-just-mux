@@ -1,12 +1,12 @@
 // TimeScaleTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/TimeScaleTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/transfer/TimeScaleTransfer.h"
 
-#include <ppbox/avcodec/aac/AacCodec.h>
-using namespace ppbox::avcodec;
+#include <just/avcodec/aac/AacCodec.h>
+using namespace just::avcodec;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -108,4 +108,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

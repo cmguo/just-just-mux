@@ -1,13 +1,13 @@
 // DemuxerFilter.h
 
-#ifndef _PPBOX_MUX_FILTER_DEMUXER_FILTER_H_
-#define _PPBOX_MUX_FILTER_DEMUXER_FILTER_H_
+#ifndef _JUST_MUX_FILTER_DEMUXER_FILTER_H_
+#define _JUST_MUX_FILTER_DEMUXER_FILTER_H_
 
-#include "ppbox/mux/Filter.h"
+#include "just/mux/Filter.h"
 
-#include <ppbox/demux/base/DemuxerBase.h>
+#include <just/demux/base/DemuxerBase.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -58,16 +58,16 @@ namespace ppbox
 
         public:
             void set_demuxer(
-                ppbox::demux::DemuxerBase * demuxer)
+                just::demux::DemuxerBase * demuxer)
             {
                 demuxer_ = demuxer;
             }
 
         private:
-            ppbox::demux::DemuxerBase * demuxer_;
+            just::demux::DemuxerBase * demuxer_;
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_FILTER_DEMUXER_FILTER_H_
+#endif // _JUST_MUX_FILTER_DEMUXER_FILTER_H_

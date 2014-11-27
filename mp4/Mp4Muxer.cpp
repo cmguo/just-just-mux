@@ -1,13 +1,13 @@
 // Mp4Muxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mp4/Mp4Muxer.h"
-#include "ppbox/mux/mp4/Mp4Transfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/mp4/Mp4Muxer.h"
+#include "just/mux/mp4/Mp4Transfer.h"
 
-#include <ppbox/avformat/mp4/box/Mp4BoxEnum.h>
-using namespace ppbox::avformat;
+#include <just/avformat/mp4/box/Mp4BoxEnum.h>
+using namespace just::avformat;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -81,4 +81,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

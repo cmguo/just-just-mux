@@ -1,14 +1,14 @@
 // FilterManager.h
 
-#ifndef _PPBOX_MUX_FILTER_MANAGER_H_
-#define _PPBOX_MUX_FILTER_MANAGER_H_
+#ifndef _JUST_MUX_FILTER_MANAGER_H_
+#define _JUST_MUX_FILTER_MANAGER_H_
 
-#include "ppbox/mux/Filter.h"
-#include "ppbox/mux/FilterPipe.h"
+#include "just/mux/Filter.h"
+#include "just/mux/FilterPipe.h"
 
-#include <ppbox/demux/base/DemuxerBase.h>
+#include <just/demux/base/DemuxerBase.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -25,7 +25,7 @@ namespace ppbox
 
         public:
             bool open(
-                ppbox::demux::DemuxerBase * demuxer, 
+                just::demux::DemuxerBase * demuxer, 
                 boost::uint32_t stream_count, 
                 boost::system::error_code & ec);
 
@@ -105,7 +105,7 @@ namespace ppbox
                 bool end;
             };
 
-            ppbox::demux::DemuxerBase * demuxer_;
+            just::demux::DemuxerBase * demuxer_;
             std::vector<FilterStream> streams_;
 
             bool is_save_sample_;
@@ -117,6 +117,6 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_FILTER_MANAGER_H_
+#endif // _JUST_MUX_FILTER_MANAGER_H_

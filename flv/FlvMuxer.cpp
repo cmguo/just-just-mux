@@ -1,14 +1,14 @@
 // FlvMuxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/flv/FlvMuxer.h"
-#include "ppbox/mux/flv/FlvAudioTransfer.h"
-#include "ppbox/mux/flv/FlvVideoTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/flv/FlvMuxer.h"
+#include "just/mux/flv/FlvAudioTransfer.h"
+#include "just/mux/flv/FlvVideoTransfer.h"
 
-#include <ppbox/avformat/flv/FlvEnum.h>
-using namespace ppbox::avformat;
+#include <just/avformat/flv/FlvEnum.h>
+using namespace just::avformat;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -54,14 +54,14 @@ namespace ppbox
             Sample & sample)
         {
             FormatBuffer buf(header_buffer_, sizeof(header_buffer_));
-            ppbox::avformat::FlvOArchive archive(buf);
+            just::avformat::FlvOArchive archive(buf);
             archive << flv_header_;
 
-            meta_data_.author = "ppbox muxer";
-            meta_data_.copyright = "ppbox 2013";
+            meta_data_.author = "just muxer";
+            meta_data_.copyright = "just 2013";
             meta_data_.description = media_info_.name;
 
-            if (media_info_.duration != ppbox::data::invalid_size) {
+            if (media_info_.duration != just::data::invalid_size) {
                 meta_data_.duration = media_info_.duration;
             }
 
@@ -69,7 +69,7 @@ namespace ppbox
 
             {
                 //FormatBuffer buf(meta_data_buffer_, sizeof(meta_data_buffer_));
-                ppbox::avformat::FlvOArchive archive(meta_data_buffer_);
+                just::avformat::FlvOArchive archive(meta_data_buffer_);
                 FlvDataTag tag;
                 tag.Name = "onMetaData";
                 meta_data_.to_data(tag.Value);
@@ -92,4 +92,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

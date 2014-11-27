@@ -1,10 +1,10 @@
 // RawMuxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/raw/RawMuxer.h"
-#include "ppbox/mux/raw/RawFormat.h"
+#include "just/mux/Common.h"
+#include "just/mux/raw/RawMuxer.h"
+#include "just/mux/raw/RawFormat.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -52,4 +52,4 @@ namespace ppbox
 
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

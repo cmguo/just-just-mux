@@ -1,14 +1,14 @@
 // TsMuxer.h
 
-#ifndef _PPBOX_MUX_MP2_MUXER_H_
-#define _PPBOX_MUX_MP2_MUXER_H_
+#ifndef _JUST_MUX_MP2_MUXER_H_
+#define _JUST_MUX_MP2_MUXER_H_
 
-#include "ppbox/mux/Muxer.h"
+#include "just/mux/Muxer.h"
 
-#include <ppbox/avformat/mp2/PatPacket.h>
-#include <ppbox/avformat/mp2/PmtPacket.h>
+#include <just/avformat/mp2/PatPacket.h>
+#include <just/avformat/mp2/PmtPacket.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -35,14 +35,14 @@ namespace ppbox
                 Sample & tag);
 
         private:
-            ppbox::avformat::PatPacket pat_;
-            ppbox::avformat::PmtPacket pmt_;
+            just::avformat::PatPacket pat_;
+            just::avformat::PmtPacket pmt_;
             boost::uint8_t header_buffer_[512];
         };
 
-        PPBOX_REGISTER_MUXER("ts", TsMuxer);
+        JUST_REGISTER_MUXER("ts", TsMuxer);
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_MP2_MUXER_H_
+#endif // _JUST_MUX_MP2_MUXER_H_

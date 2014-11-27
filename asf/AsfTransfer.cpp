@@ -1,22 +1,22 @@
 // AsfTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/asf/AsfTransfer.h"
-#include "ppbox/mux/MuxerBase.h"
+#include "just/mux/Common.h"
+#include "just/mux/asf/AsfTransfer.h"
+#include "just/mux/MuxerBase.h"
 
-#include <ppbox/avformat/asf/AsfObjectType.h>
-#include <ppbox/avformat/asf/AsfFormat.h>
-using namespace ppbox::avformat;
+#include <just/avformat/asf/AsfObjectType.h>
+#include <just/avformat/asf/AsfFormat.h>
+using namespace just::avformat;
 
-#include <ppbox/avbase/stream/SampleBuffers.h>
-using namespace ppbox::avbase;
+#include <just/avbase/stream/SampleBuffers.h>
+using namespace just::avbase;
 
 #include <util/archive/ArchiveBuffer.h>
 #include <util/buffers/BuffersCopy.h>
 
 #include <boost/asio/streambuf.hpp>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -389,4 +389,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

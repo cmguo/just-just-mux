@@ -1,16 +1,16 @@
 // Mp4Muxer.h
 
-#ifndef _PPBOX_MUX_MP4_MP4_MUXER_H_
-#define _PPBOX_MUX_MP4_MP4_MUXER_H_
+#ifndef _JUST_MUX_MP4_MP4_MUXER_H_
+#define _JUST_MUX_MP4_MP4_MUXER_H_
 
-#include "ppbox/mux/Muxer.h"
-#include "ppbox/mux/mp4/Mp4DataContext.h"
+#include "just/mux/Muxer.h"
+#include "just/mux/mp4/Mp4DataContext.h"
 
-#include <ppbox/avformat/mp4/lib/Mp4File.h>
+#include <just/avformat/mp4/lib/Mp4File.h>
 
 #include <util/buffers/StreamBuffer.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -48,15 +48,15 @@ namespace ppbox
             boost::uint32_t block_size;
 
         private:
-            ppbox::avformat::Mp4File file_;
+            just::avformat::Mp4File file_;
             util::buffers::StreamBuffer<boost::uint8_t> head_buffer_;
             util::buffers::StreamBuffer<boost::uint8_t> tail_buffer_;
             Mp4DataContext context_;
         };
 
-        PPBOX_REGISTER_MUXER("mp4", Mp4Muxer);
+        JUST_REGISTER_MUXER("mp4", Mp4Muxer);
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_MP4_MP4_MUXER_H_
+#endif // _JUST_MUX_MP4_MP4_MUXER_H_

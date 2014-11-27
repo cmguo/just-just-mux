@@ -1,16 +1,16 @@
 // SegmentFilter.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/filter/SegmentFilter.h"
-#include "ppbox/mux/filter/MergeFilter.h"
-#include "ppbox/mux/MuxError.h"
+#include "just/mux/Common.h"
+#include "just/mux/filter/SegmentFilter.h"
+#include "just/mux/filter/MergeFilter.h"
+#include "just/mux/MuxError.h"
 
-using namespace ppbox::avformat::error;
+using namespace just::avformat::error;
 
-#include <ppbox/avbase/StreamType.h>
-using namespace ppbox::avbase;
+#include <just/avbase/StreamType.h>
+using namespace just::avbase;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -78,4 +78,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

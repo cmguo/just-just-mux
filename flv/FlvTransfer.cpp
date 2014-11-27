@@ -1,15 +1,15 @@
 // FlvTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/flv/FlvTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/flv/FlvTransfer.h"
 
-using namespace ppbox::avformat;
-using namespace ppbox::avbase;
+using namespace just::avformat;
+using namespace just::avbase;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -53,4 +53,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

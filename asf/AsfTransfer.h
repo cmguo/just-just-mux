@@ -1,15 +1,15 @@
 
-#ifndef _PPBOX_MUX_ASF_ASF_TRANSFER_H_
-#define _PPBOX_MUX_ASF_ASF_TRANSFER_H_
+#ifndef _JUST_MUX_ASF_ASF_TRANSFER_H_
+#define _JUST_MUX_ASF_ASF_TRANSFER_H_
 
-#include "ppbox/mux/Transfer.h"
-#include "ppbox/mux/asf/AsfBuffer.h"
+#include "just/mux/Transfer.h"
+#include "just/mux/asf/AsfBuffer.h"
 
-#include <ppbox/avformat/asf/AsfObjectType.h>
+#include <just/avformat/asf/AsfObjectType.h>
 
 #include <boost/asio/streambuf.hpp>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -90,8 +90,8 @@ namespace ppbox
             std::deque<boost::asio::const_buffer> data_;//保存buffer的地址和长度记录
             size_t p_index_;                            //保存当前的packet在data_中下标值
             std::vector<AsfPacket> packets_;
-            ppbox::avformat::AsfParseContext context_;
-            ppbox::avformat::AsfPacket packet_head_;
+            just::avformat::AsfParseContext context_;
+            just::avformat::AsfPacket packet_head_;
             boost::uint32_t packet_left_;               //当前packet内存剩余空间
             AsfBufferQueue head_buf_queue_;
             boost::uint8_t * data_buf_[2];
@@ -100,6 +100,6 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_ASF_ASF_TRANSFER_H_
+#endif // _JUST_MUX_ASF_ASF_TRANSFER_H_

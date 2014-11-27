@@ -1,18 +1,18 @@
 // FlvVideoTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/flv/FlvVideoTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/flv/FlvVideoTransfer.h"
 
-#include <ppbox/avformat/flv/FlvFormat.h>
-#include <ppbox/avformat/flv/FlvEnum.h>
-using namespace ppbox::avformat;
+#include <just/avformat/flv/FlvFormat.h>
+#include <just/avformat/flv/FlvEnum.h>
+using namespace just::avformat;
 
-#include <ppbox/avcodec/VideoType.h>
-using namespace ppbox::avcodec;
+#include <just/avcodec/VideoType.h>
+using namespace just::avcodec;
 
 using namespace framework::system;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -75,4 +75,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

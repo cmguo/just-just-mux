@@ -1,10 +1,10 @@
 // MergeFilter.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/filter/MergeFilter.h"
-#include "ppbox/mux/filter/MergeHook.h"
+#include "just/mux/Common.h"
+#include "just/mux/filter/MergeFilter.h"
+#include "just/mux/filter/MergeHook.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -85,4 +85,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

@@ -1,13 +1,13 @@
 // Mp4DataContext.h
 
-#ifndef _PPBOX_MUX_MP4_MP4_DATA_CONTEXT_H_
-#define _PPBOX_MUX_MP4_MP4_DATA_CONTEXT_H_
+#ifndef _JUST_MUX_MP4_MP4_DATA_CONTEXT_H_
+#define _JUST_MUX_MP4_MP4_DATA_CONTEXT_H_
 
-#include "ppbox/mux/MuxBase.h"
+#include "just/mux/MuxBase.h"
 
-#include <ppbox/avformat/mp4/lib/Mp4SampleTable.h>
+#include <just/avformat/mp4/lib/Mp4SampleTable.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -27,7 +27,7 @@ namespace ppbox
                 Sample & sample);
 
             void put_sample(
-                ppbox::avformat::Mp4SampleTable & table_, 
+                just::avformat::Mp4SampleTable & table_, 
                 Sample & sample);
 
             void pad_block(
@@ -48,6 +48,6 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_MP4_MP4_DATA_CONTEXT_H_
+#endif // _JUST_MUX_MP4_MP4_DATA_CONTEXT_H_

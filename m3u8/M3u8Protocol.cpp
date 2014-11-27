@@ -1,10 +1,10 @@
 // M3u8Protocol.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/m3u8/M3u8Protocol.h"
-#include "ppbox/mux/m3u8/UrlFormator.h"
+#include "just/mux/Common.h"
+#include "just/mux/m3u8/M3u8Protocol.h"
+#include "just/mux/m3u8/UrlFormator.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -102,4 +102,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

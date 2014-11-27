@@ -1,9 +1,9 @@
 // CodecAssemblerTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/CodecAssemblerTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/transfer/CodecAssemblerTransfer.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -13,7 +13,7 @@ namespace ppbox
             boost::uint32_t format)
         {
             boost::system::error_code ec;
-            assembler_ = ppbox::avcodec::AssemblerFactory::create(codec, format, ec);
+            assembler_ = just::avcodec::AssemblerFactory::create(codec, format, ec);
         }
 
         CodecAssemblerTransfer::~CodecAssemblerTransfer()
@@ -36,4 +36,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

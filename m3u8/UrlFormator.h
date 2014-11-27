@@ -1,11 +1,11 @@
 // UrlFormator.h
 
-#ifndef _PPBOX_MUX_M3U8_URL_FORMATOR_H_
-#define _PPBOX_MUX_M3U8_URL_FORMATOR_H_
+#ifndef _JUST_MUX_M3U8_URL_FORMATOR_H_
+#define _JUST_MUX_M3U8_URL_FORMATOR_H_
 
 #include <ostream>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -118,6 +118,6 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_M3U8_URL_FORMATOR_H_
+#endif // _JUST_MUX_M3U8_URL_FORMATOR_H_

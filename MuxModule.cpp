@@ -1,27 +1,27 @@
 // MuxModule.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/MuxModule.h"
-#include "ppbox/mux/Version.h"
-#include "ppbox/mux/MuxError.h"
-#include "ppbox/mux/MuxerTypes.h"
+#include "just/mux/Common.h"
+#include "just/mux/MuxModule.h"
+#include "just/mux/Version.h"
+#include "just/mux/MuxError.h"
+#include "just/mux/MuxerTypes.h"
 
-#include <ppbox/demux/DemuxModule.h>
-#include <ppbox/common/UrlHelper.h>
+#include <just/demux/DemuxModule.h>
+#include <just/common/UrlHelper.h>
 
 #include <boost/bind.hpp>
 using namespace boost::system;
 
 #include <algorithm>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
 
         MuxModule::MuxModule(
             util::daemon::Daemon & daemon)
-            : ppbox::common::CommonModuleBase<MuxModule>(daemon, "MuxModule")
+            : just::common::CommonModuleBase<MuxModule>(daemon, "MuxModule")
         {
         }
 
@@ -40,14 +40,14 @@ namespace ppbox
         }
 
         MuxerBase * MuxModule::open(
-            ppbox::demux::DemuxerBase * demuxer,
+            just::demux::DemuxerBase * demuxer,
             framework::string::Url const & config, 
             boost::system::error_code & ec)
         {
             std::string format = config.param("format");
             MuxerBase * muxer = MuxerFactory::create(io_svc(), format, ec);
             if (muxer) {
-                ppbox::common::apply_config(muxer->config(), config, "mux.");
+                just::common::apply_config(muxer->config(), config, "mux.");
                 muxer->open(demuxer, ec);
                 boost::mutex::scoped_lock lock(mutex_);
                 muxers_.push_back(muxer);
@@ -78,4 +78,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

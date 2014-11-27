@@ -1,11 +1,11 @@
 // TranscodeFilter.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/filter/TranscodeFilter.h"
+#include "just/mux/Common.h"
+#include "just/mux/filter/TranscodeFilter.h"
 
 #include <framework/string/ParseStl.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -22,11 +22,11 @@ namespace ppbox
                 return;
             }
 
-            out_info_.sub_type = ppbox::avbase::StreamSubType::NONE;
-            out_info_.format_type = ppbox::avbase::StreamFormatType::none;
+            out_info_.sub_type = just::avbase::StreamSubType::NONE;
+            out_info_.format_type = just::avbase::StreamFormatType::none;
 
             boost::system::error_code ec;
-            if (ppbox::avcodec::TranscoderFactory::create_transcodes(
+            if (just::avcodec::TranscoderFactory::create_transcodes(
                 info.type, 
                 info.sub_type, 
                 output_codecs, 
@@ -96,7 +96,7 @@ namespace ppbox
             switch (event.type) {
                 case MuxEvent::end:
                     for (size_t i = 0; i < transcoders_.size(); ++i) {
-                        if (transcoders_[i].transcoder->push(ppbox::avcodec::Transcoder::eos(), ec)) { 
+                        if (transcoders_[i].transcoder->push(just::avcodec::Transcoder::eos(), ec)) { 
                             Sample sample;
                             sample.stream_info = &out_info_;
                             if (transcoders_[i].transcoder->pop(sample, ec)) {
@@ -133,4 +133,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

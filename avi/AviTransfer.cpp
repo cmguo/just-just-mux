@@ -1,18 +1,18 @@
 // AviTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/avi/AviTransfer.h"
-#include "ppbox/mux/avi/AviDataContext.h"
+#include "just/mux/Common.h"
+#include "just/mux/avi/AviTransfer.h"
+#include "just/mux/avi/AviDataContext.h"
 
-#include <ppbox/avformat/avi/AviFormat.h>
-using namespace ppbox::avformat;
-#include <ppbox/avbase/object/Object.hpp>
-using namespace ppbox::avbase;
+#include <just/avformat/avi/AviFormat.h>
+using namespace just::avformat;
+#include <just/avbase/object/Object.hpp>
+using namespace just::avbase;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -82,4 +82,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

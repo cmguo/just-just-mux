@@ -1,11 +1,11 @@
 // KeyFrameFilter.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/filter/KeyFrameFilter.h"
-#include "ppbox/mux/filter/MergeFilter.h"
-#include "ppbox/mux/MuxError.h"
+#include "just/mux/Common.h"
+#include "just/mux/filter/KeyFrameFilter.h"
+#include "just/mux/filter/MergeFilter.h"
+#include "just/mux/MuxError.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -41,4 +41,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

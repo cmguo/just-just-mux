@@ -1,17 +1,17 @@
 // PesTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mp2/PesTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/mp2/PesTransfer.h"
 
-#include <ppbox/avformat/mp2/PesPacket.h>
-#include <ppbox/avformat/mp2/Mp2Enum.h>
-#include <ppbox/avformat/mp2/Mp2Archive.h>
-#include <ppbox/avformat/Format.h>
-using namespace ppbox::avformat;
+#include <just/avformat/mp2/PesPacket.h>
+#include <just/avformat/mp2/Mp2Enum.h>
+#include <just/avformat/mp2/Mp2Archive.h>
+#include <just/avformat/Format.h>
+using namespace just::avformat;
 
 #define PES_TIME_SCALE 90000
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -60,4 +60,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

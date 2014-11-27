@@ -1,11 +1,11 @@
 // MuxerBase.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/MuxerBase.h"
+#include "just/mux/Common.h"
+#include "just/mux/MuxerBase.h"
 
 #include <util/daemon/Daemon.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -13,7 +13,7 @@ namespace ppbox
 
         MuxerBase::MuxerBase(
             boost::asio::io_service & io_svc)
-            : config_(util::daemon::Daemon::from_io_svc(io_svc).config(), "ppbox.mux")
+            : config_(util::daemon::Daemon::from_io_svc(io_svc).config(), "just.mux")
         {
         }
 
@@ -22,4 +22,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

@@ -1,23 +1,23 @@
 // Muxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/Muxer.h"
-#include "ppbox/mux/Transfer.h"
-#include "ppbox/mux/MuxError.h"
-#include "ppbox/mux/FilterManager.h"
-#include "ppbox/mux/filter/KeyFrameFilter.h"
-#include "ppbox/mux/filter/TranscodeFilter.h"
-#include "ppbox/mux/transfer/CodecSplitterTransfer.h"
-#include "ppbox/mux/transfer/CodecAssemblerTransfer.h"
-#include "ppbox/mux/transfer/CodecDebugerTransfer.h"
-#include "ppbox/mux/transfer/TimeScaleTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/Muxer.h"
+#include "just/mux/Transfer.h"
+#include "just/mux/MuxError.h"
+#include "just/mux/FilterManager.h"
+#include "just/mux/filter/KeyFrameFilter.h"
+#include "just/mux/filter/TranscodeFilter.h"
+#include "just/mux/transfer/CodecSplitterTransfer.h"
+#include "just/mux/transfer/CodecAssemblerTransfer.h"
+#include "just/mux/transfer/CodecDebugerTransfer.h"
+#include "just/mux/transfer/TimeScaleTransfer.h"
 
-#include <ppbox/demux/base/DemuxerBase.h>
-#include <ppbox/demux/base/DemuxError.h>
+#include <just/demux/base/DemuxerBase.h>
+#include <just/demux/base/DemuxError.h>
 
-#include <ppbox/avformat/Format.h>
-using namespace ppbox::avformat;
-using namespace ppbox::avbase;
+#include <just/avformat/Format.h>
+using namespace just::avformat;
+using namespace just::avbase;
 
 #include <util/buffers/BuffersSize.h>
 
@@ -27,12 +27,12 @@ using namespace ppbox::avbase;
 
 using namespace boost::system;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
 
-        FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("ppbox.mux.Muxer", framework::logger::Debug);
+        FRAMEWORK_LOGGER_DECLARE_MODULE_LEVEL("just.mux.Muxer", framework::logger::Debug);
 
 
         Muxer::Muxer(
@@ -68,7 +68,7 @@ namespace ppbox
         }
 
         bool Muxer::open(
-            ppbox::demux::DemuxerBase * demuxer,
+            just::demux::DemuxerBase * demuxer,
             error_code & ec)
         {
             assert(demuxer != NULL);
@@ -204,7 +204,7 @@ namespace ppbox
                 read_flag_ |= f_seek;
             }
             stat_.byte_range.beg = 0;
-            stat_.byte_range.end = ppbox::data::invalid_size;
+            stat_.byte_range.end = just::data::invalid_size;
             stat_.byte_range.pos = 0;
             stat_.byte_range.buf = 0;
             return !ec;
@@ -285,7 +285,7 @@ namespace ppbox
         }
 
         void Muxer::format(
-            ppbox::avformat::Format * format)
+            just::avformat::Format * format)
         {
             format_ = format;
         }
@@ -313,9 +313,9 @@ namespace ppbox
         }
 
         void Muxer::get_seek_points(
-            std::vector<ppbox::avformat::SeekPoint> & points)
+            std::vector<just::avformat::SeekPoint> & points)
         {
-            if (pseudo_seek_ && media_info_.bitrate && media_info_.duration != ppbox::data::invalid_size) {
+            if (pseudo_seek_ && media_info_.bitrate && media_info_.duration != just::data::invalid_size) {
                 boost::uint64_t time_interval = 10 * 1000; // 10 seconds
                 boost::uint64_t offset_interval = time_interval * media_info_.bitrate / 8 / 1000;
                 points.resize((size_t)(media_info_.duration / time_interval + 1));
@@ -335,7 +335,7 @@ namespace ppbox
             framework::string::slice<std::string>(codecs_str, std::back_inserter(codec_strs));
             std::vector<boost::uint32_t> codecs;
             for (size_t i = 0; i < codec_strs.size(); ++i) {
-                codecs.push_back(ppbox::avbase::FourCC::from_string(codec_strs[i]));
+                codecs.push_back(just::avbase::FourCC::from_string(codec_strs[i]));
             }
             return codecs;
         }
@@ -350,7 +350,7 @@ namespace ppbox
         void Muxer::open(
             boost::system::error_code & ec)
         {
-            using ppbox::avbase::FourCC;
+            using just::avbase::FourCC;
 
             assert(demuxer_ != NULL);
             demuxer_->get_media_info(media_info_, ec);
@@ -384,15 +384,15 @@ namespace ppbox
                     stream.type == StreamType::VIDE ? video_codecs : 
                     (stream.type == StreamType::AUDI ? audio_codecs : empty_codecs);
                 if (!output_codecs.empty() && !codec_in(stream.sub_type, output_codecs)) {
-                    if (tempstream.format_type != ppbox::avbase::StreamFormatType::none) {
+                    if (tempstream.format_type != just::avbase::StreamFormatType::none) {
                         LOG_INFO("[open] change format of codec " << FourCC::to_string(tempstream.sub_type) 
                             << " from " << tempstream.format_type);
                         pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
-                        tempstream.format_type = ppbox::avbase::StreamFormatType::none;
+                        tempstream.format_type = just::avbase::StreamFormatType::none;
                     }
                     std::auto_ptr<TranscodeFilter> tf(new TranscodeFilter(stream, output_codecs));
                     tempstream.sub_type = tf->output_codec();
-                    if (tempstream.sub_type == ppbox::avbase::StreamSubType::NONE) {
+                    if (tempstream.sub_type == just::avbase::StreamSubType::NONE) {
                         LOG_INFO("[open] can't change codec");
                     } else {
                         LOG_INFO("[open] change codec from " << FourCC::to_string(stream.sub_type) 
@@ -408,7 +408,7 @@ namespace ppbox
                             LOG_INFO("[open] change format of codec " << FourCC::to_string(tempstream.sub_type) 
                                 << " from " << tempstream.format_type);
                             pipe.insert(new CodecSplitterTransfer(tempstream.sub_type, tempstream.format_type));
-                            tempstream.format_type = ppbox::avbase::StreamFormatType::none;
+                            tempstream.format_type = just::avbase::StreamFormatType::none;
                         }
                         if (codec_in(tempstream.sub_type, debug_codecs)) {
                             LOG_INFO("[open] add debuger of codec " << FourCC::to_string(tempstream.sub_type));
@@ -504,4 +504,4 @@ namespace ppbox
             return muxer;
         }
     } // namespace mux
-} // namespace ppbox
+} // namespace just

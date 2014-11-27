@@ -1,13 +1,13 @@
 // AviDataContext.h
 
-#ifndef _PPBOX_MUX_AVI_AVI_DATA_CONTEXT_H_
-#define _PPBOX_MUX_AVI_AVI_DATA_CONTEXT_H_
+#ifndef _JUST_MUX_AVI_AVI_DATA_CONTEXT_H_
+#define _JUST_MUX_AVI_AVI_DATA_CONTEXT_H_
 
-#include "ppbox/mux/MuxBase.h"
+#include "just/mux/MuxBase.h"
 
-#include <ppbox/avformat/avi/lib/AviStream.h>
+#include <just/avformat/avi/lib/AviStream.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -27,7 +27,7 @@ namespace ppbox
                 Sample & sample);
 
             void put_sample(
-                ppbox::avformat::AviStream & stream, 
+                just::avformat::AviStream & stream, 
                 Sample & sample);
 
             void pad_block(
@@ -48,6 +48,6 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_AVI_AVI_DATA_CONTEXT_H_
+#endif // _JUST_MUX_AVI_AVI_DATA_CONTEXT_H_

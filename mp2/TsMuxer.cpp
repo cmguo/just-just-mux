@@ -1,13 +1,13 @@
 // TsMuxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mp2/TsMuxer.h"
-#include "ppbox/mux/mp2/PesTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/mp2/TsMuxer.h"
+#include "just/mux/mp2/PesTransfer.h"
 
-#include <ppbox/avformat/mp2/Mp2Format.h>
-using namespace ppbox::avformat;
+#include <just/avformat/mp2/Mp2Format.h>
+using namespace just::avformat;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -81,4 +81,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

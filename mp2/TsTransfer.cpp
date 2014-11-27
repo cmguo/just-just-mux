@@ -1,18 +1,18 @@
 // TsTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mp2/TsTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/mp2/TsTransfer.h"
 
-#include <ppbox/avformat/mp2/TsPacket.h>
-#include <ppbox/avformat/mp2/Mp2Archive.h>
-using namespace ppbox::avformat;
+#include <just/avformat/mp2/TsPacket.h>
+#include <just/avformat/mp2/Mp2Archive.h>
+using namespace just::avformat;
 
-#include <ppbox/avbase/stream/SampleBuffers.h>
-using namespace ppbox::avbase;
+#include <just/avbase/stream/SampleBuffers.h>
+using namespace just::avbase;
 
 #include <util/archive/ArchiveBuffer.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -88,4 +88,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

@@ -1,16 +1,16 @@
 // AviMuxer.h
 
-#ifndef _PPBOX_MUX_AVI_AVI_MUXER_H_
-#define _PPBOX_MUX_AVI_AVI_MUXER_H_
+#ifndef _JUST_MUX_AVI_AVI_MUXER_H_
+#define _JUST_MUX_AVI_AVI_MUXER_H_
 
-#include "ppbox/mux/Muxer.h"
-#include "ppbox/mux/avi/AviDataContext.h"
+#include "just/mux/Muxer.h"
+#include "just/mux/avi/AviDataContext.h"
 
-#include <ppbox/avformat/avi/lib/AviFile.h>
+#include <just/avformat/avi/lib/AviFile.h>
 
 #include <util/buffers/StreamBuffer.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -48,15 +48,15 @@ namespace ppbox
             boost::uint32_t block_size;
 
         private:
-            ppbox::avformat::AviFile file_;
+            just::avformat::AviFile file_;
             util::buffers::StreamBuffer<boost::uint8_t> head_buffer_;
             util::buffers::StreamBuffer<boost::uint8_t> tail_buffer_;
             AviDataContext context_;
         };
 
-        PPBOX_REGISTER_MUXER("avi", AviMuxer);
+        JUST_REGISTER_MUXER("avi", AviMuxer);
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_AVI_AVI_MUXER_H_
+#endif // _JUST_MUX_AVI_AVI_MUXER_H_

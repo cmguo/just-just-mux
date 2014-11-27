@@ -1,14 +1,14 @@
 // AviTransfer.h
 
-#ifndef _PPBOX_MUX_AVI_AVI_TRANSFER_H_
-#define _PPBOX_MUX_AVI_AVI_TRANSFER_H_
+#ifndef _JUST_MUX_AVI_AVI_TRANSFER_H_
+#define _JUST_MUX_AVI_AVI_TRANSFER_H_
 
-#include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/Transfer.h"
+#include "just/mux/MuxBase.h"
+#include "just/mux/Transfer.h"
 
-#include <ppbox/avformat/avi/lib/AviStream.h>
+#include <just/avformat/avi/lib/AviStream.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -20,7 +20,7 @@ namespace ppbox
         {
         public:
             AviTransfer(
-                ppbox::avformat::AviStream * stream, 
+                just::avformat::AviStream * stream, 
                 AviDataContext * ctx);
 
             virtual ~AviTransfer();
@@ -36,12 +36,12 @@ namespace ppbox
                 MuxEvent const & event);
 
         private:
-            ppbox::avformat::AviStream * stream_;
+            just::avformat::AviStream * stream_;
             AviDataContext * ctx_;
             boost::uint32_t buffer_[2];
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_AVI_AVI_TRANSFER_H_
+#endif // _JUST_MUX_AVI_AVI_TRANSFER_H_

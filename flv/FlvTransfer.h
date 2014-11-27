@@ -1,19 +1,19 @@
 // FlvTransfer.h
 
-#ifndef _PPBOX_MUX_FLV_FLV_TRANSFER_H_
-#define _PPBOX_MUX_FLV_FLV_TRANSFER_H_
+#ifndef _JUST_MUX_FLV_FLV_TRANSFER_H_
+#define _JUST_MUX_FLV_FLV_TRANSFER_H_
 
-#include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/Transfer.h"
+#include "just/mux/MuxBase.h"
+#include "just/mux/Transfer.h"
 
-#include <ppbox/avformat/flv/FlvFormat.h>
-#include <ppbox/avformat/flv/FlvTagType.h>
+#include <just/avformat/flv/FlvFormat.h>
+#include <just/avformat/flv/FlvTagType.h>
 
 #include <util/archive/ArchiveBuffer.h>
 
 #include <framework/system/BytesOrder.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -37,12 +37,12 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            ppbox::avformat::FlvTagHeader header_;
+            just::avformat::FlvTagHeader header_;
             boost::uint8_t header_buffer_[16];
             boost::uint32_t previous_tag_size_;
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_FLV_FLV_TRANSFER_H_
+#endif // _JUST_MUX_FLV_FLV_TRANSFER_H_

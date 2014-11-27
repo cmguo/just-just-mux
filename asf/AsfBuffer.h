@@ -1,8 +1,8 @@
 
-#ifndef _PPBOX_MUX_ASF_ASF_HEAD_BUFFER_H_
-#define _PPBOX_MUX_ASF_ASF_HEAD_BUFFER_H_
+#ifndef _JUST_MUX_ASF_ASF_HEAD_BUFFER_H_
+#define _JUST_MUX_ASF_ASF_HEAD_BUFFER_H_
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -111,6 +111,6 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_ASF_ASF_HEAD_BUFFER_H_
+#endif // _JUST_MUX_ASF_ASF_HEAD_BUFFER_H_

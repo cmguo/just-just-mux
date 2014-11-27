@@ -1,14 +1,14 @@
 // Mp4Transfer.h
 
-#ifndef _PPBOX_MUX_MP4_MP4_TRANSFER_H_
-#define _PPBOX_MUX_MP4_MP4_TRANSFER_H_
+#ifndef _JUST_MUX_MP4_MP4_TRANSFER_H_
+#define _JUST_MUX_MP4_MP4_TRANSFER_H_
 
-#include "ppbox/mux/MuxBase.h"
-#include "ppbox/mux/Transfer.h"
+#include "just/mux/MuxBase.h"
+#include "just/mux/Transfer.h"
 
-#include <ppbox/avformat/mp4/lib/Mp4Track.h>
+#include <just/avformat/mp4/lib/Mp4Track.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -20,7 +20,7 @@ namespace ppbox
         {
         public:
             Mp4Transfer(
-                ppbox::avformat::Mp4Track * track, 
+                just::avformat::Mp4Track * track, 
                 Mp4DataContext * ctx);
 
             virtual ~Mp4Transfer();
@@ -36,12 +36,12 @@ namespace ppbox
                 MuxEvent const & event);
 
         private:
-            ppbox::avformat::Mp4Track * track_;
-            ppbox::avformat::Mp4SampleTable * table_;
+            just::avformat::Mp4Track * track_;
+            just::avformat::Mp4SampleTable * table_;
             Mp4DataContext * ctx_;
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_MP4_MP4_TRANSFER_H_
+#endif // _JUST_MUX_MP4_MP4_TRANSFER_H_

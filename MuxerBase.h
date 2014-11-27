@@ -1,13 +1,13 @@
 // MuxerBase.h
 
-#ifndef _PPBOX_MUX_MUXER_BASE_H_
-#define _PPBOX_MUX_MUXER_BASE_H_
+#ifndef _JUST_MUX_MUXER_BASE_H_
+#define _JUST_MUX_MUXER_BASE_H_
 
-#include "ppbox/mux/MuxBase.h"
+#include "just/mux/MuxBase.h"
 
 #include <framework/configure/Config.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -22,7 +22,7 @@ namespace ppbox
 
         public:
             virtual bool open(
-                ppbox::demux::DemuxerBase * demuxer, 
+                just::demux::DemuxerBase * demuxer, 
                 boost::system::error_code & ec) = 0;
 
             virtual bool setup(
@@ -71,6 +71,6 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_MUXER_BASE_H_
+#endif // _JUST_MUX_MUXER_BASE_H_

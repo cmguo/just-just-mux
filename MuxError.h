@@ -1,11 +1,11 @@
 // Error.h
 
-#ifndef _PPBOX_MUX_MUX_ERROR_H_
-#define _PPBOX_MUX_MUX_ERROR_H_
+#ifndef _JUST_MUX_MUX_ERROR_H_
+#define _JUST_MUX_MUX_ERROR_H_
 
-#include <ppbox/avformat/Error.h>
+#include <just/avformat/Error.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -68,7 +68,7 @@ namespace ppbox
         } // namespace error
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
 namespace boost
 {
@@ -76,16 +76,16 @@ namespace boost
     {
 
         template<>
-        struct is_error_code_enum<ppbox::mux::error::errors>
+        struct is_error_code_enum<just::mux::error::errors>
         {
             BOOST_STATIC_CONSTANT(bool, value = true);
         };
 
 #ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
-        using ppbox::mux::error::make_error_code;
+        using just::mux::error::make_error_code;
 #endif
 
     }
 }
 
-#endif // _PPBOX_MUX_MUX_ERROR_H_
+#endif // _JUST_MUX_MUX_ERROR_H_

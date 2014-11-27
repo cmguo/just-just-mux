@@ -1,9 +1,9 @@
 // CodecDebugerTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/transfer/CodecDebugerTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/transfer/CodecDebugerTransfer.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -13,9 +13,9 @@ namespace ppbox
             : num_(0)
         {
             boost::system::error_code ec;
-            debuger_ = ppbox::avcodec::DebugerFactory::create(codec, ec);
+            debuger_ = just::avcodec::DebugerFactory::create(codec, ec);
             if (debuger_ == NULL)
-                debuger_ = new ppbox::avcodec::Debuger;
+                debuger_ = new just::avcodec::Debuger;
         }
 
         CodecDebugerTransfer::~CodecDebugerTransfer()
@@ -27,8 +27,8 @@ namespace ppbox
             StreamInfo & info)
         {
             std::cout << "track: " << info.index
-                << "\t type: " << ppbox::avbase::FourCC::to_string(info.type)
-                << "\t sub_type: " << ppbox::avbase::FourCC::to_string(info.sub_type)
+                << "\t type: " << just::avbase::FourCC::to_string(info.type)
+                << "\t sub_type: " << just::avbase::FourCC::to_string(info.sub_type)
                 << "\t format_data: " << info.format_data.size() << " bytes" 
                 << std::endl;
             if (info.type == StreamType::VIDE) {
@@ -66,4 +66,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

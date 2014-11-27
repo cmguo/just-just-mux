@@ -1,17 +1,17 @@
 // Mp4DataContext.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mp4/Mp4DataContext.h"
+#include "just/mux/Common.h"
+#include "just/mux/mp4/Mp4DataContext.h"
 
-#include <ppbox/avformat/mp4/box/Mp4BoxEnum.h>
-#include <ppbox/avformat/mp4/box/Mp4BoxHeader.h>
-#include <ppbox/avformat/mp4/box/Mp4BoxArchive.h>
-using namespace ppbox::avformat;
+#include <just/avformat/mp4/box/Mp4BoxEnum.h>
+#include <just/avformat/mp4/box/Mp4BoxHeader.h>
+#include <just/avformat/mp4/box/Mp4BoxArchive.h>
+using namespace just::avformat;
 
 #include <util/buffers/BuffersCopy.h>
 #include <util/archive/ArchiveBuffer.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -96,4 +96,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

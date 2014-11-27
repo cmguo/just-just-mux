@@ -1,14 +1,14 @@
 // MuxModule.h
 
-#ifndef _PPBOX_MUX_MODULE_H_
-#define _PPBOX_MUX_MODULE_H_
+#ifndef _JUST_MUX_MODULE_H_
+#define _JUST_MUX_MODULE_H_
 
 #include <framework/string/Url.h>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/function.hpp>
 
-namespace ppbox
+namespace just
 {
     namespace demux
     {
@@ -21,7 +21,7 @@ namespace ppbox
         class MuxerBase;
 
         class MuxModule
-            : public ppbox::common::CommonModuleBase<MuxModule>
+            : public just::common::CommonModuleBase<MuxModule>
         {
         public:
             typedef boost::function<void (
@@ -42,7 +42,7 @@ namespace ppbox
 
         public:
             MuxerBase * open(
-                ppbox::demux::DemuxerBase * demuxer, 
+                just::demux::DemuxerBase * demuxer, 
                 framework::string::Url const & config, 
                 boost::system::error_code & ec);
 
@@ -56,4 +56,4 @@ namespace ppbox
         };
     }
 }
-#endif // _PPBOX_MUX_MODULE_H_
+#endif // _JUST_MUX_MODULE_H_

@@ -1,10 +1,10 @@
 // Name.h
 
-#ifndef _PPBOX_MUX_NAME_H_
-#define _PPBOX_MUX_NAME_H_
+#ifndef _JUST_MUX_NAME_H_
+#define _JUST_MUX_NAME_H_
 
-#include "ppbox/mux/Define.h"
+#include "just/mux/Define.h"
 
 #include <framework/system/AutoName.h>
 
-#endif // _PPBOX_MUX_NAME_H_
+#endif // _JUST_MUX_NAME_H_

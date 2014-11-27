@@ -1,17 +1,17 @@
 // Muxer.h
 
-#ifndef _PPBOX_MUX_MUXER_H_
-#define _PPBOX_MUX_MUXER_H_
+#ifndef _JUST_MUX_MUXER_H_
+#define _JUST_MUX_MUXER_H_
 
-#include "ppbox/mux/MuxerBase.h"
-#include "ppbox/mux/Filter.h"
-#include "ppbox/mux/FilterPipe.h"
+#include "just/mux/MuxerBase.h"
+#include "just/mux/Filter.h"
+#include "just/mux/FilterPipe.h"
 
-#include <ppbox/avformat/SeekPoint.h>
+#include <just/avformat/SeekPoint.h>
 
 #include <util/tools/ClassFactory.h>
 
-namespace ppbox
+namespace just
 {
     namespace avformat
     {
@@ -37,7 +37,7 @@ namespace ppbox
 
         public:
             bool open(
-                ppbox::demux::DemuxerBase * demuxer, 
+                just::demux::DemuxerBase * demuxer, 
                 boost::system::error_code & ec);
 
             virtual bool setup(
@@ -96,13 +96,13 @@ namespace ppbox
             virtual void do_close() {};
 
         protected:
-            ppbox::demux::DemuxerBase const & demuxer() const
+            just::demux::DemuxerBase const & demuxer() const
             {
                 return *demuxer_;
             };
 
             void format(
-                ppbox::avformat::Format * format);
+                just::avformat::Format * format);
 
             void format(
                 std::string const & format);
@@ -116,7 +116,7 @@ namespace ppbox
                 bool stream_header = true);
 
             void get_seek_points(
-                std::vector<ppbox::avformat::SeekPoint> & points);
+                std::vector<just::avformat::SeekPoint> & points);
 
         private:
             void open(
@@ -139,7 +139,7 @@ namespace ppbox
         private:
             friend class MuxerFactory;
 
-            ppbox::demux::DemuxerBase * demuxer_;
+            just::demux::DemuxerBase * demuxer_;
             FilterManager * manager_;
 
             enum FlagEnum
@@ -150,7 +150,7 @@ namespace ppbox
             };
 
             std::string format_str_;
-            ppbox::avformat::Format * format_;
+            just::avformat::Format * format_;
             std::string video_codec_;
             std::string audio_codec_;
             std::string debug_codec_;
@@ -181,8 +181,8 @@ namespace ppbox
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#define PPBOX_REGISTER_MUXER(k, c) UTIL_REGISTER_CLASS(ppbox::mux::MuxerFactory, k, c)
+#define JUST_REGISTER_MUXER(k, c) UTIL_REGISTER_CLASS(just::mux::MuxerFactory, k, c)
 
-#endif // _PPBOX_MUX_MUXER_BASE_H_
+#endif // _JUST_MUX_MUXER_BASE_H_

@@ -1,25 +1,25 @@
 // MuxBase.h
 
-#ifndef _PPBOX_MUX_MUX_BASE_H_
-#define _PPBOX_MUX_MUX_BASE_H_
+#ifndef _JUST_MUX_MUX_BASE_H_
+#define _JUST_MUX_MUX_BASE_H_
 
-#include <ppbox/demux/base/DemuxBase.h>
+#include <just/demux/base/DemuxBase.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
 
-        using ppbox::avbase::MediaInfo;
-        using ppbox::avbase::StreamStatus;
+        using just::avbase::MediaInfo;
+        using just::avbase::StreamStatus;
 
-        using ppbox::avbase::StreamType;
-        using ppbox::avbase::StreamInfo;
-        using ppbox::avbase::Sample;
+        using just::avbase::StreamType;
+        using just::avbase::StreamInfo;
+        using just::avbase::Sample;
 
         class MuxerBase;
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_MUX_BASE_H_
+#endif // _JUST_MUX_MUX_BASE_H_

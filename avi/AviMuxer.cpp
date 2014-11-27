@@ -1,13 +1,13 @@
 // AviMuxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/avi/AviMuxer.h"
-#include "ppbox/mux/avi/AviTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/avi/AviMuxer.h"
+#include "just/mux/avi/AviTransfer.h"
 
-#include <ppbox/avformat/avi/box/AviBoxEnum.h>
-using namespace ppbox::avformat;
+#include <just/avformat/avi/box/AviBoxEnum.h>
+using namespace just::avformat;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -78,4 +78,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

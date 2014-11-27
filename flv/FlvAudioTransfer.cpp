@@ -1,19 +1,19 @@
 // FlvAudioTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/flv/FlvAudioTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/flv/FlvAudioTransfer.h"
 
-#include <ppbox/avformat/flv/FlvFormat.h>
-#include <ppbox/avformat/flv/FlvEnum.h>
-using namespace ppbox::avformat;
+#include <just/avformat/flv/FlvFormat.h>
+#include <just/avformat/flv/FlvEnum.h>
+using namespace just::avformat;
 
-#include <ppbox/avcodec/AudioType.h>
-using namespace ppbox::avcodec;
+#include <just/avcodec/AudioType.h>
+using namespace just::avcodec;
 
 #include <framework/system/BytesOrder.h>
 using namespace framework::system;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -94,4 +94,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

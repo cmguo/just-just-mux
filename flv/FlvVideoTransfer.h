@@ -1,11 +1,11 @@
 // FlvVideoTransfer.h
 
-#ifndef _PPBOX_MUX_FLV_FLV_VIDEO_TRANSFER_H_
-#define _PPBOX_MUX_FLV_FLV_VIDEO_TRANSFER_H_
+#ifndef _JUST_MUX_FLV_FLV_VIDEO_TRANSFER_H_
+#define _JUST_MUX_FLV_FLV_VIDEO_TRANSFER_H_
 
-#include "ppbox/mux/flv/FlvTransfer.h"
+#include "just/mux/flv/FlvTransfer.h"
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -29,11 +29,11 @@ namespace ppbox
                 Sample & sample);
 
         private:
-            ppbox::avformat::FlvVideoTagHeader header_;
+            just::avformat::FlvVideoTagHeader header_;
             boost::uint8_t header_buffer_[16];
         };
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 
-#endif // _PPBOX_MUX_FLV_FLV_VIDEO_TRANSFER_H_
+#endif // _JUST_MUX_FLV_FLV_VIDEO_TRANSFER_H_

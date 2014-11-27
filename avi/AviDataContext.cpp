@@ -1,17 +1,17 @@
 // AviDataContext.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/avi/AviDataContext.h"
+#include "just/mux/Common.h"
+#include "just/mux/avi/AviDataContext.h"
 
-#include <ppbox/avformat/avi/box/AviBoxEnum.h>
-#include <ppbox/avformat/avi/box/AviBoxHeader.h>
-#include <ppbox/avformat/avi/box/AviBoxArchive.h>
-using namespace ppbox::avformat;
+#include <just/avformat/avi/box/AviBoxEnum.h>
+#include <just/avformat/avi/box/AviBoxHeader.h>
+#include <just/avformat/avi/box/AviBoxArchive.h>
+using namespace just::avformat;
 
 #include <util/buffers/BuffersCopy.h>
 #include <util/archive/ArchiveBuffer.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -117,4 +117,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just

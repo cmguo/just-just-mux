@@ -1,14 +1,14 @@
 // MkvTransfer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/mkv/MkvTransfer.h"
+#include "just/mux/Common.h"
+#include "just/mux/mkv/MkvTransfer.h"
 
-#include <ppbox/avformat/mkv/MkvObjectType.h>
-#include <ppbox/avformat/mkv/MkvArchive.h>
-#include <ppbox/avformat/mkv/MkvFormat.h>
-using namespace ppbox::avformat;
+#include <just/avformat/mkv/MkvObjectType.h>
+#include <just/avformat/mkv/MkvArchive.h>
+#include <just/avformat/mkv/MkvFormat.h>
+using namespace just::avformat;
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -81,7 +81,7 @@ namespace ppbox
             MkvSegmentInfo segm_info;
             segm_info.Time_Code_Scale = 1000000000 / TIME_SCALE;
             segm_info.Duration = (float)(info.duration);
-            segm_info.Muxing_App = "ppbox v1.0.0";
+            segm_info.Muxing_App = "just v1.0.0";
             segm_info.Writing_App = "mkvmerge 1.0.0";
 
             //track_head
@@ -149,5 +149,5 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
 

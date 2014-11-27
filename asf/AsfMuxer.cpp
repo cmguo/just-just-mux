@@ -1,13 +1,13 @@
 // AsfMuxer.cpp
 
-#include "ppbox/mux/Common.h"
-#include "ppbox/mux/asf/AsfMuxer.h"
-#include "ppbox/mux/asf/AsfTransfer.h"
-#include "ppbox/mux/filter/MergeFilter.h"
+#include "just/mux/Common.h"
+#include "just/mux/asf/AsfMuxer.h"
+#include "just/mux/asf/AsfTransfer.h"
+#include "just/mux/filter/MergeFilter.h"
 
 #include <util/archive/BigEndianBinaryOArchive.h>
 
-namespace ppbox
+namespace just
 {
     namespace mux
     {
@@ -54,4 +54,4 @@ namespace ppbox
         }
 
     } // namespace mux
-} // namespace ppbox
+} // namespace just
