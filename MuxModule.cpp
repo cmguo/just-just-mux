@@ -29,14 +29,16 @@ namespace just
         {
         }
 
-        error_code MuxModule::startup()
+        bool MuxModule::startup(
+            error_code & ec)
         {
-            error_code ec;
-            return ec;
+            return true;
         }
 
-        void MuxModule::shutdown()
+        bool MuxModule::shutdown(
+            error_code & ec)
         {
+            return true;
         }
 
         MuxerBase * MuxModule::open(
