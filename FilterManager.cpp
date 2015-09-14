@@ -239,6 +239,8 @@ namespace just
             MuxEvent const & event, 
             boost::system::error_code & ec)
         {
+            if (!is_eof_) // this is fake end of segment filter
+                return true;
             if (event.type == MuxEvent::end) {
                 streams_[event.itrack].end = true;
                 is_eof2_ = std::find_if(streams_.begin(), streams_.end(), FilterStream::not_end()) == streams_.end();
