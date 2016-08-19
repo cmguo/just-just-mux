@@ -100,7 +100,7 @@ namespace just
 
                 struct not_end;
 
-                StreamInfo * info;
+                StreamInfo * info; // a copy in Muxer
                 FilterPipe * pipe;
                 bool end;
             };

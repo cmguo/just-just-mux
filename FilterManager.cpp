@@ -133,6 +133,14 @@ namespace just
                             // get failed, return
                             return false;
                         }
+                        if ((sample.flags & sample.f_config)) {
+                            StreamInfo & stream = *streams_[sample.itrack].info;
+                            demuxer_->get_stream_info(sample.itrack, stream, ec);
+                            FilterPipe & pipe = this->pipe(sample.itrack);
+                            if (!pipe.put(stream, ec)) {
+                                return false;
+                            }
+                        }
                         sample.stream_info = streams_[sample.itrack].info;
                     }
                     FilterPipe & pipe = this->pipe(sample.itrack);
@@ -239,9 +247,9 @@ namespace just
             MuxEvent const & event, 
             boost::system::error_code & ec)
         {
-            if (!is_eof_) // this is fake end of segment filter
-                return true;
             if (event.type == MuxEvent::end) {
+                if (!is_eof_) // this is fake end of segment filter
+                    return true;
                 streams_[event.itrack].end = true;
                 is_eof2_ = std::find_if(streams_.begin(), streams_.end(), FilterStream::not_end()) == streams_.end();
             }

@@ -31,7 +31,7 @@ namespace just
             boost::system::error_code & ec)
         {
             if (info.type == StreamType::VIDE) {
-                assert(video_track_ == boost::uint32_t(-1));
+                assert(video_track_ == boost::uint32_t(-1) || video_track_ == info.index);
                 video_track_ = info.index;
             }
             return Filter::put(info, ec);
