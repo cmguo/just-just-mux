@@ -3,6 +3,8 @@
 #ifndef _JUST_MUX_M3U8_URL_FORMATOR_H_
 #define _JUST_MUX_M3U8_URL_FORMATOR_H_
 
+#include <framework/string/Url.h>
+
 #include <ostream>
 
 namespace just
@@ -29,8 +31,9 @@ namespace just
         public:
             UrlFormator(
                 std::string const & format)
+                : format_(framework::string::Url::decode(format))
             {
-                parse(format);
+                parse(format_);
             }
 
         public:
@@ -114,6 +117,7 @@ namespace just
             }
 
         private:
+            std::string format_;
             std::vector<String> strs_;
         };
 
